@@ -1,0 +1,10 @@
+[
+  { "id": "greetings", "order": 1, "title": "인사와 안부", "summary": "인사, 안부, 감사, 사과" },
+  { "id": "daily", "order": 2, "title": "나와 일상", "summary": "자기소개, 하루 일과, 좋아하는 것" },
+  { "id": "cafe", "order": 3, "title": "카페와 식당", "summary": "주문, 요청, 계산" },
+  { "id": "shopping", "order": 4, "title": "쇼핑", "summary": "가격, 크기, 교환" },
+  { "id": "transit", "order": 5, "title": "길과 교통", "summary": "길 묻기, 대중교통" },
+  { "id": "messages", "order": 6, "title": "약속과 메시지", "summary": "시간 정하기, 짧은 문자 읽고 쓰기" },
+  { "id": "health", "order": 7, "title": "몸과 병원", "summary": "증상 말하기, 약국" },
+  { "id": "home", "order": 8, "title": "집과 생활 문제", "summary": "택배, 수리, 문의" }
+]
