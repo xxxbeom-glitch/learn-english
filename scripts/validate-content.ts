@@ -57,8 +57,10 @@ export function validateContentDir(dir: string): string[] {
   const courses = readJson<Course[]>(coursesPath);
   const words: Word[] = [];
   const sentences: Sentence[] = [];
-  for (const f of readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'courses.json')) {
-    const data = readJson<{ words?: Word[]; sentences?: Sentence[] }>(join(dir, f));
+  const wordsDir = join(dir, 'words'); // content/words/<courseId>.json, 없으면 아직 단어가 없는 것
+  const files = existsSync(wordsDir) ? readdirSync(wordsDir).filter((f) => f.endsWith('.json')).sort() : [];
+  for (const f of files) {
+    const data = readJson<{ words?: Word[]; sentences?: Sentence[] }>(join(wordsDir, f));
     words.push(...(data.words ?? []));
     sentences.push(...(data.sentences ?? []));
   }

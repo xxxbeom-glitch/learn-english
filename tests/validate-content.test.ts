@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { validateContent } from '../scripts/validate-content';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { validateContent, validateContentDir } from '../scripts/validate-content';
 import type { Sentence, Word } from '../src/domain/types';
 
 const w: Word = { id: 'w1', word: 'borrow', meaning: '빌리다', level: 1, courseId: 'daily' };
@@ -14,9 +17,16 @@ const ok = (over: Partial<Sentence> = {}): Sentence[] => [{ ...base, ...over }, 
 
 describe('validateContent', () => {
   it('정상 문장은 오류가 없다', () => expect(validateContent([w], ok())).toEqual([]));
-  it('8단어가 넘는 초급 문장을 잡는다', () => {
-    const errs = validateContent([w], ok({ after: ' your pen for a little while please?' }));
-    expect(errs.some((e) => e.includes('단어'))).toBe(true);
+  describe('길이 규칙: level 1~2는 3~7단어', () => {
+    const withWords = (n: number) => ok({ before: 'w '.repeat(n - 1), after: '' });
+    const lengthErr = (errs: string[]) => errs.filter((e) => e.includes('3~7단어'));
+    it.each([3, 7])('%i단어는 통과한다', (n) => expect(lengthErr(validateContent([w], withWords(n)))).toEqual([]));
+    it.each([2, 8])('%i단어는 길이 오류로 잡는다', (n) => expect(lengthErr(validateContent([w], withWords(n)))).toHaveLength(1));
+    it('level 3은 길이 규칙에서 빠진다', () => {
+      const w3: Word = { ...w, level: 3 };
+      expect(validateContent([w3], withWords(12))).toEqual([]);
+      expect(validateContent([w3], withWords(2))).toEqual([]);
+    });
   });
   it('koHighlight가 ko에 없으면 잡는다', () => {
     expect(validateContent([w], ok({ koHighlight: '없는말' })).some((e) => e.includes('koHighlight'))).toBe(true);
@@ -36,5 +46,40 @@ describe('validateContent', () => {
   });
   it('accepted에 answer가 들어 있으면 잡는다', () => {
     expect(validateContent([w], ok({ accepted: ['borrow'] })).some((e) => e.includes('accepted'))).toBe(true);
+  });
+});
+
+describe('validateContentDir', () => {
+  const write = (dir: string, rel: string, data: unknown) => {
+    mkdirSync(join(dir, rel, '..'), { recursive: true });
+    writeFileSync(join(dir, rel), JSON.stringify(data));
+  };
+  const courses = [{ id: 'daily', order: 1, title: '나와 일상', summary: 'x' }];
+  const run = (fn: (dir: string) => void) => {
+    const dir = mkdtempSync(join(tmpdir(), 'content-'));
+    try {
+      fn(dir);
+      return validateContentDir(dir);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  };
+
+  it('content/words/<코스>.json의 잘못된 문장을 보고한다', () => {
+    const errs = run((dir) => {
+      write(dir, 'courses.json', courses);
+      write(dir, 'words/x.json', { words: [w], sentences: [{ ...base, koHighlight: '없는말' }, s2] });
+    });
+    expect(errs.some((e) => e.includes('koHighlight'))).toBe(true);
+  });
+  it('words 폴더가 없으면 오류가 아니다', () => {
+    expect(run((dir) => write(dir, 'courses.json', courses))).toEqual([]);
+  });
+  it('words 밖의 json은 읽지 않는다', () => {
+    const errs = run((dir) => {
+      write(dir, 'courses.json', courses);
+      write(dir, 'stray.json', { words: [w], sentences: [] });
+    });
+    expect(errs).toEqual([]);
   });
 });
