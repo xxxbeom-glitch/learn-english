@@ -44,7 +44,7 @@ if ('serviceWorker' in navigator) addEventListener('load', () => navigator.servi
 </html>
 """
 
-SW = r"""// 이야기 영어 오프라인 저장. 음성은 처음 들을 때 받아 두고, 화면 파일은 새 판이 있으면 바꾼다.
+SW = r"""// 이야기 영어 오프라인 저장. 음성은 받아 둔 앨범만 저장본으로 쓰고, 화면 파일은 새 판이 있으면 바꾼다.
 const SHELL = 'shell-__VER__', AUDIO = 'audio-v1';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'PretendardVariable.woff2', 'lucide.min.js'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(SHELL).then(c => c.addAll(CORE))); self.skipWaiting() });
@@ -63,18 +63,13 @@ self.addEventListener('fetch', e => {
     return hit || net;
   })));
 });
-// 음성: 통째로 받아 저장한다. 건너뛰기용 구간 요청(Range)은 저장본에서 잘라 준다.
+// 음성: 받아 둔 앨범(audio-v1)에 있으면 저장본을 쓰고, 없으면 인터넷에서 듣기만 한다.
+// 재생할 때 저절로 받아 두지 않는다(2026-11-09 정책). 저장은 앨범 화면의 받기 단추가 맡는다(아직 연결 전).
+// 건너뛰기용 구간 요청(Range)은 저장본에서 잘라 준다.
 async function audio(r) {
   const c = await caches.open(AUDIO), u = new URL(r.url), key = u.pathname + u.search;
-  let hit = await c.match(key);
-  if (!hit) {
-    const res = await fetch(key);
-    if (!res.ok) return res;
-    // 같은 화의 옛 판은 지운다.
-    for (const old of await c.keys()) { const o = new URL(old.url); if (o.pathname === u.pathname && o.search !== u.search) await c.delete(old) }
-    await c.put(key, res.clone());
-    hit = await c.match(key);
-  }
+  const hit = await c.match(key);
+  if (!hit) return fetch(r);
   const range = r.headers.get('range');
   if (!range) return hit;
   const buf = await hit.arrayBuffer(), m = /bytes=(\d*)-(\d*)/.exec(range);
@@ -140,6 +135,8 @@ def main():
     for f in files:
         h = hashlib.sha1(f.read_bytes()).hexdigest()[:8]
         body = body.replace(f'"{f.name}"', f'"{f.name}?v={h}"')
+    # 설정 · Storage used에 보일, 앱 안에 넣는 소리 크기
+    body = body.replace("__BUNDLED_MB__", f"{sum(f.stat().st_size for f in files) / 1048576:.1f}")
     (WEB / "index.html").write_text(HEAD + body + TAIL, encoding="utf-8")
     (WEB / "manifest.webmanifest").write_text(json.dumps(MANIFEST, ensure_ascii=False, indent=2), encoding="utf-8")
     for f in files + [APP / "PretendardVariable.woff2", APP / "lucide.min.js"]:

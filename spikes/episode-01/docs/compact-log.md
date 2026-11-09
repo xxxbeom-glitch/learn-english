@@ -3686,3 +3686,230 @@ The conversation continued after an earlier compaction. Below are the things tha
    5. Rebuild (build_page → build_pwa → `npm run apk` with JAVA_HOME = Android Studio jbr), install over wireless adb, and verify each screen by screenshot.
    6. Record the results in the plan and spec, and report in Korean without committing.
 </summary>
+
+## 2026-11-09 23:26 (자동 압축, 세션 550c27d0)
+
+<analysis>
+This segment continues from an earlier summary. Work done in order:
+
+1. **TWS re-record.**
+   - Downloaded the two new takes into the album-3 pieces.
+   - Re-stitched Part 4 with ffmpeg and rebuilt the app.
+   - The first `build_podcast.py` run failed with an AssertionError because only p4 was present. Re-ran it with the scratchpad parent that holds p1–p5; it succeeded.
+   - Sent the clips to the user and updated the docs.
+
+2. **Toast test and repositioning.** The user's feedback came in this order:
+   - Lower than the header, with a set gap.
+   - "Position is awkward, just put it at the bottom."
+   - Rise up from below.
+   - More gap, and text and shape one level bigger.
+   - Passed.
+
+3. **Music.** I searched Pixabay first. The user said to use ElevenLabs, meaning the marketplace on their xxx.beom account, and said they had told me three times: "기록좀해".
+   - I wrote a memory entry.
+   - I browsed the marketplace in the web pane. The user complained that I should use the connector, and was frustrated.
+   - The connectors cannot browse the marketplace.
+   - I gave candidates. The user then said to skip music entirely.
+
+4. **Whisper re-record.** The user identified 3 lines, then said to skip it.
+
+5. **QA.** Code review, a phone walkthrough and a Figma comparison, plus a subagent audit of docs vs code. Mid-way the user asked whether anything was built differently from policy and design.
+   - Wrote the QA doc.
+   - The user said "Yes, fix them" to bugs A1–A5 plus the outdated docs.
+
+6. **Fixes applied in template.html.** Rebuilt the web; the APK build is running in the background. The preview server is started at port 8766.
+
+7. **Rename.** The user asked to rename the Solo podcast to "Seoul, Actually". Applied in template.html (mark SEOUL) and the podcast spec, and rebuilt the web pages.
+   - The APK build running in the background started before the rename, so it does not include it. Need to rebuild and install again, verify, and update the outdated docs and comments.
+
+Security: the signing key is in learn-english/signing/; never commit it or print the password. Never commit unless asked. Confirm paid costs first. Answer in Korean.
+</analysis>
+
+<summary>
+1. Primary Request and Intent:
+   - **Standing rules:**
+     - Answer in Korean, plain 해요체.
+     - Never commit unless asked. Nothing is committed or pushed.
+     - Confirm paid costs (credits) before spending.
+     - Keep the existing design. Use Lucide icons.
+     - Record decisions in the spec and plan docs and search for old wording. Keep Figma in sync.
+     - SECURITY: the signing key is in learn-english/signing/ (gitignored). Never commit it and never print the keystore password.
+     - Restore the phone screen timeout to 60000 after testing.
+   - **New memory (user insisted, "세번말했다 / 기록좀해"):** background music comes from the ElevenLabs Music marketplace on the user's xxx.beom account. Do not generate music and do not use outside sites. Connectors cannot browse the marketplace (verified), so check the connector once, then use the web pane.
+   - **Completed this segment:**
+     - TWS lines re-recorded as "two-us".
+     - Toast moved to the bottom, 24px above the mini player, Body 14, padding 12/20, rises 16px over 0.25s. The user said "오케이 확인, 통과".
+     - QA report written.
+   - **Dropped by the user:**
+     - EP4 outro music: "음악은 걍 넘어가 하지마".
+     - Whisper re-record: "소곤소곤도 패스해 하지마".
+   - **Current request ("Yes, fix them"):** fix QA bugs A1–A5 and update the outdated doc passages and code comments.
+   - **Latest request:** "solo 팟캐스트 이름은 Seoul, Actually 로 해서 적용해줘".
+
+2. Key Technical Concepts:
+   - **Build chain:**
+     - `cd spikes/episode-01 && python build_page.py && python build_pwa.py`
+     - `cd side-a && node scripts/copy-web.mjs && npx cap sync android`
+     - `cd android && JAVA_HOME="C:/Program Files/Android/Android Studio/jbr" ./gradlew.bat assembleRelease -q`
+     - `adb install -r app/build/outputs/apk/release/app-release.apk`
+     - Launch with `adb shell am start -n com.seongbeom.sidea/.MainActivity`.
+   - **CRLF files:** template.html and the docs are CRLF. Edit with Python: normalize to `\n`, assert a single match, write back with `\r\n`.
+   - **Screenshots:** `bash $SP/shot.sh name` writes `$W/name.png` and a 360×780 `names.png`.
+     - SP=/e/Temp/claude/12f846cde673f19c/550c27d0-81b6-4355-af7c-e92e6ebfcf5b/scratchpad
+     - W=E:/Temp/... (same scratchpad)
+   - **Phone taps** (CSS px ×3):
+     - Gear (1002,252), Beginner card (252,720), podcast cards (250/696/1050, 1455).
+     - Album download (1002,198), mini bar (450,2085), player more (999,303), zoom (84,2052), queue (993,2052).
+   - **Album 3 pieces:** `E:/Temp/claude/12f846cde673f19c/abc3da47-b9bf-49a1-9767-66a2ca963e79/scratchpad/podcast3/p1..p5`.
+     - `build_podcast.py "<that parent>" /d/project/uiux-study/sounds 3` needs all parts.
+     - Old backups are in `spikes/episode-01/audio/album3-pieces/p4-old/` (gitignored audio dir).
+     - The two new clips are copied to `spikes/episode-01/audio/tws-fix/`.
+   - **Stitch command:** ffmpeg with per-input `aresample=44100,aformat=mono,apad=pad_dur=0.35`, then concat, then `loudnorm=I=-16:TP=-1.5`, output 128k.
+   - **ElevenLabs connectors:**
+     - 761d98d3: voice only, has credits.
+     - 67a9ac48: has music nodes (eleven_music_v2_5), but that workspace hit its credit limit earlier.
+     - Neither connector can browse the marketplace.
+   - **Figma:** file `31ndvuyn7Zkf4sScTUgvjq`, page 0:1.
+     - Prototype frames: 01 home 117:55, 02 album 119:55, 03 player 120:199, 05 more 193:562, 06 timer 198:1120, 04 queue 199:1099, 07 settings 220:759.
+   - **Preview server:** `story-pwa` from `.claude/launch.json` serves `spikes/episode-01/web`. It is running on port 8766, serverId 6552f449-11da-48ab-a597-31e368b03f05, tab "seed".
+
+3. Files and Code Sections:
+   - **`spikes/episode-01/app/template.html`**
+     - **Toast CSS:**
+       ```css
+       .toast { position: fixed; z-index: 60; left: 50%; bottom: calc(max(var(--miniH, 0px), var(--bot)) + 24px); transform: translate(-50%, 16px); max-width: calc(100% - 32px); width: max-content;
+         padding: 12px 20px; border-radius: 999px; background: #2a2a2a; color: #fff; font: var(--t-body); text-align: center; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s cubic-bezier(.2,.8,.2,1) }
+       .toast.on { opacity: 1; transform: translate(-50%, 0) }
+       ```
+     - **A1:** `.card span {...}` changed to `.card-t > span { display: block; margin-top: 2px; font: var(--t-sub); color: var(--muted); ...}`, so album titles on home are white.
+     - **A2:** status-bar backdrop.
+       - CSS: `.sbar { position: fixed; z-index: 9; top: 0; left: 0; right: 0; height: var(--top); background: var(--sb, #121212); pointer-events: none }`
+       - Markup: `<div class="sbar" id="sbar" aria-hidden="true"></div>` before the toast.
+       - `setBarColor` now also does `document.documentElement.style.setProperty('--sb', c);`.
+     - **A3:** delete confirm dialog (09).
+       - CSS: `.dlg` centered, 16px radius, `var(--sheet)`, z 31; `.dlg.up` visible; `.dlg-b .del { color: var(--danger) }`.
+       - Markup after the scrim:
+         ```html
+         <div class="dlg" id="dlgDel" role="alertdialog" aria-modal="true" aria-labelledby="dlgDelT" inert><h2 id="dlgDelT">Delete downloads?</h2><p>Your listening history stays. To play these albums without internet again, download them again.</p><div class="dlg-b"><button data-back>Cancel</button><button class="del" data-delok>Delete</button></div></div>
+         ```
+       - SHEETS gets `del: 'dlgDel'`.
+       - Click handlers:
+         ```js
+         if (t.closest('[data-deldl]')) { if (CAP) return toast('Episodes are built into the app, so there is nothing to delete.'); return go('del') }
+         if (t.closest('[data-delok]')) { closeSheets(); deleteDownloads(); return }
+         ```
+       - The CAP check was removed from `deleteDownloads`.
+     - **A4:** removed `warmed.clear();` from `deleteDownloads`.
+     - **A5:** in the player, the toast sits above the seek bar.
+       ```js
+       function toast(msg) { const t = $('toast'); t.style.bottom = isUp() && !SHEETS[topV()] ? innerHeight - $('seek').getBoundingClientRect().top + 16 + 'px' : ''; t.textContent = msg; ...
+       ```
+     - **Rename:** PODCASTS entry now `en: 'Seoul, Actually', mark: 'SEOUL',` (was 'Solo in Seoul', 'SOLO'). The course name '매디의 서울 여행' is unchanged.
+     - **Outdated comments still to fix:**
+       - Line ~101: track number, height 52.
+       - Lines ~126–127: lyrics size slider.
+       - Line ~390: podcasts counted as '부'.
+       - Line ~913: web downloads the next episode.
+   - **Docs updated this segment:**
+     - `docs/superpowers/specs/2026-11-09-podcast-album-design.md`:
+       - Section 8 has the TWS re-record note (99 + 70 credits) and the `[softly]` whisper cause.
+       - Line 100 and line 198 now use the name Seoul, Actually; cover text SEOUL.
+     - `docs/superpowers/plans/2026-11-09-side-a-android-app.md`:
+       - New bullets for the mini-bar swipe and the podcast EP titles.
+       - The toast bullet is rewritten to the bottom position, 24px gap, Body 14, padding 12/20, rises 16px over 0.25s.
+     - `docs/superpowers/specs/2026-11-07-story-audio-english-design.md`: line 481 now has the podcast EP title / magazine Korean titles and the mini-player swipe.
+   - **`docs/superpowers/qa/2026-11-09-side-a-qa.md`** (new): the QA report.
+     - Section A, bugs A1–A5.
+     - Section B, behaves differently from docs or design:
+       - B1: Wi-Fi only switch is unused.
+       - B2: no done checkmark in the album list.
+       - B3: intro ellipse `#1ac457` vs key color `#1ED760`.
+       - B4: wake lock is released by other sheets.
+       - B5: 5s seek actions are still in the media session.
+       - B6: web manifest name is "이야기 영어" (`build_pwa.py:84`).
+       - B7: Figma home has 4 shelves.
+       - B8: Figma queue sheet shows Korean captions (outdated).
+     - Section C, outdated doc passages:
+       - Spec 538: toast at the top.
+       - Spec 469, 477, 478, 541: auto-download.
+       - Spec 532: "will re-download when played".
+       - Spec 481: pill mini player.
+       - Spec 485–486: speed and repeat icons.
+       - Spec 484: blur.
+       - Spec 490: Korean back toast.
+       - Spec 518: Account hidden.
+       - Podcast spec section 6: numbers, colors, Korean description, '부', name tags, speed.
+     - Section D: things that work correctly.
+   - **Memory:** `C:\Users\sky08\.claude\projects\D--project-learn-english\memory\elevenlabs-music-marketplace.md`, with an index line in MEMORY.md.
+
+4. Errors and fixes:
+   - **Missing pieces:** `build_podcast.py` with only p4 in the folder raised `AssertionError (1, 0, 1)`. Fixed by copying the new 05/08 into the scratchpad p4 and running with that parent.
+   - **shot.sh path:** the PIL path broke on a Git-Bash `/e/` path. Fixed by passing Windows paths through sys.argv.
+   - **ffprobe:** `ffprobe` with two inputs errored. Ran it per file instead.
+   - **Accidental Spotify:** a back-key exit left Spotify in front. I relaunched my app.
+   - **User feedback, music:**
+     - I went to Pixabay instead of ElevenLabs, and the user had to say it three times.
+     - Then I used the web instead of the connector ("커넥터로 해 왜 웹접속…", "답답하게구네").
+     - Recorded in memory. Music was then dropped.
+   - **User feedback, toast:** at the header was awkward. Moved to the bottom, larger, more gap.
+
+5. Problem Solving:
+   - **Verified on the phone:**
+     - All toasts (before the A5 change).
+     - Status-bar overlap exists on the album and settings screens.
+     - Home card title is gray because of the `.card span` selector.
+     - Queue sheet has no Korean captions, matching the spec.
+     - The player is currently paused on Beginner "I'm from ~".
+   - **Figma vs app:** the player, more, timer, settings and album screens match. Home and queue differ (B7, B8).
+
+6. All user messages:
+   - "소곤소곤대는거 ep1 호스텔에 돌아와서~ , ep2 그리고 지하철이 너무 조용해요~ 이 부분, ep3 다리마다 불이들어왔고 ~ 여기 블락이 소곤고손이야"
+   - "아니 그리고 음악 일레븐랩스에서 찾아야지"
+   - "만드는게 아니라 소스들이있자나"
+   - "아니 일레븐랩스 내가 시발 xxx.beom이라고 계정"
+   - "세번말했다"
+   - "기록좀해"
+   - "Signed in"
+   - "커넥터로 해 왜 웹접속ㄷ으ㅓㄹ해??"
+   - "아 진짜 답답하게구네"
+   - "음악은 걍 넘어가 하지마"
+   - "소곤소곤도 패스해 하지마. 나머지 앱 제작에 대해 검수해. qa검수"
+   - "우리정책이랑디자인이랑다르게개발된게있는지"
+   - "Yes, fix them"
+   - "solo 팟캐스트 이름은 Seoul, Actually 로 해서 적용해줘"
+   - Earlier in this segment (toast):
+     - "토스트팝업 헤더보단 더 내려와야할거같아 아에 헤더와의 간격을 정해서"
+     - "왜 뭔가 위치가 애매하지, 그냥 아래로 위치해봐"
+     - "아래에서 위로 올라오는 애니메이션으로"
+     - "좀 더 띄워도될거같고, 토스트팝업 글자 및 쉐이프도 1레벨 키워줘"
+     - "오케이 확인, 통과"
+
+7. Pending Tasks:
+   - Rebuild and install the APK so it includes the rename. The background build (task bvldms24q) started before the rename.
+   - Verify on the phone and in the web preview (localhost:8766):
+     - A1: white card titles.
+     - A2: status bar strip on album and settings while scrolled.
+     - A3: dialog on web; the app shows the toast.
+     - A5: zoom toast sits above the seek bar.
+     - Rename: "Seoul, Actually" with SEOUL cover text, and check the text fits on the cover.
+   - Restore the screen timeout to 60000 afterwards.
+   - Update the outdated doc passages (QA section C) in the main spec and podcast spec section 6.
+   - Fix the outdated code comments (lines ~101, ~126, ~390, ~913).
+   - Record A1–A5 fixes and the rename in the plan / spec. Mark items fixed in the QA doc.
+   - Search docs for other "Solo in Seoul" mentions. Only the podcast spec had them.
+   - Figma: the queue sheet captions (B8) are outdated. Figma may also need the rename and the home shelves. Not yet requested, so mention it.
+   - The plan list in the app: steps 1–3 done (fixes), step 4 in progress (rebuild, install, verify), step 5 pending (docs and comments).
+
+8. Current Work:
+   Fixes A1–A5 are applied to template.html, and the web was rebuilt. An APK build and install is running in the background, without the rename. The story-pwa preview is running on port 8766.
+
+   Then the user asked: "solo 팟캐스트 이름은 Seoul, Actually 로 해서 적용해줘". I changed `en: 'Solo in Seoul', mark: 'SOLO'` to `en: 'Seoul, Actually', mark: 'SEOUL'` in template.html. I updated podcast spec lines 100 and 198. I ran `build_page.py` and `build_pwa.py` ("built").
+
+9. Optional Next Step:
+   1. After the background APK build finishes, re-run copy-web, cap sync, gradle assembleRelease and adb install so the rename is included.
+   2. Verify on the phone: the home card titles are white, the status strip shows while scrolling album and settings, the zoom toast sits above the seek bar, and the Seoul, Actually card and SEOUL cover look right.
+   3. Check the delete dialog in the web preview at localhost:8766.
+   4. Restore the screen timeout to 60000.
+   5. Update the outdated doc passages and code comments, per the user's "Yes, fix them" to "Fix the 5 bugs (A1–A5) and the outdated docs here?".
+   6. Wrap up and report in Korean.
+</summary>

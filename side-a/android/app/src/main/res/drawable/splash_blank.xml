@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 안드로이드 시작 화면은 검정 바탕만 보인다. 로고는 앱 화면이 뜨면서 애니메이션으로 모인다(template.html의 .intro). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+</shape>

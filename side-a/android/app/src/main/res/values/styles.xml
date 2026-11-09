@@ -18,9 +18,9 @@
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
-        <!-- 시작 화면: 검정 바탕 가운데 앱 아이콘 막대 (Figma 11 시작 화면) -->
+        <!-- 시작 화면: 검정 바탕만. 로고 타원 9개는 앱 화면에서 애니메이션으로 모인다 (Figma 11 시작 화면) -->
         <item name="windowSplashScreenBackground">#000000</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_blank</item>
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>
