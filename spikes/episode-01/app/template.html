@@ -1,213 +1,312 @@
-<title>이야기 영어</title>
+<title>Side A</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preload" href="PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* 글꼴: 한글과 영어 모두 Pretendard 하나(앱과 같은 폴더의 파일). */
 @font-face { font-family: "Pretendard"; src: url("PretendardVariable.woff2") format("woff2-variations"), url("PretendardVariable.woff2") format("woff2"); font-weight: 45 920; font-display: swap }
-/* 음악 앱처럼: 홈은 섹션별 앨범 캐러셀, 앨범을 열면 화 목록, 재생 화면은 가사(또는 트랙리스트)가 가운데에 온다.
-   어두운 바탕이 기본이고, 앨범마다 색 하나(--c)와 글자용 밝은 색(--hi)을 쓴다. 간격은 4px 단위다(Figma EN-AudioBook 시안). */
+/* Side A. 화면은 Figma 'EN-AudioBook' 시안(2026-11-09 디자인 개편)을 따른다. 기준 문서: 설계 문서 7장 'Figma 디자인 개편'.
+   글자 단계, 색, 4px 간격, 모서리 기준은 아래 변수만 쓴다. 화면 글자는 한국어 해설과 한국어 해석 줄만 한국어, 나머지는 영어다. */
 :root {
-  --bg: #121212; --ink: #fff; --muted: #a7a7a7; --faint: #6a6a6a;
-  --c: #1f7a4d; --hi: #5fd39a;
+  --bg: #121212; --raise: #1d1d1d; --sheet: #242424; --ink: #fff; --muted: #a7a7a7; --faint: #6a6a6a; --danger: #ff453a;
+  --c: #031253; --hi: #1ed760;
   --sans: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
-  /* 글자 단계: 큰 제목 20, 제목 18, 소제목 14, 본문 14, 보조 12, 작은 글 11 */
-  --t-display: 700 20px/1.3 var(--sans); --t-title: 700 18px/1.3 var(--sans); --t-head: 600 14px/1.35 var(--sans);
-  --t-body: 400 14px/1.4 var(--sans); --t-sub: 400 12px/1.4 var(--sans); --t-cap: 500 11px/1.35 var(--sans);
+  --t-display: 700 20px/1.25 var(--sans); --t-title: 700 18px/1.3 var(--sans); --t-head: 600 14px/1.35 var(--sans);
+  --t-body: 400 14px/1.4 var(--sans); --t-sub: 400 12px/1.4 var(--sans); --t-cap: 600 11px/1.35 var(--sans);
+  --lyr: 18px;
+  /* 위·아래 시스템 막대 높이. 안드로이드 앱(Capacitor)은 --safe-area-inset-*를 넣어 주고, 브라우저는 env()를 쓴다 */
+  --top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --bot: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #121212 } }
 :root[data-theme="dark"] { --bg: #121212 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent }
-html, body { height: 100% }
+/* 당겨도 화면 전체가 늘어나거나 움직이지 않게: 안드로이드 늘어남 효과와 당겨서 새로고침을 끈다 */
+html, body { height: 100%; overscroll-behavior: none }
 body { margin: 0; background: var(--bg); color: var(--ink); font: var(--t-body); letter-spacing: -.01em; word-break: keep-all; overflow: hidden }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left }
-button:focus-visible, input:focus-visible { outline: 2px solid var(--hi); outline-offset: 2px; border-radius: 8px }
+button:focus-visible { outline: 2px solid var(--hi); outline-offset: 2px; border-radius: 8px }
 h1, h2, h3, p { margin: 0 }
 ol, ul { list-style: none; margin: 0; padding: 0 }
-svg { display: block; width: 22px; height: 22px; stroke-width: 2 }
+svg { display: block; width: 24px; height: 24px; stroke-width: 2 }
 [hidden] { display: none !important }
 body:not(.playing) .ic-pause, body.playing .ic-play { display: none }
 
 .app { height: 100%; max-width: 520px; margin: 0 auto; position: relative }
-.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
-.icon { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 50%; color: var(--ink); transition: background .15s, transform .1s, opacity .15s }
-/* 마우스가 있는 기기에서만 동그란 배경. 폰에서는 누른 뒤 남지 않게, 재생 화면 아이콘은 배경 없이 */
-@media (hover: hover) { .icon:hover { background: rgb(255 255 255 / .08) } #vNow .icon:hover { background: none } }
+.gut { padding-left: 16px; padding-right: 16px }
+.icon { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 50%; color: var(--ink); transition: transform .1s, opacity .15s }
+@media (hover: hover) { .icon:hover { background: rgb(255 255 255 / .08) } #vNow .icon:hover, .sheet .icon:hover { background: none } }
 .icon:active { transform: scale(.92) }
 .icon:disabled { opacity: .3; pointer-events: none }
 
-/* 바탕 화면(홈, 앨범): 각각 스스로 스크롤한다. 아래는 미니 플레이어와 딤이 덮는다 */
-.view { height: 100%; overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)) }
+/* 바탕 화면(홈, 앨범, 설정): 각각 스스로 스크롤한다. 아래는 미니 플레이어 높이만큼 비운다 */
+.view { height: 100%; overflow-y: auto; overscroll-behavior: none; scrollbar-width: none; padding-bottom: calc(var(--miniH, 0px) + 24px) }
+.view::-webkit-scrollbar { display: none }
 
-/* 표지: 앨범 색 + 큰 글자 */
-.cv { container-type: inline-size; aspect-ratio: 1; position: relative; overflow: hidden; border-radius: 4px; color: #fff;
+/* 표지: 정해 둔 앨범 커버 그림. 그림이 없는 앨범만 앨범 색 위에 글자를 얹는다 */
+.cv { container-type: inline-size; aspect-ratio: 1; position: relative; overflow: hidden; border-radius: 6px; color: #fff;
   background: linear-gradient(150deg, rgb(255 255 255 / .18), transparent 58%), var(--c) }
+.cv img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block }
 .cv small { position: absolute; left: 8cqw; top: 7cqw; font-size: 6cqw; font-weight: 600; opacity: .82; white-space: nowrap }
-.cv b { position: absolute; left: 6cqw; bottom: 17cqw; font-size: 54cqw; line-height: .8; font-weight: 700; letter-spacing: -.05em }
+.cv b { position: absolute; left: 6cqw; bottom: 19cqw; font-size: 26cqw; line-height: 1; font-weight: 700; letter-spacing: -.02em }
 .cv span { position: absolute; left: 8cqw; right: 8cqw; bottom: 7cqw; font-size: 6.5cqw; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.cv.al b { font-size: 26cqw; line-height: 1; letter-spacing: -.02em; bottom: 19cqw }
 .cv.xs small, .cv.xs span { display: none }
-.cv.xs b { left: 50%; top: 50%; bottom: auto; transform: translate(-50%, -50%); font-size: 46cqw; line-height: 1 }
+.cv.xs b { left: 50%; top: 50%; bottom: auto; transform: translate(-50%, -50%); font-size: 34cqw }
 
-/* 홈: 섹션 제목과 가로 캐러셀 */
-.shelf h2 { font: var(--t-title); letter-spacing: -.02em; padding-block: 32px 12px }
-.shelf:first-child h2 { padding-top: calc(36px + env(safe-area-inset-top, 0px)) }
+/* 홈: 머리 줄(프로필, 인사말, 설정)과 섹션별 가로 캐러셀 */
+.hello { display: flex; align-items: center; gap: 12px; padding-top: calc(var(--top) + 24px); padding-bottom: 32px }
+.avatar { width: 48px; height: 48px; flex: none; border-radius: 50%; background: #5a5a5a; display: grid; place-items: center }
+.avatar svg { width: 28px; height: 28px; stroke-width: 1.75 }
+.hello h1 { flex: 1; min-width: 0; font: var(--t-display); letter-spacing: -.02em }
+.hello .icon { margin-right: -12px }
+.hello .icon svg { width: 20px; height: 20px }
+.shelf + .shelf { padding-top: 32px }
+.shelf h2 { font: var(--t-title); letter-spacing: -.02em; padding-bottom: 12px }
 .rail { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
-  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-inline: max(16px, env(safe-area-inset-left, 0px)); scroll-padding-inline: 16px }
+  margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px }
 .rail::-webkit-scrollbar { display: none }
 .rail li { flex: none; width: 136px; scroll-snap-align: start }
 .card { display: grid; gap: 8px; width: 100%; transition: transform .1s }
-.card:active { transform: scale(.97) }
-.card .cv { width: 136px }
+.card:not(.soon):active { transform: scale(.97) }
+.card.soon { cursor: default }
+.card .cv { width: 136px; border-radius: 6px }
 .card b { display: block; font: var(--t-head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .card span { display: block; margin-top: 2px; font: var(--t-sub); color: var(--muted); font-variant-numeric: tabular-nums }
 .card-t { min-width: 0 }
-.card.soon .cv { filter: saturate(.55) brightness(.8) }
 
-/* 앨범: 표지는 가운데, 뒤에는 앨범 색이 아래로 어두워진다 */
+/* 앨범: 표지는 가운데, 뒤에는 앨범 색이 아래로 어두워진다(상태 표시줄 뒤까지) */
 #vAlbum { background: linear-gradient(to bottom, var(--c) 0, color-mix(in srgb, var(--c) 55%, #000) 260px, #121212 520px) no-repeat local, var(--bg) }
-.bar { display: flex; align-items: center; padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px; margin-left: -10px }
+.bar { display: flex; align-items: center; padding-top: calc(var(--top) + 8px); padding-bottom: 8px; margin-left: -12px }
 .al-cover { display: grid; place-items: center; padding-block: 8px 24px }
-.al-cover .cv { width: min(56vw, 200px); box-shadow: 0 8px 24px rgb(0 0 0 / .4) }
+.al-cover .cv { width: 200px; border-radius: 4px; box-shadow: 0 8px 24px rgb(0 0 0 / .4) }
 .al-info { display: grid; grid-template-columns: minmax(0, 1fr) 56px; gap: 12px; align-items: center; padding-bottom: 12px }
 .al-info .txt { display: grid; gap: 4px; min-width: 0 }
 .al-info h1 { font: var(--t-display); letter-spacing: -.025em }
 .al-info p { font: var(--t-sub); color: rgb(255 255 255 / .8) }
-.al-info p.meta { font: var(--t-cap); color: var(--muted); font-variant-numeric: tabular-nums }
-.play { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--hi); color: #0b0b0b; transition: transform .1s, filter .15s }
-.play:hover { filter: brightness(1.06) }
+.al-info p.meta { color: var(--muted); font-variant-numeric: tabular-nums }
+.play { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--hi); color: #0b0b0b; transition: transform .1s }
 .play:active { transform: scale(.94) }
 .play svg, .big svg, .mini-pp svg { fill: currentColor; stroke-width: 1.5 }
-.play svg { width: 24px; height: 24px }
 #vAlbum:not(.mine) #albumPlay .ic-pause { display: none }
 #vAlbum:not(.mine) #albumPlay .ic-play { display: block }
 
-/* 트랙 줄: 번호, 제목, 오른쪽 끝 시간. 높이 52 */
-.trk-go { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 12px; height: 52px; align-items: center; width: 100%; min-width: 0; border-radius: 6px }
-.trk .no { font: var(--t-sub); font-size: 13px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums }
-.trk .no svg { width: 18px; height: 18px; margin: auto; color: var(--hi) }
+/* 트랙 줄: 번호, 제목, 오른쪽 끝 시간. 높이 52. 다 들음 표시는 두지 않는다 */
+.trk-go { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; height: 52px; align-items: center; width: 100%; min-width: 0 }
 .tt { min-width: 0 }
 .tt b { display: block; font: var(--t-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.trk .tm { display: flex; align-items: center; gap: 6px; font: var(--t-sub); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums }
-.trk .dn { width: 14px; height: 14px; flex: none; color: var(--hi) }
+.trk .tm { font: var(--t-sub); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums }
 .trk.on b { color: var(--hi) }
 .trk.soon { opacity: .45 }
+.sheet .trk + .trk { border-top: 1px solid rgb(255 255 255 / .08) }
 
-/* 아래 떠 있는 미니 플레이어: 둥근 알약, 원형 표지, 진행은 배경을 채운다. 뒤에 어두운 딤을 깐다 */
-.mini-dim { position: fixed; z-index: 9; left: 0; right: 0; bottom: 0; height: calc(150px + env(safe-area-inset-bottom, 0px)); pointer-events: none;
-  background: linear-gradient(to bottom, rgb(18 18 18 / 0), rgb(18 18 18 / .92) 70%, #121212) }
-.mini { position: fixed; z-index: 10; left: 50%; bottom: calc(32px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: 232px; height: 68px;
-  display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: center; padding-right: 10px; border-radius: 999px; overflow: hidden;
-  background: color-mix(in srgb, var(--c) 52%, #121212); box-shadow: 0 8px 24px rgb(0 0 0 / .45) }
-.mini-fill { position: absolute; inset: 0 auto 0 0; width: 0; background: rgb(255 255 255 / .1); pointer-events: none }
-.mini-open { position: relative; display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; align-items: center; padding-left: 10px; height: 100%; min-width: 0 }
-.mini-open .cv { width: 48px; border-radius: 50% }
-.mini-open b { display: block; font: var(--t-head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.mini-open span { display: block; font: var(--t-sub); color: rgb(255 255 255 / .72); font-variant-numeric: tabular-nums; white-space: nowrap }
-.mini-pp { position: relative; width: 44px; height: 44px; display: grid; place-items: center }
-.mini-pp svg { width: 18px; height: 18px }
+/* 설정: iOS 설정처럼 섹션별 묶음 목록 */
+.head { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; padding-top: calc(var(--top) + 4px); padding-bottom: 4px; margin-inline: -12px }
+.head h1 { font: var(--t-title); text-align: center; letter-spacing: -.02em }
+.grp-t { font: var(--t-cap); color: var(--muted); text-transform: uppercase; letter-spacing: .02em; padding: 24px 16px 8px }
+.grp { background: var(--sheet); border-radius: 12px; overflow: hidden }
+.row { display: flex; align-items: center; gap: 12px; min-height: 48px; width: 100%; padding: 0 16px; position: relative }
+.row + .row::before { content: ""; position: absolute; left: 16px; right: 0; top: 0; height: 1px; background: rgb(255 255 255 / .08) }
+.row > b { flex: 1; min-width: 0; font: var(--t-head) }
+.row > span { font: var(--t-body); color: var(--muted); display: flex; align-items: center; gap: 4px; white-space: nowrap }
+.row > span svg { width: 20px; height: 20px; color: var(--muted) }
+.grp-d { font: var(--t-sub); color: var(--muted); padding: 8px 16px 0 }
+/* 켜고 끄는 스위치 */
+.sw { width: 44px; height: 26px; flex: none; border-radius: 13px; background: rgb(255 255 255 / .2); position: relative; transition: background .2s }
+.sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .2s }
+.sw[aria-checked="true"] { background: var(--hi) }
+.sw[aria-checked="true"]::after { transform: translateX(18px) }
 
-/* 재생 화면: 아래에서 올라오는 전체 높이 시트. 손잡이를 누르거나 아래로 쓸면 닫힌다 */
-.layer { position: fixed; z-index: 20; top: 0; bottom: 0; left: 50%; width: min(100%, 520px); display: flex; flex-direction: column;
+/* 아래에 붙은 미니 플레이어: 화면 너비 막대, 맨 위 2px 진행 선. 아래 몫은 시스템 막대 높이만큼 */
+.toast { position: fixed; z-index: 60; left: 50%; bottom: calc(var(--miniH, 0px) + 16px + var(--bot)); transform: translate(-50%, 8px); max-width: calc(100% - 32px); width: max-content;
+  padding: 10px 16px; border-radius: 999px; background: #2a2a2a; color: #fff; font: var(--t-sub); text-align: center; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s }
+.toast.on { opacity: 1; transform: translate(-50%, 0) }
+.mini { position: fixed; z-index: 10; left: 50%; bottom: 0; transform: translateX(-50%); width: min(100%, 520px);
+  display: flex; align-items: center; gap: 12px; padding: 16px 16px calc(8px + var(--bot)); background: rgb(0 0 0 / .9) }
+.mini-line { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: rgb(255 255 255 / .12); pointer-events: none }
+.mini-line i { display: block; height: 100%; width: 0; background: var(--hi) }
+.mini-open { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px }
+.mini-open .cv { width: 44px; flex: none }
+.mini-txt { display: grid; gap: 2px; min-width: 0 }
+.mini-txt b { font: var(--t-head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.mini-txt span { font: var(--t-sub); color: rgb(255 255 255 / .6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.mini-pp { width: 44px; height: 44px; flex: none; display: grid; place-items: center; margin-right: -12px }
+.mini-pp svg { width: 20px; height: 20px }
+
+/* 재생 화면: 위에서 8 띄운 전체 높이 바텀시트, 위 모서리 24. 손잡이를 누르거나 위쪽을 아래로 쓸면 닫힌다 */
+.layer { position: fixed; z-index: 20; inset: 0; pointer-events: none }
+.layer::before { content: ""; position: absolute; inset: 0; background: #000; opacity: 0; transition: opacity .34s }
+.layer.up { pointer-events: auto }
+.layer.up::before { opacity: 1 }
+.np { position: absolute; left: 50%; bottom: 0; top: calc(var(--top) + 8px); width: min(100%, 520px); display: flex; flex-direction: column;
+  border-radius: 24px 24px 0 0; overflow: hidden; padding-bottom: calc(16px + var(--bot));
+  background: linear-gradient(to bottom, var(--c) 0, color-mix(in srgb, var(--c) 40%, #0d0d0d) 55%, #0d0d0d);
   transform: translate(-50%, 100%); visibility: hidden; transition: transform .34s cubic-bezier(.2, .8, .2, 1), visibility 0s .34s }
-.layer.up { transform: translate(-50%, 0); visibility: visible; transition: transform .34s cubic-bezier(.2, .8, .2, 1), visibility 0s }
-#vNow { background: linear-gradient(180deg, rgb(0 0 0 / .4), rgb(0 0 0 / .62)), var(--c); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) }
-.grab { flex: none; display: grid; place-items: center; width: 100%; height: calc(24px + env(safe-area-inset-top, 0px)); padding-top: calc(8px + env(safe-area-inset-top, 0px)) }
-.grab::before { content: ""; width: 36px; height: 5px; border-radius: 3px; background: rgb(255 255 255 / .35) }
-.np-top { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px }
-.np-song { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; align-items: center; min-width: 0 }
-.np-song .cv { width: 52px; border-radius: 6px; box-shadow: 0 4px 12px rgb(0 0 0 / .3) }
+.layer.up .np { transform: translate(-50%, 0); visibility: visible; transition: transform .34s cubic-bezier(.2, .8, .2, 1), visibility 0s }
+.grab { flex: none; display: grid; place-items: center; width: 100%; height: 20px; padding-top: 8px }
+.grab::before { content: ""; width: 36px; height: 4px; border-radius: 2px; background: rgb(255 255 255 / .3) }
+.np-top { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px 4px }
+.np-song { display: flex; gap: 12px; align-items: center; min-width: 0 }
+.np-song .cv { width: 52px; flex: none }
 .np-song b { display: block; font: var(--t-head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.np-song span { display: block; margin-top: 2px; font: var(--t-sub); color: rgb(255 255 255 / .6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-#repBtn { margin-right: -10px }
-#repBtn[data-loop="off"] { opacity: .35 }
+.np-song span span { display: block; margin-top: 2px; font: var(--t-sub); color: rgb(255 255 255 / .6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+#moreBtn { margin-right: -12px }
 .stage { flex: 1 1 auto; min-height: 0; position: relative }
-.track { position: relative; height: 26px; display: flex; align-items: center; flex: none }
-.track input { width: 100%; height: 26px; margin: 0; background: none; -webkit-appearance: none; appearance: none; cursor: pointer }
+.offline { position: absolute; left: 0; right: 0; bottom: 8px; padding: 12px 16px; border-radius: 8px; background: #fff; color: #121212; font: var(--t-body) }
+.track { position: relative; height: 24px; display: flex; align-items: center; flex: none; margin-top: 8px }
+.track input { width: 100%; height: 24px; margin: 0; background: none; -webkit-appearance: none; appearance: none; cursor: pointer }
 .track input::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, #fff var(--p, 0%), rgb(255 255 255 / .25) var(--p, 0%)) }
 .track input::-moz-range-track { height: 4px; border-radius: 2px; background: rgb(255 255 255 / .25) }
 .track input::-moz-range-progress { height: 4px; border-radius: 2px; background: #fff }
-.track input::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; margin-top: -4.5px; border-radius: 50%; background: #fff; border: 0 }
-.track input::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: #fff; border: 0 }
+.track input::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; margin-top: -4px; border-radius: 50%; background: #fff; border: 0 }
+.track input::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 0 }
 .where { flex: none; display: flex; justify-content: space-between; font: var(--t-cap); color: rgb(255 255 255 / .7); font-variant-numeric: tabular-nums }
-.keys { flex: none; display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center; padding-block: 8px }
-.keys .mid { display: flex; justify-content: center; align-items: center; gap: 12px }
+.keys { flex: none; display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; padding-top: 8px; margin-inline: -10px }
+.keys .mid { display: flex; justify-content: center; align-items: center; gap: 24px }
 .keys .mid .icon svg { width: 28px; height: 28px; fill: currentColor }
-.big { width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: #121212; transition: transform .1s }
+.big { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: #121212; transition: transform .1s }
 .big:active { transform: scale(.94) }
 .big svg { width: 28px; height: 28px }
-#speed { height: 44px; font: var(--t-head); font-variant-numeric: tabular-nums; white-space: nowrap }
-#panelBtn { justify-self: end; margin-right: -10px }
 
-/* 가사: 애플 뮤직처럼 모두 굵게 왼쪽 정렬, 지금 줄만 또렷하고 나머지는 흐리게 */
-.lyr, .queue { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none }
-.lyr::-webkit-scrollbar, .queue::-webkit-scrollbar { display: none }
-.lyr { margin-inline: -16px; padding: 12px 16px 70%;
+/* 가사: 모두 굵게 왼쪽 정렬, 지금 줄만 또렷하고 나머지는 38%. 글자 크기는 18·21·24 세 단계(--lyr) */
+.lyr { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: none; scrollbar-width: none; margin-inline: -16px; padding: 12px 16px 70%;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 40px), transparent) }
-.ln { display: block; opacity: .38; filter: blur(2.5px); transition: opacity .3s, filter .3s }
-.ln + .ln { margin-top: 18px }
+.lyr::-webkit-scrollbar { display: none }
+.ln { display: block; opacity: .38; transition: opacity .3s }
+.ln + .ln { margin-top: 16px }
 .ln.say + .ln.say { margin-top: 8px }
-.ln.gap { margin-top: 36px }
-body.browsing .ln { filter: none }
-/* 음성이 아직 없는 화(대본만)는 소리 없이 읽는 속도로 줄만 짚어 주므로, 흐림 없이 다른 줄도 읽히게 */
-body.textonly .ln { opacity: .6; filter: none }
-body.textonly .ln.now { opacity: 1 }
-.ln.now { opacity: 1; filter: none }
+.ln.gap { margin-top: 32px }
+body.textonly .ln { opacity: .75 }
+.ln.now, body.textonly .ln.now { opacity: 1 }
 .ln-go { display: block; width: 100%; min-width: 0 }
 .ln .cl { display: inline-block }
-.ln .en { display: block; font: 700 21px/1.36 var(--sans); letter-spacing: -.02em }
-.ln .ko { display: block; margin-top: 4px; font: 500 15px/1.45 var(--sans) }
-.ln[data-s="dialogue"] .ko { display: none }
+.ln .en { display: block; font: 700 var(--lyr)/1.5 var(--sans); letter-spacing: -.02em }
+.ln .ko { display: block; margin-top: 4px; font: var(--t-body) }
+.ln[data-s="dialogue"] .ko, body.noko .ln .ko { display: none }
 .ln mark { background: none; color: inherit; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px }
 .ln.veil .en { filter: blur(9px); user-select: none }
-.ln.pause .ln-go { display: flex; align-items: center; gap: 12px; font: 700 17px/1.36 var(--sans) }
+.ln.pause .ln-go { display: flex; align-items: center; gap: 12px; font: 700 var(--lyr)/1.5 var(--sans) }
 .ln.pause svg { width: 20px; height: 20px; flex: none }
 .meter { flex: 1; height: 4px; border-radius: 2px; background: rgb(255 255 255 / .2); overflow: hidden }
 .meter i { display: block; height: 100%; width: 0; background: #fff }
-.queue { padding-bottom: 24px }
-@media (prefers-reduced-motion: reduce) { *, .layer, .layer.up { transition: none !important; animation: none !important; scroll-behavior: auto !important } }
+
+/* 바텀시트(더보기, 취침 타이머, 트랙리스트, 가사 글자 크기): 한 번에 하나, 다음 시트는 앞 시트가 내려간 뒤 올라온다 */
+.scrim { position: fixed; z-index: 30; inset: 0; background: rgb(0 0 0 / .5); opacity: 0; pointer-events: none; transition: opacity .25s }
+.scrim.on { opacity: 1; pointer-events: auto }
+.sheet { position: fixed; z-index: 31; left: 50%; bottom: 0; width: min(100%, 520px); max-height: calc(100% - var(--top) - 64px); display: flex; flex-direction: column;
+  background: var(--sheet); border-radius: 24px 24px 0 0; padding: 0 16px calc(16px + var(--bot));
+  transform: translate(-50%, 100%); visibility: hidden; transition: transform .28s cubic-bezier(.2, .8, .2, 1), visibility 0s .28s }
+.sheet.up { transform: translate(-50%, 0); visibility: visible; transition: transform .28s cubic-bezier(.2, .8, .2, 1) .06s, visibility 0s }
+.sheet .grab { margin-bottom: 8px }
+.sh-t { padding: 4px 0 12px }
+.sh-t h2 { font: var(--t-title); letter-spacing: -.02em }
+.sh-t p { margin-top: 4px; font: var(--t-sub); color: var(--muted) }
+.sh-t p.on { color: var(--hi) }
+.sh-list { overflow-y: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px }
+.sh-list::-webkit-scrollbar { display: none }
+.opt { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 52px; font: var(--t-head) }
+.opt > b { flex: 1; min-width: 0; font: inherit }
+.opt > span { font: var(--t-body); color: var(--muted); display: flex; align-items: center; gap: 4px }
+.opt > span svg, .opt > i svg { width: 20px; height: 20px }
+.opt > svg { width: 20px; height: 20px; flex: none }
+.opt.sel { color: var(--hi) }
+.opt .ck { color: var(--hi) }
+#repIc { color: var(--ink) }
+#repIc svg { width: 20px; height: 20px; flex: none }
+.opt.dim #repIc svg { opacity: .4 }
+.opt.sz { min-height: 56px }
+@media (prefers-reduced-motion: reduce) { *, .np, .sheet { transition: none !important; animation: none !important; scroll-behavior: auto !important } }
 </style>
 
 <div class="app">
-  <main class="view gut" id="vHome"></main>
+  <main class="view gut" id="vHome">
+    <header class="hello">
+      <span class="avatar" aria-hidden="true"><i data-lucide="user"></i></span>
+      <h1>Hi, Seongbeom</h1>
+      <button class="icon" data-go="settings" aria-label="Settings"><i data-lucide="settings"></i></button>
+    </header>
+    <div id="shelves"></div>
+  </main>
 
   <main class="view gut" id="vAlbum" hidden>
-    <header class="bar"><button class="icon" data-back aria-label="뒤로"><i data-lucide="chevron-left"></i></button></header>
+    <header class="bar"><button class="icon" data-back aria-label="Back"><i data-lucide="chevron-left"></i></button></header>
     <div class="al-cover" id="albumCover"></div>
     <div class="al-info"><div class="txt" id="albumInfo"></div>
-      <button class="play" id="albumPlay" aria-label="재생"><span class="ic-play"><i data-lucide="play"></i></span><span class="ic-pause"><i data-lucide="pause"></i></span></button></div>
+      <button class="play" id="albumPlay" aria-label="Play"><span class="ic-play"><i data-lucide="play"></i></span><span class="ic-pause"><i data-lucide="pause"></i></span></button></div>
     <ol id="tracks"></ol>
   </main>
 
-  <div class="mini-dim" id="miniDim" aria-hidden="true"></div>
-  <nav class="mini" id="mini" aria-label="지금 재생 중">
-    <span class="mini-fill" id="miniFill"></span>
-    <button class="mini-open" id="miniOpen" aria-label="재생 화면 열기"><span id="miniArt"></span><span style="min-width:0"><b id="miniTitle"></b><span id="miniTime">0:00 / 0:00</span></span></button>
-    <button class="mini-pp" data-pp aria-label="재생"><span class="ic-play"><i data-lucide="play"></i></span><span class="ic-pause"><i data-lucide="pause"></i></span></button>
+  <main class="view gut" id="vSettings" hidden>
+    <header class="head"><button class="icon" data-back aria-label="Back"><i data-lucide="chevron-left"></i></button><h1>Settings</h1><span></span></header>
+    <h2 class="grp-t">Playback</h2>
+    <div class="grp">
+      <button class="row" data-sheet="size"><b>Lyrics text size</b><span><em id="sizeVal" style="font-style:normal">Default</em><i data-lucide="chevron-right"></i></span></button>
+      <div class="row"><b>Korean translation</b><button class="sw" role="switch" data-ko aria-checked="true" aria-label="Korean translation"></button></div>
+    </div>
+    <p class="grp-d">Korean translation shows the meaning under each podcast line. You can also change the text size with the zoom button on the player.</p>
+    <h2 class="grp-t">About</h2>
+    <div class="grp">
+      <div class="row"><b>Version</b><span>1.0.0</span></div>
+      <div class="row"><b>Voice credits</b><span>ElevenLabs</span></div>
+    </div>
+    <p class="grp-d">Fonts: Pretendard (OFL). Icons: Lucide (ISC).</p>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <nav class="mini" id="mini" aria-label="Now playing" hidden>
+    <span class="mini-line"><i id="miniFill"></i></span>
+    <button class="mini-open" id="miniOpen" aria-label="Open player"><span id="miniArt"></span><span class="mini-txt"><b id="miniTitle"></b><span id="miniSub"></span></span></button>
+    <button class="mini-pp" data-pp aria-label="Play"><span class="ic-play"><i data-lucide="play"></i></span><span class="ic-pause"><i data-lucide="pause"></i></span></button>
   </nav>
 
-  <section class="layer gut" id="vNow" aria-label="재생 화면">
-    <button class="grab" id="grab" data-back aria-label="재생 화면 닫기"></button>
-    <header class="np-top" id="npTop">
-      <div class="np-song"><span id="npArt"></span><span style="min-width:0"><b id="npTitle"></b><span id="npSub"></span></span></div>
-      <button class="icon" id="repBtn" data-loop="off" aria-label="반복 꺼짐, 누르면 전체 반복"><span class="ic-all"><i data-lucide="repeat"></i></span><span class="ic-one" hidden><i data-lucide="repeat-1"></i></span></button>
-    </header>
-    <div class="stage">
-      <div class="lyr" id="script" aria-label="가사"></div>
-      <ol class="queue" id="queue" aria-label="트랙리스트" hidden></ol>
-    </div>
-    <div class="track"><input id="seek" type="range" min="0" step="0.1" value="0" aria-label="재생 위치"></div>
-    <div class="where"><span id="cur">0:00</span><span id="dur">0:00</span></div>
-    <div class="keys">
-      <button id="speed" aria-label="재생 속도 1.0배, 누르면 바뀜">1.0배</button>
-      <div class="mid">
-        <button class="icon" id="prev" aria-label="이전 화"><i data-lucide="skip-back"></i></button>
-        <button class="big" data-pp aria-label="재생"><span class="ic-play"><i data-lucide="play"></i></span><span class="ic-pause"><i data-lucide="pause"></i></span></button>
-        <button class="icon" id="next" aria-label="다음 화"><i data-lucide="skip-forward"></i></button>
+  <section class="layer" id="vNow" aria-label="Player">
+    <div class="np gut" id="np">
+      <button class="grab" id="grab" data-back aria-label="Close player"></button>
+      <header class="np-top" id="npTop">
+        <div class="np-song"><span id="npArt"></span><span style="min-width:0"><b id="npTitle"></b><span id="npSub"></span></span></div>
+        <button class="icon" id="moreBtn" data-sheet="more" aria-label="More"><i data-lucide="ellipsis"></i></button>
+      </header>
+      <div class="stage">
+        <div class="lyr" id="script" aria-label="Lyrics"></div>
+        <div class="offline" id="offline" role="status" hidden>You're offline. This episode isn't downloaded yet.</div>
       </div>
-      <button class="icon" id="panelBtn" aria-label="트랙리스트 보기"><span class="ic-list"><i data-lucide="list-music"></i></span><span class="ic-lyr" hidden><i data-lucide="message-square-quote"></i></span></button>
+      <div class="track"><input id="seek" type="range" min="0" step="0.1" value="0" aria-label="Position"></div>
+      <div class="where"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+      <div class="keys">
+        <button class="icon" id="zoom" aria-label="Lyrics text size"><i data-lucide="zoom-in"></i></button>
+        <div class="mid">
+          <button class="icon" id="prev" aria-label="Previous"><i data-lucide="skip-back"></i></button>
+          <button class="big" data-pp aria-label="Play"><span class="ic-play"><i data-lucide="play"></i></span><span class="ic-pause"><i data-lucide="pause"></i></span></button>
+          <button class="icon" id="next" aria-label="Next"><i data-lucide="skip-forward"></i></button>
+        </div>
+        <button class="icon" data-sheet="queue" aria-label="Track list"><i data-lucide="list-music"></i></button>
+      </div>
     </div>
+  </section>
+
+  <div class="scrim" id="scrim" data-back></div>
+  <section class="sheet" id="shMore" aria-label="More">
+    <button class="grab" data-back aria-label="Close"></button>
+    <div class="sh-list">
+      <button class="opt" id="optRep"><span id="repIc" style="display:contents"></span><b>Repeat</b><span id="repVal">Album</span></button>
+      <div class="opt" id="optKo"><i data-lucide="languages"></i><b>Korean translation</b><button class="sw" role="switch" data-ko aria-checked="true" aria-label="Korean translation"></button></div>
+      <button class="opt" data-sheet="timer"><i data-lucide="moon"></i><b>Sleep timer</b><span><em id="timerVal" style="font-style:normal">Off</em><i data-lucide="chevron-right"></i></span></button>
+    </div>
+  </section>
+  <section class="sheet" id="shTimer" aria-label="Sleep timer">
+    <button class="grab" data-back aria-label="Close"></button>
+    <div class="sh-t"><h2>Sleep timer</h2><p id="timerNote" class="on" hidden></p></div>
+    <div class="sh-list" id="timerList"></div>
+  </section>
+  <section class="sheet" id="shQueue" aria-label="Track list">
+    <button class="grab" data-back aria-label="Close"></button>
+    <div class="sh-t"><h2 id="qTitle"></h2><p id="qMeta"></p></div>
+    <ol class="sh-list" id="queue"></ol>
+  </section>
+  <section class="sheet" id="shSize" aria-label="Lyrics text size">
+    <button class="grab" data-back aria-label="Close"></button>
+    <div class="sh-t"><h2>Lyrics text size</h2></div>
+    <div class="sh-list" id="sizeList"></div>
   </section>
 </div>
 
@@ -221,138 +320,228 @@ const a = $('a');
 const SCRIPTS = __SCRIPTS__;
 let cur = 0, T = EPS[0], L = T.lines, E = SCRIPTS[0];
 const TOC = [
-  ['초급', '나를 말하고 상대에게 묻기', [
+  ['초급', 'Beginner', 'Talk about yourself, ask about others', [
     ['내 얘기', ["I'm / I'm not ~", "I'm ~ing", "I'm from ~", "I'm good at ~", "I like / don't like ~", "I have / don't have ~", "I want / want to ~"]],
     ['상대에게 묻기', ["Are you ~?", "Are you ~ing?", "Do you ~?", "Is it ~?", "Do you like ~?", "Do you have ~?", "Is there ~?", "Do you know ~?", "Do you want (to) ~?"]],
     ['자세히 묻기', ["What's ~?", "That's ~", "Where is ~?", "Who is ~?", "What do you ~?", "Where do you ~?", "How's ~?", "Did you ~?", "How was ~?"]],
   ]],
-  ['심화', '지난 일, 앞일, 제안과 부탁', [
+  ['심화', 'Intermediate', 'The past, plans, offers and requests', [
     ['지난 일', ["I was / wasn't ~", "Were you ~?", "I went to ~", "I ~ed / didn't ~", "What did you ~?", "Why did you ~?", "Where / When did you ~?", "Have you ever ~? / I've never ~"]],
     ['더 자세히 묻기', ["What kind of ~?", "When is / do you ~?", "Why are / do you ~?", "How much / long / many ~?", "How do you ~?"]],
     ['앞일, 제안, 부탁', ["I'm going to ~", "Are you going to ~?", "I'll ~", "Let's ~", "How about ~?", "Why don't we ~?", "Can / Could you ~?", "Can I ~?", "I'm looking for ~", "I'd like to ~ / Would you like ~?", "Do you want me to ~?", "Don't ~"]],
   ]],
-  ['고급', '내 생각을 길고 자연스럽게 말하기', [
+  ['고급', 'Advanced', 'Say what you think, at length and naturally', [
     ['생각, 감정, 조언', ["I think / don't think ~", "Do you think ~?", "I feel / feel like ~", "Are you into ~?", "I can / can't ~", "I have to / don't have to ~", "You should / shouldn't ~", "It looks / sounds ~", "I hope ~", "I'm sure / not sure ~", "I'm worried about ~", "I'm sorry for ~"]],
     ['문장 잇기', ["and / but", "because", "so", "when", "if", "before / after"]],
     ['자연스러운 말', ["I used to ~", "I'm about to ~", "It depends on ~", "I don't know what ~"]],
     ['아직 정하지 않음', ["나중에 정해요", "나중에 정해요", "나중에 정해요"]],
   ]],
 ];
-/* 앨범 = 과정. 앨범마다 표지 색(c)과 어두운 바탕 위 글자 색(hi) */
-const COLOR = { 초급: ['#1f7a4d', '#5fd39a'], 심화: ['#b5651d', '#f0a868'], 고급: ['#1d5f8a', '#6cb6e8'] };
-/* 팟캐스트 앨범: 사회자와 게스트가 한 주제로 나누는 방송. 트랙은 '부'로 세고, 가사에 한글 뜻을 함께 보인다. course는 build_page.py와 같아야 한다 */
+/* 앨범 = 과정. 앨범 색은 커버 그림의 바탕색에서 뽑았다. 강조색은 앱 전체 초록(--hi)으로 고정 */
+const COLOR = { 초급: ['#031253', 'b1'], 심화: ['#0224d1', 'b2'], 고급: ['#06411b', 'b3'] };
+const COVERS = __COVERS__;
+/* 팟캐스트 앨범: 트랙은 '부'로 세고, 가사에 한글 뜻(Korean translation)을 함께 보인다. 이름(name)은 build_page.py와 대본을 잇는 열쇠다 */
 const PODCASTS = [
-  { name: '드레이크 vs 켄드릭', mark: 'VS', about: 'The Replay · 랩판 최대 디스전', c: '#6d3a8c', hi: '#c99be3', pats: ['How It Started', 'The Songs', 'The Tea', 'Who Won'] },
-  { name: '영떡과 YSL 재판', mark: 'YSL', about: 'The Replay · 조지아 최장 재판', c: '#9a2f45', hi: '#f2899c', pats: ['The Arrest', 'The Longest Trial', 'Gunna', 'The Plea'] },
+  { name: '드레이크 vs 켄드릭', en: 'Drake vs Kendrick', mark: 'VS', about: 'The Replay · The biggest beef in rap', c: '#b78564', art: 'replay1', pats: ['How It Started', 'The Songs', 'The Tea', 'Who Won'] },
+  { name: '영떡과 YSL 재판', en: 'Young Thug and the YSL Trial', mark: 'YSL', about: 'The Replay · The longest trial in Georgia', c: '#b48563', art: 'replay2', pats: ['The Arrest', 'The Longest Trial', 'Gunna', 'The Plea'] },
+  { name: '매디의 서울 여행', en: 'Solo in Seoul', mark: 'SOLO', about: "Maddie's Seoul era · solo trip, no cap", c: '#c97b95', pats: ['Day One', 'Day Two', 'Day Three', 'Day Four', 'Day Five'] },
 ];
-const ALBUMS = [...TOC.map(([name, about, groups]) => ({ name, about, c: COLOR[name][0], hi: COLOR[name][1], pats: groups.flatMap(g => g[1]).filter(x => x !== '나중에 정해요') })),
-  ...PODCASTS.map(p => ({ ...p, unit: '부' }))];
-/* 홈 섹션: 기본 표현(과정 세 개)과 팟캐스트 */
-const SHELVES = [['기본 표현', ALBUMS.slice(0, TOC.length)], ['팟캐스트', ALBUMS.slice(TOC.length)]];
+const ALBUMS = [...TOC.map(([name, en, about, groups]) => ({ name, en, about, c: COLOR[name][0], art: COLOR[name][1], pats: groups.flatMap(g => g[1]).filter(x => x !== '나중에 정해요') })),
+  ...PODCASTS.map(p => ({ ...p, pod: true }))];
+const SHELVES = [['Basic Expressions', ALBUMS.slice(0, TOC.length)], ['Podcasts', ALBUMS.slice(TOC.length)]];
 const albumOf = c => ALBUMS.find(x => x.name === c) || ALBUMS[0];
-const U = e => albumOf(e.course).unit || '화';
+const nameOf = al => al.en || al.name;
 /* 같은 앨범의 음성 있는 화. 다음 화 자동 재생과 이전, 다음 버튼은 앨범 안에서만 움직인다 */
-const sibs = () => SCRIPTS.map((e, i) => i).filter(i => has(i) && SCRIPTS[i].course === E.course);
+const sibs = () => SCRIPTS.map((e, i) => i).filter(i => has(i) && SCRIPTS[i].course === E.course)
+  .sort((a, b) => SCRIPTS[a].n - SCRIPTS[b].n || !!SCRIPTS[a].alt - !!SCRIPTS[b].alt);
 const nextIn = n => { const l = sibs(); return l[l.indexOf(cur) + n] };
 
 const store = { get() { try { return JSON.parse(localStorage.getItem('course-1') || '{}') } catch { return {} } },
                 set(v) { try { localStorage.setItem('course-1', JSON.stringify(v)) } catch {} } };
-const S = Object.assign({ ep: 0, eps: {}, pos: 0, done: false, speed: 1, loop: 'off' }, store.get());
+const first = store.get();
+/* loop: all(앨범 전체 반복) → one(한 화 반복) → off. size: 가사 글자 0·1·2 단계. ko: 팟캐스트 한국어 해석 */
+const S = Object.assign({ ep: 0, eps: {}, pos: 0, done: false, loop: 'all', size: 0, ko: true }, first);
 const save = () => {
   S.eps[cur] = { done: S.done, pos: S.pos };
-  store.set({ ep: cur, eps: S.eps, speed: S.speed, loop: S.loop });
+  store.set({ ep: cur, eps: S.eps, loop: S.loop, size: S.size, ko: S.ko, started: S.started });
 };
 const icons = () => window.lucide && lucide.createIcons();
 const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
-const long = s => { const m = Math.round(s / 60), h = Math.floor(m / 60); return h ? `${h}시간 ${m % 60}분` : `${m}분` };
+const mins = s => `${Math.round(s / 60)} min`;
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const has = i => i >= 0 && i < EPS.length;
-const doneIn = al => SCRIPTS.filter((e, i) => e.course === al.name && has(i) && (S.eps[i] || {}).done).length;
-const madeIn = al => SCRIPTS.filter((e, i) => e.course === al.name && has(i)).length;
-const totalIn = al => EPS.reduce((s, t, i) => s + (SCRIPTS[i].course === al.name ? t.duration : 0), 0);
+const doneIn = al => SCRIPTS.filter((e, i) => e.course === al.name && !e.alt && has(i) && (S.eps[i] || {}).done).length;
+const madeIn = al => SCRIPTS.filter((e, i) => e.course === al.name && !e.alt && has(i)).length;
+const totalIn = al => EPS.reduce((s, t, i) => s + (SCRIPTS[i].course === al.name && !SCRIPTS[i].alt ? t.duration : 0), 0);
+const eps = n => `${n} episode${n === 1 ? '' : 's'}`;
 
-/* 표지 */
-const cover = (e, cls = '') => `<div class="cv ${cls}" style="--c:${albumOf(e.course).c}" aria-hidden="true"><small>이야기 영어 · ${e.course}</small><b>${e.n}</b><span>${esc(e.title)}</span></div>`;
-const albumCover = (al, cls = '') => `<div class="cv al ${cls}" style="--c:${al.c}" aria-hidden="true"><small>이야기 영어</small><b>${al.mark || al.name}</b><span>${esc(al.about)}</span></div>`;
+/* 표지: 모든 자리(카드, 앨범, 재생 시트, 미니 플레이어)에 앨범 커버를 쓴다 */
+const art = al => al.art && COVERS[al.art] ? `<img src="${COVERS[al.art]}" alt="" decoding="async">` : '';
+const albumCover = (al, cls = '') => art(al) ? `<div class="cv ${cls}" aria-hidden="true">${art(al)}</div>` : `<div class="cv ${cls}" style="--c:${al.c}" aria-hidden="true"><small>Side A</small><b>${al.mark || esc(nameOf(al))}</b><span>${esc(al.about)}</span></div>`;
 
-/* 화면 이동: 쌓아 두고, 휴대폰 뒤로 가기로도 닫힌다 */
-const BASE = ['home', 'album'];
+/* 화면 이동: 쌓아 두고, 휴대폰 뒤로 가기로도 닫힌다. 바탕 화면 위에 재생 시트, 그 위에 작은 시트가 한 장 올라온다 */
+const BASE = ['home', 'album', 'settings'], SHEETS = { more: 'shMore', timer: 'shTimer', queue: 'shQueue', size: 'shSize' };
 const stack = ['home'];
-let pushed = 0, albumSel = 0, panel = 'lyrics';
+let pushed = 0, albumSel = 0;
 function go(v) {
   if (stack[stack.length - 1] === v) return;
+  /* 시트에서 다음 시트로 갈 때(더보기 → 취침 타이머)는 앞 시트가 내려가고 다음 시트가 올라온다. 뒤로 가기는 앞 시트로 */
   stack.push(v);
   try { history.pushState({ n: stack.length }, ''); pushed++ } catch {}
   render();
 }
 function back() { if (stack.length < 2) return; if (pushed > 0) history.back(); else { stack.pop(); render() } }
-addEventListener('popstate', () => { if (pushed > 0) pushed--; if (stack.length > 1) { stack.pop(); render() } });
+/* 시트를 고르고 닫을 때는 시트만큼 한꺼번에 내려간다 */
+function closeSheets() { let n = 0; for (let k = stack.length - 1; k > 0 && SHEETS[stack[k]]; k--) n++; if (!n) return;
+  if (pushed >= n) { history.go(-n) } else { stack.splice(stack.length - n); render() } }
+/* 홈에서 뒤로 가기를 계속 누르면 안드로이드가 앱을 닫아 소리가 끊긴다. 맨 아래에 막이(guard) 한 칸을 깔아 두고,
+   재생 중이면 닫지 않고 남는다(홈 버튼으로 나가면 계속 들린다). 재생 중이 아니면 한 번 더 누르면 닫힌다. */
+let armed = false, toastT = 0;
+function arm() { if (armed) return; try { history.pushState({ guard: 1 }, ''); armed = true } catch {} }
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600) }
+addEventListener('popstate', e => {
+  if (pushed > 0) pushed--;
+  if (stack.length > 1) { stack.pop(); render() }
+  if (CAP || e.state && e.state.guard) return;
+  if (stack.length > 1) return;
+  armed = false;
+  if (!a.paused) { arm(); toast('Still playing. Use the home button to keep listening.') }
+  else toast('Press back again to exit.');
+});
 const topV = () => stack[stack.length - 1];
+const isUp = () => stack.includes('now');
 function render() {
   const t = topV(), base = [...stack].reverse().find(v => BASE.includes(v));
-  $('vHome').hidden = base !== 'home'; $('vAlbum').hidden = base !== 'album';
-  const up = t === 'now';
-  $('vNow').classList.toggle('up', up); $('vNow').inert = !up;
-  ['vHome', 'vAlbum', 'mini'].forEach(id => $(id).inert = up);
+  $('vHome').hidden = base !== 'home'; $('vAlbum').hidden = base !== 'album'; $('vSettings').hidden = base !== 'settings';
+  const up = isUp();
+  $('vNow').classList.toggle('up', up); $('vNow').inert = !up || !!SHEETS[t];
+  Object.entries(SHEETS).forEach(([k, id]) => { $(id).classList.toggle('up', t === k); $(id).inert = t !== k });
+  $('scrim').classList.toggle('on', !!SHEETS[t]);
+  ['vHome', 'vAlbum', 'vSettings', 'mini'].forEach(id => $(id).inert = up || !!SHEETS[t]);
   if (base === 'home') renderHome();
   if (base === 'album') renderAlbum();
-  if (up) { manual = 0; lastI = -2; requestAnimationFrame(() => tick(true)) }
+  if (base === 'settings') renderSettings();
+  if (t === 'queue') renderQueue();
+  if (t === 'timer') renderTimer();
+  if (t === 'size') renderSize();
+  if (t === 'more') renderMore();
+  if (t === 'now') { manual = 0; lastI = -2; requestAnimationFrame(() => tick(true)) }
+  setBarColor(up ? '#000000' : base === 'album' ? ALBUMS[albumSel].c : '#121212');
+  syncWake();
+}
+/* 가사를 보는 동안은 화면이 꺼지지 않게 한다. 다른 화면으로 가거나 앱을 내리면 풀린다 */
+let wake = null, waking = false;
+const wantWake = () => topV() === 'now' && document.visibilityState === 'visible';
+async function syncWake() {
+  if (!('wakeLock' in navigator) || waking) return;
+  if (wantWake() && !wake) {
+    waking = true;
+    try { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null }) } catch { wake = null }
+    waking = false;
+    if (!wantWake() && wake) syncWake();
+  } else if (!wantWake() && wake) { const w = wake; wake = null; w.release().catch(() => {}) }
+}
+document.addEventListener('visibilitychange', syncWake);
+function setBarColor(c) {
+  let m = document.querySelector('meta[name="theme-color"]');
+  if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m) }
+  m.content = c;
 }
 
 /* 홈 */
 function renderHome() {
-  $('vHome').innerHTML = SHELVES.map(([title, list]) => `<section class="shelf"><h2>${title}</h2><ul class="rail">${list.map(al => {
+  $('shelves').innerHTML = SHELVES.map(([title, list]) => `<section class="shelf"><h2>${title}</h2><ul class="rail">${list.map(al => {
     const k = ALBUMS.indexOf(al), made = madeIn(al);
-    return `<li><button class="card ${made ? '' : 'soon'}" data-album="${k}" aria-label="${esc(al.name)} 앨범 열기">${albumCover(al)}<span class="card-t"><b>${esc(al.name)}</b><span>${made ? long(totalIn(al)) : '준비 중'}</span></span></button></li>`;
+    return `<li><button class="card ${made ? '' : 'soon'}" ${made ? `data-album="${k}"` : 'aria-disabled="true"'} aria-label="${esc(nameOf(al))}">${albumCover(al)}<span class="card-t"><b>${esc(nameOf(al))}</b><span>${made ? mins(totalIn(al)) : 'Coming soon'}</span></span></button></li>`;
   }).join('')}</ul></section>`).join('');
   icons(); syncPlay();
 }
 
-/* 트랙 줄(앨범 화면과 재생 화면 트랙리스트가 같이 쓴다) */
+/* 트랙 줄(앨범 화면과 트랙리스트 시트가 같이 쓴다) */
 function trackRows(al) {
   return al.pats.map((p, k) => {
-    const n = k + 1, i = SCRIPTS.findIndex(e => e.course === al.name && e.n === n);
-    if (i < 0) return `<li class="trk soon"><div class="trk-go"><span class="no">${n}</span><span class="tt"><b>${esc(p)}</b></span><span class="tm">준비 중</span></div></li>`;
-    const e = SCRIPTS[i], on = i === cur, done = (S.eps[i] || {}).done;
-    const tm = has(i) ? mmss(EPS[i].duration) : '대본만';
-    const inner = `<span class="no">${on ? '<i data-lucide="audio-lines"></i>' : n}</span><span class="tt"><b>${esc(e.title)}</b></span><span class="tm">${done ? '<i data-lucide="circle-check" class="dn" aria-label="다 들음"></i>' : ''}${tm}</span>`;
-    return `<li class="trk ${on ? 'on' : ''}">${has(i) ? `<button class="trk-go" data-play="${i}" ${on ? 'aria-current="true"' : ''}>${inner}</button>` : `<div class="trk-go">${inner}</div>`}</li>`;
+    const n = k + 1, i = SCRIPTS.findIndex(e => e.course === al.name && e.n === n && !e.alt);
+    if (i < 0) return `<li class="trk soon"><div class="trk-go"><span class="tt"><b>${esc(p)}</b></span><span class="tm">Coming soon</span></div></li>`;
+    const alts = SCRIPTS.map((e, j) => j).filter(j => SCRIPTS[j].alt && SCRIPTS[j].course === al.name && SCRIPTS[j].n === n);
+    return [i, ...alts].map(i => trackRow(i, n)).join('');
   }).join('');
+}
+function trackRow(i, n) {
+  const e = SCRIPTS[i], on = i === cur && S.started;
+  const tm = has(i) ? mmss(EPS[i].duration) : 'Script only';
+  const inner = `<span class="tt"><b>${esc(e.title)}</b></span><span class="tm">${tm}</span>`;
+  return `<li class="trk ${on ? 'on' : ''}">${has(i) ? `<button class="trk-go" data-play="${i}" ${on ? 'aria-current="true"' : ''}>${inner}</button>` : `<div class="trk-go">${inner}</div>`}</li>`;
 }
 
 /* 앨범 */
 function renderAlbum() {
-  const al = ALBUMS[albumSel], made = madeIn(al), u = al.unit || '화';
-  $('vAlbum').style.setProperty('--c', al.c); $('vAlbum').style.setProperty('--hi', al.hi);
+  const al = ALBUMS[albumSel], made = madeIn(al);
+  $('vAlbum').style.setProperty('--c', al.c);
   $('albumCover').innerHTML = albumCover(al);
-  $('albumInfo').innerHTML = `<h1>${esc(al.name)}</h1><p>${esc(al.about)}</p><p class="meta">${made ? `${made}${u} · ${long(totalIn(al))} · ${doneIn(al)}${u} 들음` : `준비 중 · ${al.pats.length}${u} 예정`}</p>`;
+  $('albumInfo').innerHTML = `<h1>${esc(nameOf(al))}</h1><p>${esc(al.about)}</p><p class="meta">${made ? `${eps(made)} · ${mins(totalIn(al))} · ${doneIn(al)} played` : `Coming soon · ${eps(al.pats.length)}`}</p>`;
   $('albumPlay').hidden = !made;
   $('tracks').innerHTML = trackRows(al);
   icons(); syncPlay();
 }
 $('albumPlay').onclick = () => {
   const al = ALBUMS[albumSel];
-  if (E.course === al.name) return togglePlay();
+  if (E.course === al.name && S.started) return togglePlay();
   const list = SCRIPTS.map((e, i) => i).filter(i => SCRIPTS[i].course === al.name && has(i));
   startEp(list.find(i => !(S.eps[i] || {}).done) ?? list[0]);
 };
 
-/* 재생 화면 가운데: 가사와 트랙리스트를 오른쪽 아래 버튼으로 바꾼다 */
-function renderQueue() { $('queue').innerHTML = trackRows(albumOf(E.course)); icons() }
-function setPanel(p) {
-  panel = p;
-  const q = p === 'queue';
-  $('script').hidden = q; $('queue').hidden = !q;
-  $('panelBtn').querySelector('.ic-list').hidden = q; $('panelBtn').querySelector('.ic-lyr').hidden = !q;
-  $('panelBtn').setAttribute('aria-label', q ? '가사 보기' : '트랙리스트 보기');
-  if (q) { renderQueue(); const on = $('queue').querySelector('[aria-current]'); if (on) on.scrollIntoView({ block: 'center' }) }
-  else { manual = 0; lastI = -2; requestAnimationFrame(() => tick(true)) }
+/* 설정 */
+const SIZES = [['Default', 18], ['Large', 21], ['Extra large', 24]];
+function renderSettings() { $('sizeVal').textContent = SIZES[S.size][0]; syncKo(); icons() }
+function setSize(k) { S.size = k; document.documentElement.style.setProperty('--lyr', SIZES[k][1] + 'px'); $('sizeVal').textContent = SIZES[k][0]; save(); if (isUp()) { lastI = -2; requestAnimationFrame(() => tick(true)) } }
+function renderSize() {
+  $('sizeList').innerHTML = SIZES.map(([t, px], k) => `<button class="opt sz ${k === S.size ? 'sel' : ''}" data-size="${k}"><b style="font:700 ${px}px/1.3 var(--sans)">${t}</b>${k === S.size ? '<i class="ck" data-lucide="check"></i>' : ''}</button>`).join('');
+  icons();
+}
+/* 한국어 해석: 팟캐스트 가사에만 쓴다. 설정과 더보기 시트의 스위치가 같은 값이다 */
+const isPod = e => !!albumOf(e.course).pod;
+function syncKo() {
+  document.querySelectorAll('[data-ko]').forEach(b => b.setAttribute('aria-checked', String(!!S.ko)));
+  document.body.classList.toggle('noko', isPod(E) && !S.ko);
+}
+
+/* 더보기 시트: Repeat(전체 반복 → 한 화 반복 → 끔), Korean translation(팟캐스트만), Sleep timer */
+const LOOP = { all: ['one', 'Album'], one: ['off', 'One'], off: ['all', 'Off'] };
+function renderMore() {
+  const m = S.loop;
+  $('repIc').innerHTML = `<i data-lucide="${m === 'one' ? 'repeat-1' : 'repeat'}"></i>`;
+  $('optRep').classList.toggle('dim', m === 'off'); $('repVal').textContent = LOOP[m][1];
+  $('optKo').hidden = !isPod(E);
+  $('timerVal').textContent = timer.label; syncKo(); icons();
+}
+function setLoop(m) { S.loop = m; save(); if (topV() === 'more') renderMore() }
+
+/* 취침 타이머: 정한 시간이 되면 그냥 멈춘다. 켜져 있다는 표시는 재생 화면과 미니 플레이어에 두지 않는다 */
+const TIMERS = [['Off', 0], ['15 min', 15], ['30 min', 30], ['45 min', 45], ['60 min', 60], ['End of episode', -1]];
+const timer = { label: 'Off', min: 0, at: 0, id: 0 };
+function setTimer(k) {
+  const [label, min] = TIMERS[k];
+  clearTimeout(timer.id); Object.assign(timer, { label, min, at: min > 0 ? Date.now() + min * 60000 : 0, id: 0 });
+  if (min > 0) timer.id = setTimeout(() => { a.pause(); Object.assign(timer, { label: 'Off', min: 0, at: 0 }) }, min * 60000);
+}
+function renderTimer() {
+  const left = timer.min > 0 ? Math.max(1, Math.round((timer.at - Date.now()) / 60000)) : 0;
+  $('timerNote').hidden = !timer.min; $('timerNote').textContent = timer.min === -1 ? 'Playback stops at the end of this episode' : `Playback stops in ${left} min`;
+  $('timerList').innerHTML = TIMERS.map(([t], k) => `<button class="opt ${t === timer.label ? 'sel' : ''}" data-timer="${k}"><b>${t}</b>${t === timer.label ? '<i class="ck" data-lucide="check"></i>' : ''}</button>`).join('');
+  icons();
+}
+
+/* 트랙리스트 시트 */
+function renderQueue() {
+  const al = albumOf(E.course);
+  $('qTitle').textContent = nameOf(al); $('qMeta').textContent = `${eps(madeIn(al))} · ${mins(totalIn(al))}`;
+  $('queue').innerHTML = trackRows(al); icons();
+  const on = $('queue').querySelector('[aria-current]'); if (on) on.scrollIntoView({ block: 'center' });
 }
 
 /* 가사형 대본 */
 /* 해설은 쉼표와 마침표 뒤 마디 단위로 묶어, 줄이 마디 사이에서 바뀌게 한다. 인용 뒤 "라는", "라고"는 앞 마디에 붙인다 */
 const clauses = t => esc(t).split(/(?<=[,.?!])\s+(?!(?:이)?라(?:는|고) )/).map(c => `<span class="cl">${c}</span>`).join(' ');
-/* 문장을 누르면 그 문장으로 간다. 대화 줄 위의 이름은 보이지 않는다 */
 function lineHtml(l, i) {
   const wrap = (cls, body, extra = '') => `<div class="ln ${cls}" data-i="${i}"${extra}><button class="ln-go">${body}</button></div>`;
   if (l.kind === 'pause') return wrap('pause', `<i data-lucide="mic"></i>${esc(l.text)}<span class="meter"><i id="m${i}"></i></span>`);
@@ -373,13 +562,19 @@ function renderScript() {
 /* 재생 */
 let lastI = -2, manual = 0, raf = 0, ready = false;
 /* 재생 요청이 막히면(새 화를 아직 못 받았을 때 등) 받을 수 있게 되는 순간 한 번 더 시도한다 */
-const play = () => { a.play().catch(() => { if (a.paused) a.addEventListener('canplay', () => a.play().catch(() => {}), { once: true }) }) };
+const play = () => { if (!S.started) { S.started = true; showMini() } a.play().catch(() => { if (a.paused) a.addEventListener('canplay', () => a.play().catch(() => {}), { once: true }) }) };
 const togglePlay = () => a.paused ? play() : a.pause();
 function syncPlay() {
   document.body.classList.toggle('playing', !a.paused);
-  document.querySelectorAll('[data-pp], #albumPlay').forEach(b => b.setAttribute('aria-label', a.paused ? '재생' : '멈춤'));
-  $('vAlbum').classList.toggle('mine', E.course === ALBUMS[albumSel].name);
+  document.querySelectorAll('[data-pp], #albumPlay').forEach(b => b.setAttribute('aria-label', a.paused ? 'Play' : 'Pause'));
+  $('vAlbum').classList.toggle('mine', S.started && E.course === ALBUMS[albumSel].name);
 }
+/* 아직 아무것도 듣지 않았으면 미니 플레이어가 없다(01b 홈 처음 실행) */
+function showMini() {
+  $('mini').hidden = !S.started;
+  document.documentElement.style.setProperty('--miniH', S.started ? $('mini').offsetHeight + 'px' : '0px');
+}
+addEventListener('resize', showMini);
 function seekTo(t, go = true) { a.currentTime = t; S.pos = t; tick(true); if (go) play() }
 function indexAt(t) { let k = -1; for (let i = 0; i < L.length; i++) { if (L[i].start <= t + .02) k = i; else break } return k }
 
@@ -387,9 +582,7 @@ function tick(force) {
   const t = ready ? a.currentTime : S.pos, d = a.duration || T.duration, p = Math.min(100, t / d * 100) + '%';
   $('cur').textContent = mmss(t);
   $('seek').value = t; $('seek').style.setProperty('--p', p);
-  $('miniFill').style.width = p; $('miniTime').textContent = `${mmss(t)} / ${mmss(d)}`;
-  /* 손으로 가사를 넘기는 동안은 흐림을 풀어 읽기 쉽게 한다 */
-  document.body.classList.toggle('browsing', Date.now() - manual < 6000);
+  $('miniFill').style.width = p;
   const i = indexAt(t), pl = L[i];
   if (pl && pl.kind === 'pause') { const m = $('m' + i); if (m) m.style.width = Math.min(100, (t - pl.start) / (pl.end - pl.start) * 100) + '%' }
   if (i !== lastI || force) {
@@ -399,10 +592,10 @@ function tick(force) {
       el.classList.toggle('now', k === i);
       el.classList.toggle('veil', L[k].kind === 'answer' && k > i);
     });
-    if (topV() === 'now' && panel === 'lyrics' && Date.now() - manual > 6000) center(i, force);
+    if (isUp() && Date.now() - manual > 6000) center(i, force);
   }
 }
-/* 지금 줄은 가사 영역 위쪽 1/4쯤에 둔다 */
+/* 지금 줄은 가사 영역 위쪽 22%쯤에 둔다 */
 function center(i, jump) {
   const box = $('script'), el = box.querySelector(`[data-i="${Math.max(i, 0)}"]`);
   if (!el) return;
@@ -414,69 +607,104 @@ function loop() { tick(); raf = requestAnimationFrame(loop) }
 
 a.addEventListener('play', () => { syncPlay(); cancelAnimationFrame(raf); loop(); media('playing') });
 a.addEventListener('pause', () => { syncPlay(); cancelAnimationFrame(raf); tick(); save(); media('paused') });
+a.addEventListener('playing', () => { $('offline').hidden = true });
 a.addEventListener('loadedmetadata', () => {
   $('seek').max = a.duration; $('dur').textContent = mmss(a.duration);
   if (S.pos > 0 && S.pos < a.duration - 1) a.currentTime = S.pos;
-  a.playbackRate = S.speed; ready = true; tick(true);
+  ready = true; tick(true); position();
 });
 /* 음성 파일이 바뀌거나 비워지는 순간 0초가 위치로 저장되지 않게 */
 a.addEventListener('emptied', () => { ready = false });
 let lastSave = 0;
-a.addEventListener('timeupdate', () => { if (!ready) return; S.pos = a.currentTime; if (Date.now() - lastSave > 4000) { lastSave = Date.now(); save() } });
-/* 끝나면: 한 화 반복은 처음부터, 그 밖에는 다음 화로 넘어간다(마지막 화 다음은 전체 반복일 때만 1화) */
+a.addEventListener('timeupdate', () => { if (!ready) return; S.pos = a.currentTime; if (Date.now() - lastSave > 4000) { lastSave = Date.now(); save(); position() } });
+/* 끝나면: 한 화 반복은 처음부터, 그 밖에는 다음 화로 넘어간다(마지막 화 다음은 전체 반복일 때만 1화).
+   취침 타이머가 '이 화 끝까지'면 여기서 멈춘다 */
 a.addEventListener('ended', () => {
   S.done = true; S.pos = 0; save(); syncPlay();
   if (!$('vHome').hidden) renderHome(); if (!$('vAlbum').hidden) renderAlbum();
+  if (timer.min === -1) { setTimer(0); media('paused'); return }
   if (S.loop === 'one') { a.currentTime = 0; play() }
   else if (nextIn(1) !== undefined) startEp(nextIn(1));
   else if (S.loop === 'all') startEp(sibs()[0]);
 });
-/* 반복: 꺼짐(흐린 아이콘) → 전체 반복(흰 아이콘) → 한 화 반복(흰 repeat-1) */
-const LOOP = { off: ['all', '반복 꺼짐, 누르면 전체 반복'], all: ['one', '전체 반복 중, 누르면 한 화 반복'], one: ['off', '한 화 반복 중, 누르면 반복 끄기'] };
-function setLoop(m) {
-  S.loop = m; $('repBtn').dataset.loop = m; $('repBtn').setAttribute('aria-label', LOOP[m][1]);
-  $('repBtn').querySelector('.ic-all').hidden = m === 'one'; $('repBtn').querySelector('.ic-one').hidden = m !== 'one';
-  save();
-}
-/* 배속: 누를 때마다 다음 단계로 */
-const SPEEDS = [0.75, 1, 1.25, 1.5];
-const speedLabel = v => v.toFixed(2).replace(/0$/, '') + '배';
-function setSpeed(v) {
-  S.speed = v; a.playbackRate = v;
-  $('speed').textContent = speedLabel(v); $('speed').setAttribute('aria-label', `재생 속도 ${speedLabel(v)}, 누르면 바뀜`);
-  save();
-}
 
-/* 잠금화면과 알림창 조작: 표지 그림도 함께 넘긴다 */
+/* 잠금 화면과 알림창 재생 컨트롤: 앨범 커버를 띄운다. 안드로이드 앱에서는 미디어 재생 서비스(@capgo/capacitor-media-session)가
+   화면이 꺼져도 앱을 살려 두어 다음 화까지 이어진다. 브라우저에서는 웹 표준 mediaSession을 쓴다 */
+const CAP = window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform() && Capacitor.isPluginAvailable && Capacitor.isPluginAvailable('MediaSession') ? Capacitor : null;
+const NMS = (m, o) => CAP ? CAP.nativePromise('MediaSession', m, o).catch(() => {}) : null;
+/* 안드로이드 뒤로 가기(앱): 시트·화면을 하나씩 닫고, 홈에서 재생 중이면 앱을 닫지 않고 내린다(소리는 계속).
+   멈춰 있으면 한 번 더 누를 때 닫힌다. 브라우저에서는 아래 막이(guard) 방식을 쓴다 */
+/* 앨범 화면 끝에서 더 당기면 트랙 목록만 살짝 늘어났다 돌아온다(스포티파이와 같다).
+   맨 위에서 아래로 당기면 목록 위쪽을 기준으로, 맨 아래에서 위로 밀면 목록 아래쪽을 기준으로 늘어난다.
+   위쪽 커버와 제목, 미니 바, 시스템 막대는 움직이지 않는다.
+   안드로이드 WebView 자체의 당김 효과는 MainActivity에서 껐다(전체 화면과 미니 바가 같이 흔들렸다, 2026-11-09 성범 지적). */
+{
+  const v = $('vAlbum'), list = $('tracks');
+  let y0 = null, edge = 0;
+  const atTop = () => v.scrollTop <= 0, atEnd = () => v.scrollTop + v.clientHeight >= v.scrollHeight - 1;
+  const set = (k, anim) => {
+    list.style.transformOrigin = edge < 0 ? '50% 100%' : '50% 0';
+    list.style.transition = anim ? 'transform .35s cubic-bezier(.2,.8,.2,1)' : 'none';
+    list.style.transform = k > 1 ? `scaleY(${k})` : '';
+  };
+  v.addEventListener('touchstart', e => { y0 = atTop() || atEnd() ? e.touches[0].clientY : null; edge = 0; }, { passive: true });
+  v.addEventListener('touchmove', e => {
+    if (y0 == null) return;
+    const dy = e.touches[0].clientY - y0;
+    const dir = dy > 0 && atTop() ? 1 : dy < 0 && atEnd() ? -1 : 0;
+    if (!dir) { if (edge) { edge = 0; set(1); } if (!atTop() && !atEnd()) y0 = null; return; }
+    edge = dir;
+    e.preventDefault();
+    set(1 + .06 * (1 - Math.exp(-Math.abs(dy) / 400)));
+  }, { passive: false });
+  const end = () => { if (y0 == null) return; y0 = null; set(1, true); };
+  v.addEventListener('touchend', end); v.addEventListener('touchcancel', end);
+}
+let exitAsk = 0;
+if (CAP && Capacitor.isPluginAvailable('App')) CAP.nativeCallback('App', 'addListener', { eventName: 'backButton' }, () => {
+  if (stack.length > 1) return back();
+  if (!a.paused) return CAP.nativePromise('App', 'minimizeApp', {}).catch(() => {});
+  if (Date.now() - exitAsk < 2600) return CAP.nativePromise('App', 'exitApp', {}).catch(() => {});
+  exitAsk = Date.now(); toast('Press back again to exit.');
+});
 const arts = {};
 function artwork(e) {
-  const k = e.course + e.n;
-  if (arts[k]) return arts[k];
+  const al = albumOf(e.course);
+  if (al.art && COVERS[al.art]) return COVERS[al.art];
+  const k = al.name; if (arts[k]) return arts[k];
   try {
     const c = document.createElement('canvas'); c.width = c.height = 512;
     const x = c.getContext('2d'), f = 'Pretendard, sans-serif';
-    x.fillStyle = albumOf(e.course).c; x.fillRect(0, 0, 512, 512);
-    const g = x.createLinearGradient(0, 0, 512, 512); g.addColorStop(0, 'rgba(255,255,255,.18)'); g.addColorStop(.58, 'rgba(255,255,255,0)');
-    x.fillStyle = g; x.fillRect(0, 0, 512, 512);
-    x.fillStyle = 'rgba(255,255,255,.82)'; x.font = `600 30px ${f}`; x.fillText(`이야기 영어 · ${e.course}`, 40, 66);
-    x.fillStyle = '#fff'; x.font = `700 280px ${f}`; x.fillText(String(e.n), 26, 420);
-    x.font = `600 32px ${f}`; x.fillText(e.title, 40, 478);
+    x.fillStyle = al.c; x.fillRect(0, 0, 512, 512);
+    x.fillStyle = '#fff'; x.font = `700 132px ${f}`; x.fillText(al.mark || nameOf(al), 32, 300);
+    x.font = `600 30px ${f}`; x.fillText('Side A', 40, 470);
     return arts[k] = c.toDataURL('image/png');
   } catch { return '' }
 }
+const ACTIONS = { play: () => play(), pause: () => a.pause(), previoustrack: () => step(-1), nexttrack: () => step(1),
+  seekbackward: () => nudge(-5), seekforward: () => nudge(5), seekto: d => d && d.seekTime != null && seekTo(d.seekTime, !a.paused) };
+let metaKey = '';
+if (CAP) Object.entries(ACTIONS).forEach(([action, fn]) => CAP.nativeCallback('MediaSession', 'setActionHandler', { action }, d => fn(d || {})));
 function media(state) {
+  const al = albumOf(E.course), key = cur + state;
+  const meta = { title: E.title, artist: nameOf(al), album: 'Side A', artwork: [{ src: artwork(E), sizes: '512x512', type: art(al) ? 'image/webp' : 'image/png' }] };
+  if (CAP) {
+    if (metaKey !== String(cur)) { metaKey = String(cur); NMS('setMetadata', meta) }
+    NMS('setPlaybackState', { playbackState: state }); position();
+    return;
+  }
   if (!('mediaSession' in navigator)) return;
   try {
     navigator.mediaSession.playbackState = state;
-    const src = artwork(E);
-    navigator.mediaSession.metadata = new MediaMetadata({ title: `${E.n}${U(E)}. ${E.title}`, artist: '이야기 영어', album: E.course, artwork: src ? [{ src, sizes: '512x512', type: 'image/png' }] : [] });
-    navigator.mediaSession.setActionHandler('play', play);
-    navigator.mediaSession.setActionHandler('pause', () => a.pause());
-    navigator.mediaSession.setActionHandler('previoustrack', nextIn(-1) !== undefined ? () => step(-1) : null);
-    navigator.mediaSession.setActionHandler('nexttrack', nextIn(1) !== undefined ? () => step(1) : null);
-    navigator.mediaSession.setActionHandler('seekbackward', () => nudge(-5));
-    navigator.mediaSession.setActionHandler('seekforward', () => nudge(5));
+    navigator.mediaSession.metadata = new MediaMetadata(meta);
+    Object.entries(ACTIONS).forEach(([k, fn]) => { try { navigator.mediaSession.setActionHandler(k, k === 'previoustrack' && nextIn(-1) === undefined || k === 'nexttrack' && nextIn(1) === undefined ? null : fn) } catch {} });
   } catch {}
+}
+function position() {
+  const d = a.duration || T.duration, p = Math.min(ready ? a.currentTime : S.pos, d);
+  if (!isFinite(d) || !d) return;
+  if (CAP) NMS('setPositionState', { duration: d, position: p, playbackRate: 1 });
+  else try { navigator.mediaSession.setPositionState({ duration: d, position: p, playbackRate: 1 }) } catch {}
 }
 /* 목록에서 화를 고르면 처음부터 재생한다 */
 function startEp(i) {
@@ -485,6 +713,8 @@ function startEp(i) {
   else { a.currentTime = 0; S.pos = 0 }
   manual = 0; $('script').scrollTop = 0;
   play();
+  /* 시트가 내려가는 사이 가사 위치가 옛 화에 남지 않게, 시트가 닫힌 뒤 한 번 더 맞춘다 */
+  setTimeout(() => { lastI = -2; tick(true) }, 450);
 }
 function step(n) { const i = nextIn(n); if (i !== undefined) startEp(i) }
 function nudge(s) { const t = Math.max(0, Math.min((a.duration || T.duration) - .1, (ready ? a.currentTime : S.pos) + s)); seekTo(t, !a.paused) }
@@ -494,21 +724,27 @@ document.addEventListener('click', e => {
   const t = e.target;
   if (t.closest('[data-pp]')) return togglePlay();
   if (t.closest('[data-back]')) return back();
+  if (t.closest('[data-ko]')) { S.ko = !S.ko; save(); syncKo(); return }
+  const sh = t.closest('[data-sheet]');
+  if (sh) { const v = sh.dataset.sheet; if (SHEETS[topV()]) { stack.pop(); stack.push(v); history.replaceState({ n: stack.length }, ''); render() } else go(v); return }
+  const g = t.closest('[data-go]'); if (g) return go(g.dataset.go);
   const al = t.closest('[data-album]'); if (al) { albumSel = +al.dataset.album; return go('album') }
+  const tm = t.closest('[data-timer]'); if (tm) { setTimer(+tm.dataset.timer); return closeSheets() }
+  const sz = t.closest('[data-size]'); if (sz) { setSize(+sz.dataset.size); return back() }
   const pl = t.closest('[data-play]');
   if (pl) {
     const i = +pl.dataset.play;
-    if (pl.closest('#queue')) return i === cur ? setPanel('lyrics') : startEp(i);
-    return i === cur ? go('now') : startEp(i);
+    if (pl.closest('#queue')) { if (i !== cur) startEp(i); return closeSheets() }
+    return i === cur && S.started ? go('now') : (startEp(i), go('now'));
   }
   if (t.closest('#miniOpen')) return go('now');
 });
 $('prev').onclick = () => step(-1);
 $('next').onclick = () => step(1);
-$('repBtn').onclick = () => setLoop(LOOP[S.loop || 'off'][0]);
-$('speed').onclick = () => setSpeed(SPEEDS[(SPEEDS.indexOf(S.speed) + 1) % SPEEDS.length]);
-$('panelBtn').onclick = () => setPanel(panel === 'lyrics' ? 'queue' : 'lyrics');
-$('seek').oninput = e => { a.currentTime = +e.target.value; S.pos = +e.target.value; manual = 0; tick(true) };
+$('optRep').onclick = () => setLoop(LOOP[S.loop][0]);
+/* 돋보기: 누를 때마다 가사 글자 18 → 21 → 24 → 18 */
+$('zoom').onclick = () => { setSize((S.size + 1) % SIZES.length); toast(`Lyrics: ${SIZES[S.size][0]}`) };
+$('seek').oninput = e => { a.currentTime = +e.target.value; S.pos = +e.target.value; manual = 0; tick(true); position() };
 /* 재생 화면 위쪽(손잡이, 곡 정보)을 아래로 쓸면 닫힌다 */
 let dragY = null;
 ['grab', 'npTop'].forEach(id => {
@@ -528,7 +764,7 @@ $('script').addEventListener('click', e => {
 });
 ['wheel', 'touchmove'].forEach(ev => $('script').addEventListener(ev, () => { manual = Date.now() }, { passive: true }));
 
-/* 서버가 구간 요청을 안 받아도 건너뛰기가 되도록 음성을 통째로 받아 둔다. 실패하면 원래 주소로 재생한다. */
+/* 서버가 구간 요청을 안 받아도 건너뛰기가 되도록 음성을 통째로 받아 둔다(웹). 앱 안에 든 음성은 바로 쓴다 */
 let blobUrl = null;
 function useBlob() {
   if (!blobUrl || !a.paused || a.ended || a.src === blobUrl) return;
@@ -536,22 +772,25 @@ function useBlob() {
   ready = false; a.src = blobUrl; a.load();
 }
 a.addEventListener('pause', useBlob);
-/* 재생 중 음성이 끊기면(화면이 꺼진 동안 인터넷이 막히는 경우 등) 받아 둔 통째 음성으로, 없으면 같은 주소로 그 자리에서 다시 잇는다 */
+/* 재생 중 음성이 끊기면 받아 둔 통째 음성으로, 없으면 같은 주소로 그 자리에서 다시 잇는다.
+   인터넷이 없어 못 받는 화면 재생 바 위에 알림 띠를 띄운다(10 인터넷 없음) */
 let wantPlay = false, retries = 0;
 a.addEventListener('play', () => { wantPlay = true });
 a.addEventListener('pause', () => { if (!a.error) wantPlay = false });
 a.addEventListener('playing', () => { retries = 0 });
 a.addEventListener('error', () => {
   const at = S.pos, again = wantPlay;
+  if (navigator.onLine === false) $('offline').hidden = false;
   if (a.src.startsWith('blob:')) blobUrl = null;
   if (retries++ > 3) return;
   ready = false; S.pos = at;
   a.src = blobUrl || T.file; a.load();
   if (again) setTimeout(play, blobUrl ? 0 : 1500 * retries);
 });
-/* 다음 화 음성을 미리 받아 두어, 화면이 꺼진 채 다음 화로 넘어갈 때 인터넷이 없어도 이어지게 한다 */
+/* 다음 화 음성을 미리 받아 둔다(웹). 화면이 꺼진 채 다음 화로 넘어갈 때 인터넷이 없어도 이어지게 */
 const warmed = new Set();
 function warmNext() {
+  if (CAP) return;
   const n = nextIn(1); if (n === undefined || warmed.has(n)) return;
   warmed.add(n); fetch(EPS[n].file).then(r => r.blob()).catch(() => warmed.delete(n));
 }
@@ -561,28 +800,36 @@ function loadEp(i, resume) {
   cur = i; T = EPS[i]; L = T.lines; E = SCRIPTS[i];
   const st = S.eps[i] || {};
   S.pos = resume ? st.pos || 0 : 0; S.done = !!st.done; lastI = -2; blobUrl = null; ready = false;
-  a.src = T.file; a.load(); a.playbackRate = S.speed;
+  a.src = T.file; a.load();
   const al = albumOf(E.course);
-  document.body.style.setProperty('--c', al.c); document.body.style.setProperty('--hi', al.hi);
+  document.body.style.setProperty('--c', al.c);
   renderScript();
-  $('npArt').innerHTML = cover(E, 'xs');
+  $('npArt').innerHTML = albumCover(al, 'xs');
   document.body.classList.toggle('textonly', !!E.text);
-  $('npTitle').textContent = E.title; $('npSub').textContent = [E.course, E.text && '음성 준비 중 · 대본만'].filter(Boolean).join(' · ');
-  $('miniArt').innerHTML = cover(E, 'xs'); $('miniTitle').textContent = E.title;
+  $('npTitle').textContent = E.title; $('npSub').textContent = [nameOf(al), E.text && 'Script only'].filter(Boolean).join(' · ');
+  $('miniArt').innerHTML = albumCover(al, 'xs'); $('miniTitle').textContent = E.title; $('miniSub').textContent = nameOf(al);
   $('seek').max = T.duration; $('dur').textContent = mmss(T.duration);
   $('prev').disabled = nextIn(-1) === undefined; $('next').disabled = nextIn(1) === undefined;
+  syncKo();
   if (!$('vHome').hidden) renderHome();
   if (!$('vAlbum').hidden) renderAlbum();
-  if (panel === 'queue') renderQueue();
+  if (topV() === 'queue') renderQueue();
   icons(); tick(true); save();
+  if (CAP) return;
   const file = T.file;
   fetch(file).then(r => r.ok ? r.blob() : null).then(b => { if (b && T.file === file) { blobUrl = URL.createObjectURL(b); useBlob() } }).catch(() => {});
 }
 
 try { history.replaceState({ n: 1 }, '') } catch {}
-if (!SPEEDS.includes(S.speed)) S.speed = 1;
-setSpeed(S.speed); setLoop(S.loop || 'off');
+if (!CAP) arm();
+/* 막이 칸이 빠졌으면 다음에 화면을 누를 때 다시 깐다 */
+addEventListener('pointerdown', () => { if (!CAP && !armed && stack.length === 1) arm() }, { capture: true });
+/* 예전 기록(반복 꺼짐이 기본이던 때, 배속)은 그대로 읽는다. 들은 기록이 있으면 처음 실행이 아니다 */
+if (!LOOP[S.loop]) S.loop = 'all';
+if (!SIZES[S.size]) S.size = 0;
+if (S.started === undefined) S.started = Object.keys(S.eps).length > 0;
+setSize(S.size);
 loadEp(Math.min(S.ep, EPS.length - 1), true);
 render();
-icons(); tick(true);
+icons(); showMini(); tick(true);
 </script>

@@ -134,18 +134,21 @@ def main():
     # 2026-11-09 초급을 새 짜임으로 다시 썼다. 옛 음성(b1-NN.webm)은 새 대본과 맞지 않아 쓰지 않고,
     # 음성을 만들 때까지 글 길이로 어림한 시간표와 소리 없는 파일로 대본을 보여 준다.
     # 화 수(25)와 순서는 그대로라 폰에 저장된 들은 기록의 자리 번호는 밀리지 않는다.
+    from beginner_v2 import timeline as voiced  # 새 짜임으로 음성을 만든 화(beginner_v2.py build N)
     for e in parse(BEGINNER.read_text(encoding="utf-8")):
         e["kolines"] = []
         e["course"] = "초급"
-        e["text"] = True
+        v = voiced(e["n"])
+        e["text"] = not v
         eps.append(e)
-        tl.append(text_timeline(e))
+        tl.append(v or text_timeline(e))
     # 팟캐스트 앨범(build_podcast.py가 만든 시간표). 시간표와 대본은 같은 자리에 있어야 하므로,
     # 음성 있는 화 바로 뒤, 음성 없는 화 앞에 끼운다. 앨범 이름(course)은 템플릿의 PODCASTS와 같아야 한다.
     # 주의: 초급 화의 음성이 새로 생기면 팟캐스트 트랙의 자리 번호가 밀려, 폰에 저장된 들은 기록이 어긋날 수 있다.
     pods_e, pods_t = [], []
     # 앨범 번호(r1, r2 ...)마다 이름과 출연자. 새 앨범은 기존 앨범 뒤에 붙어서 앞 트랙의 자리 번호를 밀지 않는다.
-    albums = {"r1": ("드레이크 vs 켄드릭", ["마이크", "데이나"]), "r2": ("영떡과 YSL 재판", ["마이크", "타샤"])}
+    albums = {"r1": ("드레이크 vs 켄드릭", ["마이크", "데이나"]), "r2": ("영떡과 YSL 재판", ["마이크", "타샤"]),
+              "r3": ("매디의 서울 여행", ["매디"])}
     for src in sorted((HERE / "audio" / "podcast").glob("r*-*.json")):
         p = json.loads(src.read_text(encoding="utf-8"))
         al, n = src.stem.split("-")
@@ -156,6 +159,8 @@ def main():
     k = len(tl)
     eps[k:k] = pods_e
     tl += pods_t
+    # 구글 비교 트랙 세 줄('(구글 영어)', '(구글 전체)', '해설 목소리 비교 (구글)')은 2026-11-09 성범 요청으로 뺐다.
+    # 맨 뒤에 붙어 있던 트랙이라 빼도 앞 트랙의 자리 번호는 그대로다.
     # 해설을 쓰기 전의 화는 대화만 대본에 넣는다.
     have = {e["n"] for e in eps if e["course"] == "초급"}
     for n, title, lines in parse_draft(DRAFT.read_text(encoding="utf-8")) if DRAFT.exists() else []:
@@ -168,7 +173,11 @@ def main():
     # (2026-11-08 성범 지적: 어떤 줄은 성범, 어떤 줄은 Seongbeom)
     def shown(x):
         return json.dumps(x, ensure_ascii=False).replace("Seongbeom", "성범")
-    out = t.replace("__TIMELINE__", shown(tl)).replace("__SCRIPTS__", shown(eps))
+    # 앨범 커버: Figma에서 내보낸 그림(app/cover-*.webp)을 한 파일 안에 넣는다 (아티팩트가 한 장짜리 페이지라서)
+    import base64
+    covers = {f.stem[6:]: "data:image/webp;base64," + base64.b64encode(f.read_bytes()).decode()
+              for f in sorted((HERE / "app").glob("cover-*.webp"))}
+    out = t.replace("__TIMELINE__", shown(tl)).replace("__SCRIPTS__", shown(eps)).replace("__COVERS__", json.dumps(covers))
     (HERE / "app" / "episode-01.html").write_text(out, encoding="utf-8")
     print(len(eps), [sum(len(s["lines"]) for s in e["sections"]) for e in eps])
 

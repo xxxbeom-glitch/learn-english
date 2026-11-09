@@ -1,0 +1,22 @@
+{
+  "name": "side-a",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Side A 안드로이드 앱 (Capacitor로 웹 코드를 감쌈)",
+  "scripts": {
+    "web": "node scripts/copy-web.mjs",
+    "sync": "node scripts/copy-web.mjs && cap sync android",
+    "apk": "node scripts/copy-web.mjs && cap sync android && cd android && gradlew.bat assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capgo/capacitor-media-session": "^8.1.8"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.0"
+  }
+}

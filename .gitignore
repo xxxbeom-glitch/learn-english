@@ -3,3 +3,14 @@ dist/
 .env*
 .superpowers/
 .vercel/
+.claude/
+# 앱 서명 키 (절대 커밋하지 않는다)
+signing/
+__pycache__/
+# 만든 소리와 빌드 결과물은 크기가 커서 깃에 넣지 않는다(소리는 나중에 Cloudflare R2로 옮긴다)
+spikes/episode-01/audio/
+spikes/episode-01/web/
+spikes/episode-01/app/*.webm
+spikes/episode-01/app/*.mp3
+spikes/episode-01/app/*.len
+spikes/episode-01/app/episode-01.html

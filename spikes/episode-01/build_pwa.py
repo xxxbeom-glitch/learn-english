@@ -21,8 +21,13 @@ HEAD = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F6F3EC" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1C1B18" media="(prefers-color-scheme: dark)">
+<script>
+/* 폰에서는 화면 폭을 시안과 같은 360으로 잡아, 폭이 넓은 폰에서도 시안 비율 그대로 꽉 차게 키운다 */
+(function () { var m = document.querySelector('meta[name=viewport]');
+  function fit() { m.content = screen.width < 600 ? 'width=360, viewport-fit=cover' : 'width=device-width, initial-scale=1, viewport-fit=cover' }
+  fit(); addEventListener('orientationchange', fit) })();
+</script>
+<meta name="theme-color" content="#121212">
 <meta name="robots" content="noindex">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
@@ -86,8 +91,8 @@ MANIFEST = {
     "start_url": "./",
     "scope": "./",
     "display": "standalone",
-    "background_color": "#F6F3EC",
-    "theme_color": "#F6F3EC",
+    "background_color": "#121212",
+    "theme_color": "#121212",
     "lang": "ko",
     "icons": [
         {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
