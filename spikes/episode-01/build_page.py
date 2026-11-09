@@ -161,6 +161,21 @@ def main():
     tl += pods_t
     # 구글 비교 트랙 세 줄('(구글 영어)', '(구글 전체)', '해설 목소리 비교 (구글)')은 2026-11-09 성범 요청으로 뺐다.
     # 맨 뒤에 붙어 있던 트랙이라 빼도 앞 트랙의 자리 번호는 그대로다.
+    # 심화·고급(course_v2.py로 음성을 만든 화). 폰에 저장된 들은 기록의 자리 번호가 밀리지 않게 팟캐스트 뒤에 붙인다.
+    # 시간표 없는 초안 화보다 앞에 둬야 시간표와 대본의 자리가 맞는다.
+    # 2026-11-10 심화 1화, 고급 1화를 처음 넣었다. 소리 파일(i-NN.webm, a-NN.webm)은 app 폴더로 복사한다.
+    import shutil
+    from course_v2 import episode as course_episode
+    for course, name, tag in (("intermediate", "심화", "i"), ("advanced", "고급", "a")):
+        for d in sorted((HERE / "audio" / course).glob("ep[0-9][0-9]")):
+            if not (d / "timeline.json").exists():
+                continue
+            n = int(d.name[2:])
+            e = course_episode(course, n)
+            e["kolines"], e["course"], e["text"] = [], name, False
+            eps.append(e)
+            tl.append(json.loads((d / "timeline.json").read_text(encoding="utf-8")))
+            shutil.copy(d / f"{tag}-{n:02d}.webm", HERE / "app" / f"{tag}-{n:02d}.webm")
     # 해설을 쓰기 전의 화는 대화만 대본에 넣는다.
     have = {e["n"] for e in eps if e["course"] == "초급"}
     for n, title, lines in parse_draft(DRAFT.read_text(encoding="utf-8")) if DRAFT.exists() else []:
