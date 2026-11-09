@@ -1,0 +1,588 @@
+<title>이야기 영어</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preload" href="PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* 글꼴: 한글과 영어 모두 Pretendard 하나(앱과 같은 폴더의 파일). */
+@font-face { font-family: "Pretendard"; src: url("PretendardVariable.woff2") format("woff2-variations"), url("PretendardVariable.woff2") format("woff2"); font-weight: 45 920; font-display: swap }
+/* 음악 앱처럼: 홈은 섹션별 앨범 캐러셀, 앨범을 열면 화 목록, 재생 화면은 가사(또는 트랙리스트)가 가운데에 온다.
+   어두운 바탕이 기본이고, 앨범마다 색 하나(--c)와 글자용 밝은 색(--hi)을 쓴다. 간격은 4px 단위다(Figma EN-AudioBook 시안). */
+:root {
+  --bg: #121212; --ink: #fff; --muted: #a7a7a7; --faint: #6a6a6a;
+  --c: #1f7a4d; --hi: #5fd39a;
+  --sans: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  /* 글자 단계: 큰 제목 20, 제목 18, 소제목 14, 본문 14, 보조 12, 작은 글 11 */
+  --t-display: 700 20px/1.3 var(--sans); --t-title: 700 18px/1.3 var(--sans); --t-head: 600 14px/1.35 var(--sans);
+  --t-body: 400 14px/1.4 var(--sans); --t-sub: 400 12px/1.4 var(--sans); --t-cap: 500 11px/1.35 var(--sans);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #121212 } }
+:root[data-theme="dark"] { --bg: #121212 }
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent }
+html, body { height: 100% }
+body { margin: 0; background: var(--bg); color: var(--ink); font: var(--t-body); letter-spacing: -.01em; word-break: keep-all; overflow: hidden }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--hi); outline-offset: 2px; border-radius: 8px }
+h1, h2, h3, p { margin: 0 }
+ol, ul { list-style: none; margin: 0; padding: 0 }
+svg { display: block; width: 22px; height: 22px; stroke-width: 2 }
+[hidden] { display: none !important }
+body:not(.playing) .ic-pause, body.playing .ic-play { display: none }
+
+.app { height: 100%; max-width: 520px; margin: 0 auto; position: relative }
+.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.icon { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 50%; color: var(--ink); transition: background .15s, transform .1s, opacity .15s }
+/* 마우스가 있는 기기에서만 동그란 배경. 폰에서는 누른 뒤 남지 않게, 재생 화면 아이콘은 배경 없이 */
+@media (hover: hover) { .icon:hover { background: rgb(255 255 255 / .08) } #vNow .icon:hover { background: none } }
+.icon:active { transform: scale(.92) }
+.icon:disabled { opacity: .3; pointer-events: none }
+
+/* 바탕 화면(홈, 앨범): 각각 스스로 스크롤한다. 아래는 미니 플레이어와 딤이 덮는다 */
+.view { height: 100%; overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)) }
+
+/* 표지: 앨범 색 + 큰 글자 */
+.cv { container-type: inline-size; aspect-ratio: 1; position: relative; overflow: hidden; border-radius: 4px; color: #fff;
+  background: linear-gradient(150deg, rgb(255 255 255 / .18), transparent 58%), var(--c) }
+.cv small { position: absolute; left: 8cqw; top: 7cqw; font-size: 6cqw; font-weight: 600; opacity: .82; white-space: nowrap }
+.cv b { position: absolute; left: 6cqw; bottom: 17cqw; font-size: 54cqw; line-height: .8; font-weight: 700; letter-spacing: -.05em }
+.cv span { position: absolute; left: 8cqw; right: 8cqw; bottom: 7cqw; font-size: 6.5cqw; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.cv.al b { font-size: 26cqw; line-height: 1; letter-spacing: -.02em; bottom: 19cqw }
+.cv.xs small, .cv.xs span { display: none }
+.cv.xs b { left: 50%; top: 50%; bottom: auto; transform: translate(-50%, -50%); font-size: 46cqw; line-height: 1 }
+
+/* 홈: 섹션 제목과 가로 캐러셀 */
+.shelf h2 { font: var(--t-title); letter-spacing: -.02em; padding-block: 32px 12px }
+.shelf:first-child h2 { padding-top: calc(36px + env(safe-area-inset-top, 0px)) }
+.rail { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
+  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-inline: max(16px, env(safe-area-inset-left, 0px)); scroll-padding-inline: 16px }
+.rail::-webkit-scrollbar { display: none }
+.rail li { flex: none; width: 136px; scroll-snap-align: start }
+.card { display: grid; gap: 8px; width: 100%; transition: transform .1s }
+.card:active { transform: scale(.97) }
+.card .cv { width: 136px }
+.card b { display: block; font: var(--t-head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.card span { display: block; margin-top: 2px; font: var(--t-sub); color: var(--muted); font-variant-numeric: tabular-nums }
+.card-t { min-width: 0 }
+.card.soon .cv { filter: saturate(.55) brightness(.8) }
+
+/* 앨범: 표지는 가운데, 뒤에는 앨범 색이 아래로 어두워진다 */
+#vAlbum { background: linear-gradient(to bottom, var(--c) 0, color-mix(in srgb, var(--c) 55%, #000) 260px, #121212 520px) no-repeat local, var(--bg) }
+.bar { display: flex; align-items: center; padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px; margin-left: -10px }
+.al-cover { display: grid; place-items: center; padding-block: 8px 24px }
+.al-cover .cv { width: min(56vw, 200px); box-shadow: 0 8px 24px rgb(0 0 0 / .4) }
+.al-info { display: grid; grid-template-columns: minmax(0, 1fr) 56px; gap: 12px; align-items: center; padding-bottom: 12px }
+.al-info .txt { display: grid; gap: 4px; min-width: 0 }
+.al-info h1 { font: var(--t-display); letter-spacing: -.025em }
+.al-info p { font: var(--t-sub); color: rgb(255 255 255 / .8) }
+.al-info p.meta { font: var(--t-cap); color: var(--muted); font-variant-numeric: tabular-nums }
+.play { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--hi); color: #0b0b0b; transition: transform .1s, filter .15s }
+.play:hover { filter: brightness(1.06) }
+.play:active { transform: scale(.94) }
+.play svg, .big svg, .mini-pp svg { fill: currentColor; stroke-width: 1.5 }
+.play svg { width: 24px; height: 24px }
+#vAlbum:not(.mine) #albumPlay .ic-pause { display: none }
+#vAlbum:not(.mine) #albumPlay .ic-play { display: block }
+
+/* 트랙 줄: 번호, 제목, 오른쪽 끝 시간. 높이 52 */
+.trk-go { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 12px; height: 52px; align-items: center; width: 100%; min-width: 0; border-radius: 6px }
+.trk .no { font: var(--t-sub); font-size: 13px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums }
+.trk .no svg { width: 18px; height: 18px; margin: auto; color: var(--hi) }
+.tt { min-width: 0 }
+.tt b { display: block; font: var(--t-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.trk .tm { display: flex; align-items: center; gap: 6px; font: var(--t-sub); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums }
+.trk .dn { width: 14px; height: 14px; flex: none; color: var(--hi) }
+.trk.on b { color: var(--hi) }
+.trk.soon { opacity: .45 }
+
+/* 아래 떠 있는 미니 플레이어: 둥근 알약, 원형 표지, 진행은 배경을 채운다. 뒤에 어두운 딤을 깐다 */
+.mini-dim { position: fixed; z-index: 9; left: 0; right: 0; bottom: 0; height: calc(150px + env(safe-area-inset-bottom, 0px)); pointer-events: none;
+  background: linear-gradient(to bottom, rgb(18 18 18 / 0), rgb(18 18 18 / .92) 70%, #121212) }
+.mini { position: fixed; z-index: 10; left: 50%; bottom: calc(32px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: 232px; height: 68px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: center; padding-right: 10px; border-radius: 999px; overflow: hidden;
+  background: color-mix(in srgb, var(--c) 52%, #121212); box-shadow: 0 8px 24px rgb(0 0 0 / .45) }
+.mini-fill { position: absolute; inset: 0 auto 0 0; width: 0; background: rgb(255 255 255 / .1); pointer-events: none }
+.mini-open { position: relative; display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; align-items: center; padding-left: 10px; height: 100%; min-width: 0 }
+.mini-open .cv { width: 48px; border-radius: 50% }
+.mini-open b { display: block; font: var(--t-head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.mini-open span { display: block; font: var(--t-sub); color: rgb(255 255 255 / .72); font-variant-numeric: tabular-nums; white-space: nowrap }
+.mini-pp { position: relative; width: 44px; height: 44px; display: grid; place-items: center }
+.mini-pp svg { width: 18px; height: 18px }
+
+/* 재생 화면: 아래에서 올라오는 전체 높이 시트. 손잡이를 누르거나 아래로 쓸면 닫힌다 */
+.layer { position: fixed; z-index: 20; top: 0; bottom: 0; left: 50%; width: min(100%, 520px); display: flex; flex-direction: column;
+  transform: translate(-50%, 100%); visibility: hidden; transition: transform .34s cubic-bezier(.2, .8, .2, 1), visibility 0s .34s }
+.layer.up { transform: translate(-50%, 0); visibility: visible; transition: transform .34s cubic-bezier(.2, .8, .2, 1), visibility 0s }
+#vNow { background: linear-gradient(180deg, rgb(0 0 0 / .4), rgb(0 0 0 / .62)), var(--c); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) }
+.grab { flex: none; display: grid; place-items: center; width: 100%; height: calc(24px + env(safe-area-inset-top, 0px)); padding-top: calc(8px + env(safe-area-inset-top, 0px)) }
+.grab::before { content: ""; width: 36px; height: 5px; border-radius: 3px; background: rgb(255 255 255 / .35) }
+.np-top { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px }
+.np-song { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; align-items: center; min-width: 0 }
+.np-song .cv { width: 52px; border-radius: 6px; box-shadow: 0 4px 12px rgb(0 0 0 / .3) }
+.np-song b { display: block; font: var(--t-head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.np-song span { display: block; margin-top: 2px; font: var(--t-sub); color: rgb(255 255 255 / .6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+#repBtn { margin-right: -10px }
+#repBtn[data-loop="off"] { opacity: .35 }
+.stage { flex: 1 1 auto; min-height: 0; position: relative }
+.track { position: relative; height: 26px; display: flex; align-items: center; flex: none }
+.track input { width: 100%; height: 26px; margin: 0; background: none; -webkit-appearance: none; appearance: none; cursor: pointer }
+.track input::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, #fff var(--p, 0%), rgb(255 255 255 / .25) var(--p, 0%)) }
+.track input::-moz-range-track { height: 4px; border-radius: 2px; background: rgb(255 255 255 / .25) }
+.track input::-moz-range-progress { height: 4px; border-radius: 2px; background: #fff }
+.track input::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; margin-top: -4.5px; border-radius: 50%; background: #fff; border: 0 }
+.track input::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: #fff; border: 0 }
+.where { flex: none; display: flex; justify-content: space-between; font: var(--t-cap); color: rgb(255 255 255 / .7); font-variant-numeric: tabular-nums }
+.keys { flex: none; display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center; padding-block: 8px }
+.keys .mid { display: flex; justify-content: center; align-items: center; gap: 12px }
+.keys .mid .icon svg { width: 28px; height: 28px; fill: currentColor }
+.big { width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: #121212; transition: transform .1s }
+.big:active { transform: scale(.94) }
+.big svg { width: 28px; height: 28px }
+#speed { height: 44px; font: var(--t-head); font-variant-numeric: tabular-nums; white-space: nowrap }
+#panelBtn { justify-self: end; margin-right: -10px }
+
+/* 가사: 애플 뮤직처럼 모두 굵게 왼쪽 정렬, 지금 줄만 또렷하고 나머지는 흐리게 */
+.lyr, .queue { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none }
+.lyr::-webkit-scrollbar, .queue::-webkit-scrollbar { display: none }
+.lyr { margin-inline: -16px; padding: 12px 16px 70%;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 40px), transparent) }
+.ln { display: block; opacity: .38; filter: blur(2.5px); transition: opacity .3s, filter .3s }
+.ln + .ln { margin-top: 18px }
+.ln.say + .ln.say { margin-top: 8px }
+.ln.gap { margin-top: 36px }
+body.browsing .ln { filter: none }
+/* 음성이 아직 없는 화(대본만)는 소리 없이 읽는 속도로 줄만 짚어 주므로, 흐림 없이 다른 줄도 읽히게 */
+body.textonly .ln { opacity: .6; filter: none }
+body.textonly .ln.now { opacity: 1 }
+.ln.now { opacity: 1; filter: none }
+.ln-go { display: block; width: 100%; min-width: 0 }
+.ln .cl { display: inline-block }
+.ln .en { display: block; font: 700 21px/1.36 var(--sans); letter-spacing: -.02em }
+.ln .ko { display: block; margin-top: 4px; font: 500 15px/1.45 var(--sans) }
+.ln[data-s="dialogue"] .ko { display: none }
+.ln mark { background: none; color: inherit; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px }
+.ln.veil .en { filter: blur(9px); user-select: none }
+.ln.pause .ln-go { display: flex; align-items: center; gap: 12px; font: 700 17px/1.36 var(--sans) }
+.ln.pause svg { width: 20px; height: 20px; flex: none }
+.meter { flex: 1; height: 4px; border-radius: 2px; background: rgb(255 255 255 / .2); overflow: hidden }
+.meter i { display: block; height: 100%; width: 0; background: #fff }
+.queue { padding-bottom: 24px }
+@media (prefers-reduced-motion: reduce) { *, .layer, .layer.up { transition: none !important; animation: none !important; scroll-behavior: auto !important } }
+</style>
+
+<div class="app">
+  <main class="view gut" id="vHome"></main>
+
+  <main class="view gut" id="vAlbum" hidden>
+    <header class="bar"><button class="icon" data-back aria-label="뒤로"><i data-lucide="chevron-left"></i></button></header>
+    <div class="al-cover" id="albumCover"></div>
+    <div class="al-info"><div class="txt" id="albumInfo"></div>
+      <button class="play" id="albumPlay" aria-label="재생"><span class="ic-play"><i data-lucide="play"></i></span><span class="ic-pause"><i data-lucide="pause"></i></span></button></div>
+    <ol id="tracks"></ol>
+  </main>
+
+  <div class="mini-dim" id="miniDim" aria-hidden="true"></div>
+  <nav class="mini" id="mini" aria-label="지금 재생 중">
+    <span class="mini-fill" id="miniFill"></span>
+    <button class="mini-open" id="miniOpen" aria-label="재생 화면 열기"><span id="miniArt"></span><span style="min-width:0"><b id="miniTitle"></b><span id="miniTime">0:00 / 0:00</span></span></button>
+    <button class="mini-pp" data-pp aria-label="재생"><span class="ic-play"><i data-lucide="play"></i></span><span class="ic-pause"><i data-lucide="pause"></i></span></button>
+  </nav>
+
+  <section class="layer gut" id="vNow" aria-label="재생 화면">
+    <button class="grab" id="grab" data-back aria-label="재생 화면 닫기"></button>
+    <header class="np-top" id="npTop">
+      <div class="np-song"><span id="npArt"></span><span style="min-width:0"><b id="npTitle"></b><span id="npSub"></span></span></div>
+      <button class="icon" id="repBtn" data-loop="off" aria-label="반복 꺼짐, 누르면 전체 반복"><span class="ic-all"><i data-lucide="repeat"></i></span><span class="ic-one" hidden><i data-lucide="repeat-1"></i></span></button>
+    </header>
+    <div class="stage">
+      <div class="lyr" id="script" aria-label="가사"></div>
+      <ol class="queue" id="queue" aria-label="트랙리스트" hidden></ol>
+    </div>
+    <div class="track"><input id="seek" type="range" min="0" step="0.1" value="0" aria-label="재생 위치"></div>
+    <div class="where"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+    <div class="keys">
+      <button id="speed" aria-label="재생 속도 1.0배, 누르면 바뀜">1.0배</button>
+      <div class="mid">
+        <button class="icon" id="prev" aria-label="이전 화"><i data-lucide="skip-back"></i></button>
+        <button class="big" data-pp aria-label="재생"><span class="ic-play"><i data-lucide="play"></i></span><span class="ic-pause"><i data-lucide="pause"></i></span></button>
+        <button class="icon" id="next" aria-label="다음 화"><i data-lucide="skip-forward"></i></button>
+      </div>
+      <button class="icon" id="panelBtn" aria-label="트랙리스트 보기"><span class="ic-list"><i data-lucide="list-music"></i></span><span class="ic-lyr" hidden><i data-lucide="message-square-quote"></i></span></button>
+    </div>
+  </section>
+</div>
+
+<audio id="a" preload="auto"></audio>
+
+<script src="lucide.min.js"></script>
+<script>
+const EPS = __TIMELINE__;
+const $ = id => document.getElementById(id);
+const a = $('a');
+const SCRIPTS = __SCRIPTS__;
+let cur = 0, T = EPS[0], L = T.lines, E = SCRIPTS[0];
+const TOC = [
+  ['초급', '나를 말하고 상대에게 묻기', [
+    ['내 얘기', ["I'm / I'm not ~", "I'm ~ing", "I'm from ~", "I'm good at ~", "I like / don't like ~", "I have / don't have ~", "I want / want to ~"]],
+    ['상대에게 묻기', ["Are you ~?", "Are you ~ing?", "Do you ~?", "Is it ~?", "Do you like ~?", "Do you have ~?", "Is there ~?", "Do you know ~?", "Do you want (to) ~?"]],
+    ['자세히 묻기', ["What's ~?", "That's ~", "Where is ~?", "Who is ~?", "What do you ~?", "Where do you ~?", "How's ~?", "Did you ~?", "How was ~?"]],
+  ]],
+  ['심화', '지난 일, 앞일, 제안과 부탁', [
+    ['지난 일', ["I was / wasn't ~", "Were you ~?", "I went to ~", "I ~ed / didn't ~", "What did you ~?", "Why did you ~?", "Where / When did you ~?", "Have you ever ~? / I've never ~"]],
+    ['더 자세히 묻기', ["What kind of ~?", "When is / do you ~?", "Why are / do you ~?", "How much / long / many ~?", "How do you ~?"]],
+    ['앞일, 제안, 부탁', ["I'm going to ~", "Are you going to ~?", "I'll ~", "Let's ~", "How about ~?", "Why don't we ~?", "Can / Could you ~?", "Can I ~?", "I'm looking for ~", "I'd like to ~ / Would you like ~?", "Do you want me to ~?", "Don't ~"]],
+  ]],
+  ['고급', '내 생각을 길고 자연스럽게 말하기', [
+    ['생각, 감정, 조언', ["I think / don't think ~", "Do you think ~?", "I feel / feel like ~", "Are you into ~?", "I can / can't ~", "I have to / don't have to ~", "You should / shouldn't ~", "It looks / sounds ~", "I hope ~", "I'm sure / not sure ~", "I'm worried about ~", "I'm sorry for ~"]],
+    ['문장 잇기', ["and / but", "because", "so", "when", "if", "before / after"]],
+    ['자연스러운 말', ["I used to ~", "I'm about to ~", "It depends on ~", "I don't know what ~"]],
+    ['아직 정하지 않음', ["나중에 정해요", "나중에 정해요", "나중에 정해요"]],
+  ]],
+];
+/* 앨범 = 과정. 앨범마다 표지 색(c)과 어두운 바탕 위 글자 색(hi) */
+const COLOR = { 초급: ['#1f7a4d', '#5fd39a'], 심화: ['#b5651d', '#f0a868'], 고급: ['#1d5f8a', '#6cb6e8'] };
+/* 팟캐스트 앨범: 사회자와 게스트가 한 주제로 나누는 방송. 트랙은 '부'로 세고, 가사에 한글 뜻을 함께 보인다. course는 build_page.py와 같아야 한다 */
+const PODCASTS = [
+  { name: '드레이크 vs 켄드릭', mark: 'VS', about: 'The Replay · 랩판 최대 디스전', c: '#6d3a8c', hi: '#c99be3', pats: ['How It Started', 'The Songs', 'The Tea', 'Who Won'] },
+  { name: '영떡과 YSL 재판', mark: 'YSL', about: 'The Replay · 조지아 최장 재판', c: '#9a2f45', hi: '#f2899c', pats: ['The Arrest', 'The Longest Trial', 'Gunna', 'The Plea'] },
+];
+const ALBUMS = [...TOC.map(([name, about, groups]) => ({ name, about, c: COLOR[name][0], hi: COLOR[name][1], pats: groups.flatMap(g => g[1]).filter(x => x !== '나중에 정해요') })),
+  ...PODCASTS.map(p => ({ ...p, unit: '부' }))];
+/* 홈 섹션: 기본 표현(과정 세 개)과 팟캐스트 */
+const SHELVES = [['기본 표현', ALBUMS.slice(0, TOC.length)], ['팟캐스트', ALBUMS.slice(TOC.length)]];
+const albumOf = c => ALBUMS.find(x => x.name === c) || ALBUMS[0];
+const U = e => albumOf(e.course).unit || '화';
+/* 같은 앨범의 음성 있는 화. 다음 화 자동 재생과 이전, 다음 버튼은 앨범 안에서만 움직인다 */
+const sibs = () => SCRIPTS.map((e, i) => i).filter(i => has(i) && SCRIPTS[i].course === E.course);
+const nextIn = n => { const l = sibs(); return l[l.indexOf(cur) + n] };
+
+const store = { get() { try { return JSON.parse(localStorage.getItem('course-1') || '{}') } catch { return {} } },
+                set(v) { try { localStorage.setItem('course-1', JSON.stringify(v)) } catch {} } };
+const S = Object.assign({ ep: 0, eps: {}, pos: 0, done: false, speed: 1, loop: 'off' }, store.get());
+const save = () => {
+  S.eps[cur] = { done: S.done, pos: S.pos };
+  store.set({ ep: cur, eps: S.eps, speed: S.speed, loop: S.loop });
+};
+const icons = () => window.lucide && lucide.createIcons();
+const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+const long = s => { const m = Math.round(s / 60), h = Math.floor(m / 60); return h ? `${h}시간 ${m % 60}분` : `${m}분` };
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const has = i => i >= 0 && i < EPS.length;
+const doneIn = al => SCRIPTS.filter((e, i) => e.course === al.name && has(i) && (S.eps[i] || {}).done).length;
+const madeIn = al => SCRIPTS.filter((e, i) => e.course === al.name && has(i)).length;
+const totalIn = al => EPS.reduce((s, t, i) => s + (SCRIPTS[i].course === al.name ? t.duration : 0), 0);
+
+/* 표지 */
+const cover = (e, cls = '') => `<div class="cv ${cls}" style="--c:${albumOf(e.course).c}" aria-hidden="true"><small>이야기 영어 · ${e.course}</small><b>${e.n}</b><span>${esc(e.title)}</span></div>`;
+const albumCover = (al, cls = '') => `<div class="cv al ${cls}" style="--c:${al.c}" aria-hidden="true"><small>이야기 영어</small><b>${al.mark || al.name}</b><span>${esc(al.about)}</span></div>`;
+
+/* 화면 이동: 쌓아 두고, 휴대폰 뒤로 가기로도 닫힌다 */
+const BASE = ['home', 'album'];
+const stack = ['home'];
+let pushed = 0, albumSel = 0, panel = 'lyrics';
+function go(v) {
+  if (stack[stack.length - 1] === v) return;
+  stack.push(v);
+  try { history.pushState({ n: stack.length }, ''); pushed++ } catch {}
+  render();
+}
+function back() { if (stack.length < 2) return; if (pushed > 0) history.back(); else { stack.pop(); render() } }
+addEventListener('popstate', () => { if (pushed > 0) pushed--; if (stack.length > 1) { stack.pop(); render() } });
+const topV = () => stack[stack.length - 1];
+function render() {
+  const t = topV(), base = [...stack].reverse().find(v => BASE.includes(v));
+  $('vHome').hidden = base !== 'home'; $('vAlbum').hidden = base !== 'album';
+  const up = t === 'now';
+  $('vNow').classList.toggle('up', up); $('vNow').inert = !up;
+  ['vHome', 'vAlbum', 'mini'].forEach(id => $(id).inert = up);
+  if (base === 'home') renderHome();
+  if (base === 'album') renderAlbum();
+  if (up) { manual = 0; lastI = -2; requestAnimationFrame(() => tick(true)) }
+}
+
+/* 홈 */
+function renderHome() {
+  $('vHome').innerHTML = SHELVES.map(([title, list]) => `<section class="shelf"><h2>${title}</h2><ul class="rail">${list.map(al => {
+    const k = ALBUMS.indexOf(al), made = madeIn(al);
+    return `<li><button class="card ${made ? '' : 'soon'}" data-album="${k}" aria-label="${esc(al.name)} 앨범 열기">${albumCover(al)}<span class="card-t"><b>${esc(al.name)}</b><span>${made ? long(totalIn(al)) : '준비 중'}</span></span></button></li>`;
+  }).join('')}</ul></section>`).join('');
+  icons(); syncPlay();
+}
+
+/* 트랙 줄(앨범 화면과 재생 화면 트랙리스트가 같이 쓴다) */
+function trackRows(al) {
+  return al.pats.map((p, k) => {
+    const n = k + 1, i = SCRIPTS.findIndex(e => e.course === al.name && e.n === n);
+    if (i < 0) return `<li class="trk soon"><div class="trk-go"><span class="no">${n}</span><span class="tt"><b>${esc(p)}</b></span><span class="tm">준비 중</span></div></li>`;
+    const e = SCRIPTS[i], on = i === cur, done = (S.eps[i] || {}).done;
+    const tm = has(i) ? mmss(EPS[i].duration) : '대본만';
+    const inner = `<span class="no">${on ? '<i data-lucide="audio-lines"></i>' : n}</span><span class="tt"><b>${esc(e.title)}</b></span><span class="tm">${done ? '<i data-lucide="circle-check" class="dn" aria-label="다 들음"></i>' : ''}${tm}</span>`;
+    return `<li class="trk ${on ? 'on' : ''}">${has(i) ? `<button class="trk-go" data-play="${i}" ${on ? 'aria-current="true"' : ''}>${inner}</button>` : `<div class="trk-go">${inner}</div>`}</li>`;
+  }).join('');
+}
+
+/* 앨범 */
+function renderAlbum() {
+  const al = ALBUMS[albumSel], made = madeIn(al), u = al.unit || '화';
+  $('vAlbum').style.setProperty('--c', al.c); $('vAlbum').style.setProperty('--hi', al.hi);
+  $('albumCover').innerHTML = albumCover(al);
+  $('albumInfo').innerHTML = `<h1>${esc(al.name)}</h1><p>${esc(al.about)}</p><p class="meta">${made ? `${made}${u} · ${long(totalIn(al))} · ${doneIn(al)}${u} 들음` : `준비 중 · ${al.pats.length}${u} 예정`}</p>`;
+  $('albumPlay').hidden = !made;
+  $('tracks').innerHTML = trackRows(al);
+  icons(); syncPlay();
+}
+$('albumPlay').onclick = () => {
+  const al = ALBUMS[albumSel];
+  if (E.course === al.name) return togglePlay();
+  const list = SCRIPTS.map((e, i) => i).filter(i => SCRIPTS[i].course === al.name && has(i));
+  startEp(list.find(i => !(S.eps[i] || {}).done) ?? list[0]);
+};
+
+/* 재생 화면 가운데: 가사와 트랙리스트를 오른쪽 아래 버튼으로 바꾼다 */
+function renderQueue() { $('queue').innerHTML = trackRows(albumOf(E.course)); icons() }
+function setPanel(p) {
+  panel = p;
+  const q = p === 'queue';
+  $('script').hidden = q; $('queue').hidden = !q;
+  $('panelBtn').querySelector('.ic-list').hidden = q; $('panelBtn').querySelector('.ic-lyr').hidden = !q;
+  $('panelBtn').setAttribute('aria-label', q ? '가사 보기' : '트랙리스트 보기');
+  if (q) { renderQueue(); const on = $('queue').querySelector('[aria-current]'); if (on) on.scrollIntoView({ block: 'center' }) }
+  else { manual = 0; lastI = -2; requestAnimationFrame(() => tick(true)) }
+}
+
+/* 가사형 대본 */
+/* 해설은 쉼표와 마침표 뒤 마디 단위로 묶어, 줄이 마디 사이에서 바뀌게 한다. 인용 뒤 "라는", "라고"는 앞 마디에 붙인다 */
+const clauses = t => esc(t).split(/(?<=[,.?!])\s+(?!(?:이)?라(?:는|고) )/).map(c => `<span class="cl">${c}</span>`).join(' ');
+/* 문장을 누르면 그 문장으로 간다. 대화 줄 위의 이름은 보이지 않는다 */
+function lineHtml(l, i) {
+  const wrap = (cls, body, extra = '') => `<div class="ln ${cls}" data-i="${i}"${extra}><button class="ln-go">${body}</button></div>`;
+  if (l.kind === 'pause') return wrap('pause', `<i data-lucide="mic"></i>${esc(l.text)}<span class="meter"><i id="m${i}"></i></span>`);
+  if (l.speaker === '해설자') return wrap(`say ${l.kind}`, `<span class="en">${clauses(l.text)}</span>`);
+  let t = esc(l.text);
+  if (l.section === 'dialogue' || l.section === 'replay') E.keys.forEach(k => { const r = findPhrase(t, k, true); if (r) t = t.replace(r, '<mark>$&</mark>') });
+  return wrap(l.kind, `<span class="en">${t}</span>${l.meaning ? `<span class="ko">${esc(l.meaning)}</span>` : ''}`, ` data-s="${l.section}"`);
+}
+function renderScript() {
+  let html = '';
+  T.sections.forEach(s => {
+    let first = html !== '';
+    L.forEach((l, i) => { if (l.section !== s.key) return; let h = lineHtml(l, i); if (first) { h = h.replace('class="ln ', 'class="ln gap '); first = false } html += h });
+  });
+  $('script').innerHTML = html;
+}
+
+/* 재생 */
+let lastI = -2, manual = 0, raf = 0, ready = false;
+/* 재생 요청이 막히면(새 화를 아직 못 받았을 때 등) 받을 수 있게 되는 순간 한 번 더 시도한다 */
+const play = () => { a.play().catch(() => { if (a.paused) a.addEventListener('canplay', () => a.play().catch(() => {}), { once: true }) }) };
+const togglePlay = () => a.paused ? play() : a.pause();
+function syncPlay() {
+  document.body.classList.toggle('playing', !a.paused);
+  document.querySelectorAll('[data-pp], #albumPlay').forEach(b => b.setAttribute('aria-label', a.paused ? '재생' : '멈춤'));
+  $('vAlbum').classList.toggle('mine', E.course === ALBUMS[albumSel].name);
+}
+function seekTo(t, go = true) { a.currentTime = t; S.pos = t; tick(true); if (go) play() }
+function indexAt(t) { let k = -1; for (let i = 0; i < L.length; i++) { if (L[i].start <= t + .02) k = i; else break } return k }
+
+function tick(force) {
+  const t = ready ? a.currentTime : S.pos, d = a.duration || T.duration, p = Math.min(100, t / d * 100) + '%';
+  $('cur').textContent = mmss(t);
+  $('seek').value = t; $('seek').style.setProperty('--p', p);
+  $('miniFill').style.width = p; $('miniTime').textContent = `${mmss(t)} / ${mmss(d)}`;
+  /* 손으로 가사를 넘기는 동안은 흐림을 풀어 읽기 쉽게 한다 */
+  document.body.classList.toggle('browsing', Date.now() - manual < 6000);
+  const i = indexAt(t), pl = L[i];
+  if (pl && pl.kind === 'pause') { const m = $('m' + i); if (m) m.style.width = Math.min(100, (t - pl.start) / (pl.end - pl.start) * 100) + '%' }
+  if (i !== lastI || force) {
+    lastI = i;
+    document.querySelectorAll('.ln').forEach(el => {
+      const k = +el.dataset.i;
+      el.classList.toggle('now', k === i);
+      el.classList.toggle('veil', L[k].kind === 'answer' && k > i);
+    });
+    if (topV() === 'now' && panel === 'lyrics' && Date.now() - manual > 6000) center(i, force);
+  }
+}
+/* 지금 줄은 가사 영역 위쪽 1/4쯤에 둔다 */
+function center(i, jump) {
+  const box = $('script'), el = box.querySelector(`[data-i="${Math.max(i, 0)}"]`);
+  if (!el) return;
+  const y = el.offsetTop - box.clientHeight * .22;
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  box.scrollTo({ top: y, behavior: jump || calm ? 'auto' : 'smooth' });
+}
+function loop() { tick(); raf = requestAnimationFrame(loop) }
+
+a.addEventListener('play', () => { syncPlay(); cancelAnimationFrame(raf); loop(); media('playing') });
+a.addEventListener('pause', () => { syncPlay(); cancelAnimationFrame(raf); tick(); save(); media('paused') });
+a.addEventListener('loadedmetadata', () => {
+  $('seek').max = a.duration; $('dur').textContent = mmss(a.duration);
+  if (S.pos > 0 && S.pos < a.duration - 1) a.currentTime = S.pos;
+  a.playbackRate = S.speed; ready = true; tick(true);
+});
+/* 음성 파일이 바뀌거나 비워지는 순간 0초가 위치로 저장되지 않게 */
+a.addEventListener('emptied', () => { ready = false });
+let lastSave = 0;
+a.addEventListener('timeupdate', () => { if (!ready) return; S.pos = a.currentTime; if (Date.now() - lastSave > 4000) { lastSave = Date.now(); save() } });
+/* 끝나면: 한 화 반복은 처음부터, 그 밖에는 다음 화로 넘어간다(마지막 화 다음은 전체 반복일 때만 1화) */
+a.addEventListener('ended', () => {
+  S.done = true; S.pos = 0; save(); syncPlay();
+  if (!$('vHome').hidden) renderHome(); if (!$('vAlbum').hidden) renderAlbum();
+  if (S.loop === 'one') { a.currentTime = 0; play() }
+  else if (nextIn(1) !== undefined) startEp(nextIn(1));
+  else if (S.loop === 'all') startEp(sibs()[0]);
+});
+/* 반복: 꺼짐(흐린 아이콘) → 전체 반복(흰 아이콘) → 한 화 반복(흰 repeat-1) */
+const LOOP = { off: ['all', '반복 꺼짐, 누르면 전체 반복'], all: ['one', '전체 반복 중, 누르면 한 화 반복'], one: ['off', '한 화 반복 중, 누르면 반복 끄기'] };
+function setLoop(m) {
+  S.loop = m; $('repBtn').dataset.loop = m; $('repBtn').setAttribute('aria-label', LOOP[m][1]);
+  $('repBtn').querySelector('.ic-all').hidden = m === 'one'; $('repBtn').querySelector('.ic-one').hidden = m !== 'one';
+  save();
+}
+/* 배속: 누를 때마다 다음 단계로 */
+const SPEEDS = [0.75, 1, 1.25, 1.5];
+const speedLabel = v => v.toFixed(2).replace(/0$/, '') + '배';
+function setSpeed(v) {
+  S.speed = v; a.playbackRate = v;
+  $('speed').textContent = speedLabel(v); $('speed').setAttribute('aria-label', `재생 속도 ${speedLabel(v)}, 누르면 바뀜`);
+  save();
+}
+
+/* 잠금화면과 알림창 조작: 표지 그림도 함께 넘긴다 */
+const arts = {};
+function artwork(e) {
+  const k = e.course + e.n;
+  if (arts[k]) return arts[k];
+  try {
+    const c = document.createElement('canvas'); c.width = c.height = 512;
+    const x = c.getContext('2d'), f = 'Pretendard, sans-serif';
+    x.fillStyle = albumOf(e.course).c; x.fillRect(0, 0, 512, 512);
+    const g = x.createLinearGradient(0, 0, 512, 512); g.addColorStop(0, 'rgba(255,255,255,.18)'); g.addColorStop(.58, 'rgba(255,255,255,0)');
+    x.fillStyle = g; x.fillRect(0, 0, 512, 512);
+    x.fillStyle = 'rgba(255,255,255,.82)'; x.font = `600 30px ${f}`; x.fillText(`이야기 영어 · ${e.course}`, 40, 66);
+    x.fillStyle = '#fff'; x.font = `700 280px ${f}`; x.fillText(String(e.n), 26, 420);
+    x.font = `600 32px ${f}`; x.fillText(e.title, 40, 478);
+    return arts[k] = c.toDataURL('image/png');
+  } catch { return '' }
+}
+function media(state) {
+  if (!('mediaSession' in navigator)) return;
+  try {
+    navigator.mediaSession.playbackState = state;
+    const src = artwork(E);
+    navigator.mediaSession.metadata = new MediaMetadata({ title: `${E.n}${U(E)}. ${E.title}`, artist: '이야기 영어', album: E.course, artwork: src ? [{ src, sizes: '512x512', type: 'image/png' }] : [] });
+    navigator.mediaSession.setActionHandler('play', play);
+    navigator.mediaSession.setActionHandler('pause', () => a.pause());
+    navigator.mediaSession.setActionHandler('previoustrack', nextIn(-1) !== undefined ? () => step(-1) : null);
+    navigator.mediaSession.setActionHandler('nexttrack', nextIn(1) !== undefined ? () => step(1) : null);
+    navigator.mediaSession.setActionHandler('seekbackward', () => nudge(-5));
+    navigator.mediaSession.setActionHandler('seekforward', () => nudge(5));
+  } catch {}
+}
+/* 목록에서 화를 고르면 처음부터 재생한다 */
+function startEp(i) {
+  save();
+  if (i !== cur) loadEp(i, false);
+  else { a.currentTime = 0; S.pos = 0 }
+  manual = 0; $('script').scrollTop = 0;
+  play();
+}
+function step(n) { const i = nextIn(n); if (i !== undefined) startEp(i) }
+function nudge(s) { const t = Math.max(0, Math.min((a.duration || T.duration) - .1, (ready ? a.currentTime : S.pos) + s)); seekTo(t, !a.paused) }
+
+/* 입력 */
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (t.closest('[data-pp]')) return togglePlay();
+  if (t.closest('[data-back]')) return back();
+  const al = t.closest('[data-album]'); if (al) { albumSel = +al.dataset.album; return go('album') }
+  const pl = t.closest('[data-play]');
+  if (pl) {
+    const i = +pl.dataset.play;
+    if (pl.closest('#queue')) return i === cur ? setPanel('lyrics') : startEp(i);
+    return i === cur ? go('now') : startEp(i);
+  }
+  if (t.closest('#miniOpen')) return go('now');
+});
+$('prev').onclick = () => step(-1);
+$('next').onclick = () => step(1);
+$('repBtn').onclick = () => setLoop(LOOP[S.loop || 'off'][0]);
+$('speed').onclick = () => setSpeed(SPEEDS[(SPEEDS.indexOf(S.speed) + 1) % SPEEDS.length]);
+$('panelBtn').onclick = () => setPanel(panel === 'lyrics' ? 'queue' : 'lyrics');
+$('seek').oninput = e => { a.currentTime = +e.target.value; S.pos = +e.target.value; manual = 0; tick(true) };
+/* 재생 화면 위쪽(손잡이, 곡 정보)을 아래로 쓸면 닫힌다 */
+let dragY = null;
+['grab', 'npTop'].forEach(id => {
+  $(id).addEventListener('touchstart', e => { dragY = e.touches[0].clientY }, { passive: true });
+  $(id).addEventListener('touchend', e => { if (dragY !== null && e.changedTouches[0].clientY - dragY > 70) back(); dragY = null }, { passive: true });
+});
+
+/* 문장 안에서 핵심 표현 찾기 */
+const rx = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function findPhrase(html, en, whole) {
+  const words = en.replace(/[.?!]+$/, '').split(' ');
+  for (let n = words.length; n >= (whole ? words.length : 2); n--) { const r = new RegExp(rx(words.slice(0, n).join(' ')), 'gi'); if (html.search(r) >= 0) return r }
+  return null;
+}
+$('script').addEventListener('click', e => {
+  const b = e.target.closest('.ln'); if (b) { manual = 0; seekTo(L[+b.dataset.i].start) }
+});
+['wheel', 'touchmove'].forEach(ev => $('script').addEventListener(ev, () => { manual = Date.now() }, { passive: true }));
+
+/* 서버가 구간 요청을 안 받아도 건너뛰기가 되도록 음성을 통째로 받아 둔다. 실패하면 원래 주소로 재생한다. */
+let blobUrl = null;
+function useBlob() {
+  if (!blobUrl || !a.paused || a.ended || a.src === blobUrl) return;
+  if (ready) S.pos = a.currentTime;
+  ready = false; a.src = blobUrl; a.load();
+}
+a.addEventListener('pause', useBlob);
+/* 재생 중 음성이 끊기면(화면이 꺼진 동안 인터넷이 막히는 경우 등) 받아 둔 통째 음성으로, 없으면 같은 주소로 그 자리에서 다시 잇는다 */
+let wantPlay = false, retries = 0;
+a.addEventListener('play', () => { wantPlay = true });
+a.addEventListener('pause', () => { if (!a.error) wantPlay = false });
+a.addEventListener('playing', () => { retries = 0 });
+a.addEventListener('error', () => {
+  const at = S.pos, again = wantPlay;
+  if (a.src.startsWith('blob:')) blobUrl = null;
+  if (retries++ > 3) return;
+  ready = false; S.pos = at;
+  a.src = blobUrl || T.file; a.load();
+  if (again) setTimeout(play, blobUrl ? 0 : 1500 * retries);
+});
+/* 다음 화 음성을 미리 받아 두어, 화면이 꺼진 채 다음 화로 넘어갈 때 인터넷이 없어도 이어지게 한다 */
+const warmed = new Set();
+function warmNext() {
+  const n = nextIn(1); if (n === undefined || warmed.has(n)) return;
+  warmed.add(n); fetch(EPS[n].file).then(r => r.blob()).catch(() => warmed.delete(n));
+}
+a.addEventListener('playing', warmNext);
+
+function loadEp(i, resume) {
+  cur = i; T = EPS[i]; L = T.lines; E = SCRIPTS[i];
+  const st = S.eps[i] || {};
+  S.pos = resume ? st.pos || 0 : 0; S.done = !!st.done; lastI = -2; blobUrl = null; ready = false;
+  a.src = T.file; a.load(); a.playbackRate = S.speed;
+  const al = albumOf(E.course);
+  document.body.style.setProperty('--c', al.c); document.body.style.setProperty('--hi', al.hi);
+  renderScript();
+  $('npArt').innerHTML = cover(E, 'xs');
+  document.body.classList.toggle('textonly', !!E.text);
+  $('npTitle').textContent = E.title; $('npSub').textContent = [E.course, E.text && '음성 준비 중 · 대본만'].filter(Boolean).join(' · ');
+  $('miniArt').innerHTML = cover(E, 'xs'); $('miniTitle').textContent = E.title;
+  $('seek').max = T.duration; $('dur').textContent = mmss(T.duration);
+  $('prev').disabled = nextIn(-1) === undefined; $('next').disabled = nextIn(1) === undefined;
+  if (!$('vHome').hidden) renderHome();
+  if (!$('vAlbum').hidden) renderAlbum();
+  if (panel === 'queue') renderQueue();
+  icons(); tick(true); save();
+  const file = T.file;
+  fetch(file).then(r => r.ok ? r.blob() : null).then(b => { if (b && T.file === file) { blobUrl = URL.createObjectURL(b); useBlob() } }).catch(() => {});
+}
+
+try { history.replaceState({ n: 1 }, '') } catch {}
+if (!SPEEDS.includes(S.speed)) S.speed = 1;
+setSpeed(S.speed); setLoop(S.loop || 'off');
+loadEp(Math.min(S.ep, EPS.length - 1), true);
+render();
+icons(); tick(true);
+</script>
