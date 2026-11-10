@@ -1,5 +1,5 @@
 // 지금 웹 앱(spikes/episode-01/web, build_pwa.py가 만듦)을 앱 안에 넣을 www/로 복사한다.
-// 소리 파일도 지금은 앱 안에 넣는다(2026-11-09 성범: 현재는 로컬로 넣어도 됨. 나중에 R2로 옮김).
+// 소리 파일은 앱 안에 넣지 않고 Cloudflare R2에서 받는다(2026-11-10, build_pwa.py의 AUDIO_BASE). 옛: 2026-11-09엔 앱 안에 넣었다.
 // 웹 전용 파일(서비스 워커, Vercel 설정, 설치 설정)은 앱에서 필요 없어서 뺀다.
 import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";

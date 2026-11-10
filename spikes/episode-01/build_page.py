@@ -147,16 +147,19 @@ def main():
     # 주의: 초급 화의 음성이 새로 생기면 팟캐스트 트랙의 자리 번호가 밀려, 폰에 저장된 들은 기록이 어긋날 수 있다.
     pods_e, pods_t = [], []
     # 앨범 번호(r1, r2 ...)마다 이름과 출연자. 새 앨범은 기존 앨범 뒤에 붙어서 앞 트랙의 자리 번호를 밀지 않는다.
-    albums = {"r1": ("드레이크 vs 켄드릭", ["마이크", "데이나"]), "r2": ("영떡과 YSL 재판", ["마이크", "타샤"]),
+    # 2026-11-10 r1, r2는 4부작을 한 트랙(rN-01)으로 합쳐 The Replay 채널 하나에 넣었다(merge_replay.py)
+    albums = {"r1": ("더 리플레이", ["마이크", "데이나"]), "r2": ("더 리플레이", ["마이크", "타샤"]),
               "r3": ("매디의 서울 여행", ["매디"])}
     for src in sorted((HERE / "audio" / "podcast").glob("r*-*.json")):
         p = json.loads(src.read_text(encoding="utf-8"))
         al, n = src.stem.split("-")
         course, cast = albums[al]
-        pods_e.append({"n": int(n), "title": p["title"], "keys": [], "again": [], "notes": [], "sections": [],
+        # 화 번호는 앨범(course) 안에서 차례로 센다. 합친 The Replay는 r1-01이 1화, r2-01이 2화다
+        pods_e.append({"n": sum(e["course"] == course for e in pods_e) + 1, "title": p["title"], "keys": [], "again": [], "notes": [], "sections": [],
                        "kolines": [], "cast": cast, "course": course})
         pods_t.append({k: v for k, v in p.items() if k != "title"} | {"file": f"{src.stem}.webm"})
     k = len(tl)
+    pod_at = k  # 템플릿의 들은 기록 옮기기(__POD_AT__)가 쓴다
     eps[k:k] = pods_e
     tl += pods_t
     # 구글 비교 트랙 세 줄('(구글 영어)', '(구글 전체)', '해설 목소리 비교 (구글)')은 2026-11-09 성범 요청으로 뺐다.
@@ -206,7 +209,7 @@ def main():
     import base64
     covers = {f.stem[6:]: "data:image/webp;base64," + base64.b64encode(f.read_bytes()).decode()
               for f in sorted((HERE / "app").glob("cover-*.webp"))}
-    out = t.replace("__TIMELINE__", shown(tl)).replace("__SCRIPTS__", shown(eps)).replace("__COVERS__", json.dumps(covers))
+    out = t.replace("__TIMELINE__", shown(tl)).replace("__SCRIPTS__", shown(eps)).replace("__COVERS__", json.dumps(covers)).replace("__POD_AT__", str(pod_at))
     (HERE / "app" / "episode-01.html").write_text(out, encoding="utf-8")
     print(len(eps), [sum(len(s["lines"]) for s in e["sections"]) for e in eps])
 

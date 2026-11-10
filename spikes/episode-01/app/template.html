@@ -58,6 +58,7 @@ body:not(.playing) .ic-pause, body.playing .ic-play { display: none }
 .hello { display: flex; align-items: center; gap: 12px; padding-top: calc(var(--top) + 24px); padding-bottom: 32px }
 .avatar { width: 48px; height: 48px; flex: none; border-radius: 50%; background: #5a5a5a; display: grid; place-items: center }
 .avatar svg { width: 28px; height: 28px; stroke-width: 1.75 }
+.avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover }
 .hello h1 { flex: 1; min-width: 0; font: var(--t-display); letter-spacing: -.02em }
 .hello .icon { margin-right: -12px }
 .hello .icon svg { width: 20px; height: 20px }
@@ -283,7 +284,7 @@ body.textonly .ln { opacity: .75 }
 <div class="app">
   <main class="view gut" id="vHome">
     <header class="hello">
-      <span class="avatar" aria-hidden="true"><i data-lucide="user"></i></span>
+      <span class="avatar" id="avatar" aria-hidden="true"><i data-lucide="user"></i></span>
       <h1>Hi, Seongbeom</h1>
       <button class="icon" data-go="settings" aria-label="Settings"><i data-lucide="settings"></i></button>
     </header>
@@ -420,10 +421,12 @@ const TOC = [
 /* 앨범 = 과정. 앨범 색은 커버 그림의 바탕색에서 뽑았다. 강조색은 앱 전체 초록(--hi)으로 고정 */
 const COLOR = { 초급: ['#031253', 'b1'], 심화: ['#0224d1', 'b2'], 고급: ['#06411b', 'b3'] };
 const COVERS = __COVERS__;
+// 홈 위쪽 프로필 사진 (Figma profile 프레임, app/cover-profile.webp). 없으면 사람 아이콘 그대로
+if (COVERS.profile) document.getElementById('avatar').innerHTML = `<img src="${COVERS.profile}" alt="">`;
 /* 팟캐스트 앨범: 트랙은 '부'로 세고, 가사에 한글 뜻(Korean translation)을 함께 보인다. 이름(name)은 build_page.py와 대본을 잇는 열쇠다 */
 const PODCASTS = [
-  { name: '드레이크 vs 켄드릭', en: 'Drake vs Kendrick', show: 'The Replay', mark: 'VS', about: 'The biggest beef in rap', c: '#b78564', art: 'replay1', pats: ['How It Started', 'The Songs', 'The Tea', 'Who Won'] },
-  { name: '영떡과 YSL 재판', en: 'Young Thug and the YSL Trial', show: 'The Replay', mark: 'YSL', about: 'The longest trial in Georgia', c: '#b48563', art: 'replay2', pats: ['The Arrest', 'The Longest Trial', 'Gunna', 'The Plea'] },
+  // 2026-11-10 성범 요청: 4부작 두 개를 각각 한 트랙으로 합치고 채널 하나로 묶었다(옛: 드레이크 vs 켄드릭, 영떡과 YSL 재판 두 앨범)
+  { name: '더 리플레이', en: 'The Replay', mark: 'TR', about: "Rap's biggest stories, retold", c: '#b78564', art: 'replay1', pats: ['Drake vs Kendrick', 'Young Thug and the YSL Trial'] },
   { name: '매디의 서울 여행', en: "Maddie's Seoul Era", show: 'Seoul, Actually', mark: 'SEOUL', about: 'Solo trip, no cap', c: '#8f8c7a', art: 'seoul', pats: ['Day One', 'Day Two', 'Day Three', 'Day Four', 'Day Five'] },
 ];
 /* 쉐도잉 앨범(2026-11-10): 들리는 소리는 모두 영어, 가사에 한글 뜻을 함께 보이고 팟캐스트처럼 끄고 켤 수 있다(pod).
@@ -447,7 +450,7 @@ const SHADOW_WHO = {
   '항의와 언쟁': ['Brittany', 'Kelsey', 'Paula', 'Tiffany', 'Vanessa', 'Erin', 'Chloe', 'Chloe', 'Chloe', 'Chloe'],
   '현지인처럼 욕하기': ['Kayla', 'Brooke', 'Kayla', 'Brooke', 'Kayla', 'Brooke', 'Kayla', 'Kayla', 'Brooke', 'Kayla'] };
 /* 화의 한국어 제목. 앨범 화면 트랙 목록에서만 영어 제목 아래 캡션으로 보인다(2026-11-09 사용자 요청) */
-const KO_TITLE = {"I'm / I'm not ~": "나에 대해 말하기", "I'm ~ing": "지금 하는 일 말하기", "I'm from ~": "어디 출신인지 말하기", "I'm good at ~": "잘하는 것 말하기", "I like / don't like ~": "좋아하는 것, 싫어하는 것", "I have / don't have ~": "있는 것, 없는 것", "I want / want to ~": "갖고 싶은 것, 하고 싶은 것", "Are you ~?": "상대에 대해 묻기", "Are you ~ing?": "지금 뭐 하는지 묻기", "Do you ~?": "평소에 하는 일 묻기", "Is it ~?": "어떤지 묻기", "Do you like ~?": "좋아하는지 묻기", "Do you have ~?": "있는지 묻기", "Is there ~?": "그곳에 있는지 묻기", "Do you know ~?": "아는지 묻기", "Do you want (to) ~?": "권하고 같이 하자고 하기", "What's ~?": "무엇인지 묻기", "That's ~": "듣고 반응하기", "Where is ~?": "어디 있는지 묻기", "Who is ~?": "누구인지 묻기", "What do you ~?": "무엇을 하는지 묻기", "Where do you ~?": "어디서 하는지 묻기", "How's ~?": "요즘 어떤지 묻기", "Did you ~?": "했는지 묻기", "How was ~?": "어땠는지 묻기", "I was / wasn't ~": "지난 상태 말하기", "Were you ~?": "지난 상태 묻기", "I went to ~": "다녀온 곳 말하기", "I ~ed / didn't ~": "한 일, 안 한 일", "What did you ~?": "무엇을 했는지 묻기", "Why did you ~?": "왜 했는지 묻기", "Where / When did you ~?": "어디서, 언제 했는지 묻기", "Have you ever ~? / I've never ~": "해 본 적 있는지", "What kind of ~?": "어떤 종류인지 묻기", "When is / do you ~?": "언제인지 묻기", "Why are / do you ~?": "왜 그런지 묻기", "How much / long / many ~?": "얼마나인지 묻기", "How do you ~?": "어떻게 하는지 묻기", "I'm going to ~": "할 계획 말하기", "Are you going to ~?": "할 계획 묻기", "I'll ~": "그 자리에서 정한 일", "Let's ~": "같이 하자고 하기", "How about ~?": "제안하기", "Why don't we ~?": "부드럽게 제안하기", "Can / Could you ~?": "부탁하기", "Can I ~?": "해도 되는지 묻기", "I'm looking for ~": "찾는 것 말하기", "I'd like to ~ / Would you like ~?": "정중하게 말하고 권하기", "Do you want me to ~?": "해 줄지 묻기", "Don't ~": "하지 말라고 하기", "I think / don't think ~": "내 생각 말하기", "Do you think ~?": "상대 생각 묻기", "I feel / feel like ~": "기분과 느낌 말하기", "Are you into ~?": "빠져 있는지 묻기", "I can / can't ~": "할 수 있는 것, 없는 것", "I have to / don't have to ~": "해야 하는 일", "You should / shouldn't ~": "조언하기", "It looks / sounds ~": "보이는 것, 들리는 것", "I hope ~": "바라는 것 말하기", "I'm sure / not sure ~": "확실한지 말하기", "I'm worried about ~": "걱정 말하기", "I'm sorry for ~": "사과하기", "and / but": "그리고, 하지만", "because": "왜냐하면", "so": "그래서", "when": "~할 때", "if": "만약 ~하면", "before / after": "전에, 후에", "I used to ~": "예전에 하던 일", "I'm about to ~": "막 하려는 일", "It depends on ~": "~에 따라 달라요", "I don't know what ~": "모르는 것 말하기", "How It Started": "불씨는 2013년에 붙었다", "The Songs": "곡으로 주고받은 펀치", "The Tea": "소송까지 간 무대 밖 이야기", "Who Won": "차트, 그래미, 그리고 슈퍼볼", "The Arrest": "28명이 한꺼번에 기소된 날", "The Longest Trial": "조지아 역사상 가장 긴 재판", "Gunna": "먼저 걸어 나간 한 사람", "The Plea": "아무도 예상 못 한 유죄 인정", "Day One": "스물둘, 처음 혼자 떠난 서울", "Day Two": "노트북을 두고 가도 괜찮은 도시", "Day Three": "비 오는 아침, 팬미팅 가는 길", "Day Four": "새벽부터 줄 선 음악방송", "Day Five": "광장시장에서 보낸 마지막 날", "How's It Going?": "아는 사람과 가볍게 인사", "Long Time No See": "오랜만에 만난 친구", "How Was Your Weekend?": "주말 얘기", "Crazy Weather": "날씨로 말 꺼내기", "Busy Week": "요즘 바쁘다는 얘기", "What Are You Into?": "요즘 빠진 것", "Any Plans?": "계획 묻기", "Stuck in Line": "줄 서다 나누는 짧은 대화", "Which Way?": "외국인에게 길 알려 주기", "I Should Get Going": "대화 마무리하기", "Early Bird": "몇 시에 일어나는지", "Gym Before Work": "출근 전 운동", "Running Late": "늦는다고 연락하기", "Coffee First": "출근해서 일 시작 전", "Lunch Break": "점심 메뉴 정하기", "Swamped": "일이 밀려 바쁠 때", "Calling It a Day": "퇴근 인사", "What's for Dinner?": "저녁 뭐 먹을지", "Laundry Day": "집안일로 약속 미루기", "Lights Out": "이제 자러 갈게요", "Nice to Meet You": "처음 만나 인사하기", "How Do You Spell That?": "이름 철자 알려 주기", "Where Are You From?": "어디서 왔는지 말하기", "What Do You Do?": "하는 일 말하기", "How's Work?": "회사 생활 얘기하기", "In My Free Time": "쉬는 날 하는 것", "My Kind of Music": "좋아하는 음악", "I'm a Foodie": "좋아하는 음식", "My Family": "가족 얘기", "Tell Me About Yourself": "짧게 자기소개하기", "Nice Shoes!": "가볍게 칭찬하기", "You Nailed It": "동료 칭찬하기", "I'll Pass Tonight": "2차 정중하게 거절하기", "I Wish I Could": "부탁 거절하기", "My Bad": "늦어서 사과하기", "I'm So Sorry": "실수했을 때 사과하기", "I See Your Point": "부드럽게 반대하기", "Agree to Disagree": "의견이 다를 때", "Is This Seat Taken?": "마음에 드는 사람에게 말 걸기", "Can I Get Your Number?": "번호 묻기", "Light Ice, Please": "스타벅스 얼음 적게", "Oat Milk Instead": "스타벅스 우유 바꾸기", "Make It a Meal": "맥도날드 세트 주문", "No Pickles": "맥도날드 피클 빼기", "For Here or To Go?": "포장 주문하기", "Footlong, Toasted": "서브웨이 주문하기", "Table for Two": "자리 안내 받기", "This Isn't What I Ordered": "주문이 잘못 나왔을 때", "Check, Please": "계산하기", "It's on Me": "친구에게 한턱내기", "Excuse Me, I Was Here First": "새치기당했을 때", "Can You Keep It Down?": "시끄러운 옆집", "You Charged Me Twice": "결제가 두 번 됐을 때", "I'd Like to Speak to the Manager": "매니저 부르기", "Don't Talk to Me Like That": "무례한 말투에 선 긋기", "That's Not What I Said": "내 말을 왜곡할 때", "You Always Do This": "또 약속을 깬 친구", "Let's Not Fight": "말싸움 멈추기", "I Was Hurt": "서운했던 점 말하기", "Are We Good?": "화해하기", "Holy Shit": "깜짝 놀랐을 때", "What the Hell?": "황당할 때", "Damn, That's Good": "좋은 걸 보고 감탄할 때", "Are You Fucking Kidding Me?": "어이없을 때", "This Is Bullshit": "부당하다고 느낄 때", "Screw It": "될 대로 되라 할 때", "Shut Up! No Way": "믿기지 않는 좋은 소식", "So Fucking Tired": "말에 힘을 줄 때", "I'm So Pissed": "화난 이유 털어놓기", "Don't Be a Dick": "친구끼리 놀릴 때"};
+const KO_TITLE = {"I'm / I'm not ~": "나에 대해 말하기", "I'm ~ing": "지금 하는 일 말하기", "I'm from ~": "어디 출신인지 말하기", "I'm good at ~": "잘하는 것 말하기", "I like / don't like ~": "좋아하는 것, 싫어하는 것", "I have / don't have ~": "있는 것, 없는 것", "I want / want to ~": "갖고 싶은 것, 하고 싶은 것", "Are you ~?": "상대에 대해 묻기", "Are you ~ing?": "지금 뭐 하는지 묻기", "Do you ~?": "평소에 하는 일 묻기", "Is it ~?": "어떤지 묻기", "Do you like ~?": "좋아하는지 묻기", "Do you have ~?": "있는지 묻기", "Is there ~?": "그곳에 있는지 묻기", "Do you know ~?": "아는지 묻기", "Do you want (to) ~?": "권하고 같이 하자고 하기", "What's ~?": "무엇인지 묻기", "That's ~": "듣고 반응하기", "Where is ~?": "어디 있는지 묻기", "Who is ~?": "누구인지 묻기", "What do you ~?": "무엇을 하는지 묻기", "Where do you ~?": "어디서 하는지 묻기", "How's ~?": "요즘 어떤지 묻기", "Did you ~?": "했는지 묻기", "How was ~?": "어땠는지 묻기", "I was / wasn't ~": "지난 상태 말하기", "Were you ~?": "지난 상태 묻기", "I went to ~": "다녀온 곳 말하기", "I ~ed / didn't ~": "한 일, 안 한 일", "What did you ~?": "무엇을 했는지 묻기", "Why did you ~?": "왜 했는지 묻기", "Where / When did you ~?": "어디서, 언제 했는지 묻기", "Have you ever ~? / I've never ~": "해 본 적 있는지", "What kind of ~?": "어떤 종류인지 묻기", "When is / do you ~?": "언제인지 묻기", "Why are / do you ~?": "왜 그런지 묻기", "How much / long / many ~?": "얼마나인지 묻기", "How do you ~?": "어떻게 하는지 묻기", "I'm going to ~": "할 계획 말하기", "Are you going to ~?": "할 계획 묻기", "I'll ~": "그 자리에서 정한 일", "Let's ~": "같이 하자고 하기", "How about ~?": "제안하기", "Why don't we ~?": "부드럽게 제안하기", "Can / Could you ~?": "부탁하기", "Can I ~?": "해도 되는지 묻기", "I'm looking for ~": "찾는 것 말하기", "I'd like to ~ / Would you like ~?": "정중하게 말하고 권하기", "Do you want me to ~?": "해 줄지 묻기", "Don't ~": "하지 말라고 하기", "I think / don't think ~": "내 생각 말하기", "Do you think ~?": "상대 생각 묻기", "I feel / feel like ~": "기분과 느낌 말하기", "Are you into ~?": "빠져 있는지 묻기", "I can / can't ~": "할 수 있는 것, 없는 것", "I have to / don't have to ~": "해야 하는 일", "You should / shouldn't ~": "조언하기", "It looks / sounds ~": "보이는 것, 들리는 것", "I hope ~": "바라는 것 말하기", "I'm sure / not sure ~": "확실한지 말하기", "I'm worried about ~": "걱정 말하기", "I'm sorry for ~": "사과하기", "and / but": "그리고, 하지만", "because": "왜냐하면", "so": "그래서", "when": "~할 때", "if": "만약 ~하면", "before / after": "전에, 후에", "I used to ~": "예전에 하던 일", "I'm about to ~": "막 하려는 일", "It depends on ~": "~에 따라 달라요", "I don't know what ~": "모르는 것 말하기", "Drake vs Kendrick": "드레이크와 켄드릭의 디스전", "Young Thug and the YSL Trial": "래퍼 영떡의 YSL 갱단 재판", "How It Started": "불씨는 2013년에 붙었다", "The Songs": "곡으로 주고받은 펀치", "The Tea": "소송까지 간 무대 밖 이야기", "Who Won": "차트, 그래미, 그리고 슈퍼볼", "The Arrest": "28명이 한꺼번에 기소된 날", "The Longest Trial": "조지아 역사상 가장 긴 재판", "Gunna": "먼저 걸어 나간 한 사람", "The Plea": "아무도 예상 못 한 유죄 인정", "Day One": "스물둘, 처음 혼자 떠난 서울", "Day Two": "노트북을 두고 가도 괜찮은 도시", "Day Three": "비 오는 아침, 팬미팅 가는 길", "Day Four": "새벽부터 줄 선 음악방송", "Day Five": "광장시장에서 보낸 마지막 날", "How's It Going?": "아는 사람과 가볍게 인사", "Long Time No See": "오랜만에 만난 친구", "How Was Your Weekend?": "주말 얘기", "Crazy Weather": "날씨로 말 꺼내기", "Busy Week": "요즘 바쁘다는 얘기", "What Are You Into?": "요즘 빠진 것", "Any Plans?": "계획 묻기", "Stuck in Line": "줄 서다 나누는 짧은 대화", "Which Way?": "외국인에게 길 알려 주기", "I Should Get Going": "대화 마무리하기", "Early Bird": "몇 시에 일어나는지", "Gym Before Work": "출근 전 운동", "Running Late": "늦는다고 연락하기", "Coffee First": "출근해서 일 시작 전", "Lunch Break": "점심 메뉴 정하기", "Swamped": "일이 밀려 바쁠 때", "Calling It a Day": "퇴근 인사", "What's for Dinner?": "저녁 뭐 먹을지", "Laundry Day": "집안일로 약속 미루기", "Lights Out": "이제 자러 갈게요", "Nice to Meet You": "처음 만나 인사하기", "How Do You Spell That?": "이름 철자 알려 주기", "Where Are You From?": "어디서 왔는지 말하기", "What Do You Do?": "하는 일 말하기", "How's Work?": "회사 생활 얘기하기", "In My Free Time": "쉬는 날 하는 것", "My Kind of Music": "좋아하는 음악", "I'm a Foodie": "좋아하는 음식", "My Family": "가족 얘기", "Tell Me About Yourself": "짧게 자기소개하기", "Nice Shoes!": "가볍게 칭찬하기", "You Nailed It": "동료 칭찬하기", "I'll Pass Tonight": "2차 정중하게 거절하기", "I Wish I Could": "부탁 거절하기", "My Bad": "늦어서 사과하기", "I'm So Sorry": "실수했을 때 사과하기", "I See Your Point": "부드럽게 반대하기", "Agree to Disagree": "의견이 다를 때", "Is This Seat Taken?": "마음에 드는 사람에게 말 걸기", "Can I Get Your Number?": "번호 묻기", "Light Ice, Please": "스타벅스 얼음 적게", "Oat Milk Instead": "스타벅스 우유 바꾸기", "Make It a Meal": "맥도날드 세트 주문", "No Pickles": "맥도날드 피클 빼기", "For Here or To Go?": "포장 주문하기", "Footlong, Toasted": "서브웨이 주문하기", "Table for Two": "자리 안내 받기", "This Isn't What I Ordered": "주문이 잘못 나왔을 때", "Check, Please": "계산하기", "It's on Me": "친구에게 한턱내기", "Excuse Me, I Was Here First": "새치기당했을 때", "Can You Keep It Down?": "시끄러운 옆집", "You Charged Me Twice": "결제가 두 번 됐을 때", "I'd Like to Speak to the Manager": "매니저 부르기", "Don't Talk to Me Like That": "무례한 말투에 선 긋기", "That's Not What I Said": "내 말을 왜곡할 때", "You Always Do This": "또 약속을 깬 친구", "Let's Not Fight": "말싸움 멈추기", "I Was Hurt": "서운했던 점 말하기", "Are We Good?": "화해하기", "Holy Shit": "깜짝 놀랐을 때", "What the Hell?": "황당할 때", "Damn, That's Good": "좋은 걸 보고 감탄할 때", "Are You Fucking Kidding Me?": "어이없을 때", "This Is Bullshit": "부당하다고 느낄 때", "Screw It": "될 대로 되라 할 때", "Shut Up! No Way": "믿기지 않는 좋은 소식", "So Fucking Tired": "말에 힘을 줄 때", "I'm So Pissed": "화난 이유 털어놓기", "Don't Be a Dick": "친구끼리 놀릴 때"};
 /* 목차 묶음의 영어 이름. 앨범 화면 트랙 목록에서만 묶음 머리에 작게 보인다(2026-11-09 사용자 요청) */
 const GROUP_EN = { '내 얘기': 'About me', '상대에게 묻기': 'Asking others', '자세히 묻기': 'Asking for details', '지난 일': 'The past', '더 자세히 묻기': 'More questions', '앞일, 제안, 부탁': 'Plans, offers and requests', '생각, 감정, 조언': 'Thoughts, feelings and advice', '문장 잇기': 'Linking sentences', '자연스러운 말': 'Natural phrases' };
 const ALBUMS = [...TOC.map(([name, en, about, groups]) => ({ name, en, about, c: COLOR[name][0], art: COLOR[name][1], pats: groups.flatMap(g => g[1]).filter(x => x !== '나중에 정해요'),
@@ -472,9 +475,22 @@ const store = { get() { try { return JSON.parse(localStorage.getItem('course-1')
 const first = store.get();
 /* loop: all(앨범 전체 반복) → one(한 화 반복) → off. size: 가사 글자 0·1·2 단계. ko: 팟캐스트 한국어 해석 */
 const S = Object.assign({ ep: 0, eps: {}, pos: 0, done: false, loop: 'all', size: 0, ko: true, dled: [], wifi: false, push: true }, first);
+/* 2026-11-10 The Replay 8화(4부작 2개)를 2트랙으로 합쳐 그 뒤 화의 자리 번호가 6칸 당겨졌다. 옛 기록을 한 번 옮긴다.
+   합친 트랙은 네 부를 다 들었을 때만 다 들은 것으로 치고, 들던 위치는 처음으로 돌린다 */
+if ((S.lay || 0) < 1) {
+  const P = __POD_AT__, mv = i => i < P ? i : i < P + 4 ? P : i < P + 8 ? P + 1 : i - 6, eps = {};
+  for (const [k, v] of Object.entries(S.eps || {})) {
+    const j = mv(+k);
+    if (j === P || j === P + 1) { const o = eps[j] || { done: true, pos: 0, n: 0 }; eps[j] = { done: o.done && !!v.done, pos: 0, n: o.n + 1 } }
+    else eps[j] = v;
+  }
+  for (const j of [P, P + 1]) if (eps[j]) { if (eps[j].n < 4) eps[j].done = false; delete eps[j].n }
+  S.eps = eps; S.ep = mv(S.ep || 0); S.dled = [...new Set((S.dled || []).map(mv))].filter(j => j !== P && j !== P + 1);  // 합친 트랙은 새 파일이라 다시 받아야 한다
+  S.lay = 1;
+}
 const save = () => {
   S.eps[cur] = { done: S.done, pos: S.pos };
-  store.set({ ep: cur, eps: S.eps, loop: S.loop, size: S.size, ko: S.ko, dled: S.dled, wifi: S.wifi, push: S.push, started: S.started });
+  store.set({ lay: S.lay, ep: cur, eps: S.eps, loop: S.loop, size: S.size, ko: S.ko, dled: S.dled, wifi: S.wifi, push: S.push, started: S.started });
 };
 /* 시작 애니메이션: 모이기(마지막 타원 1.88초에 자리) → 쉼 → 출렁임(2.2초부터, 마지막 타원 3.46초에 끝) → 커지며 사라짐(0.5초) */
 setTimeout(() => { const el = $('intro'); el.classList.add('out'); setTimeout(() => el.remove(), 520); }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 400 : 3700);
@@ -609,7 +625,7 @@ function trackRow(i, n, heads) {
   const tm = has(i) ? mmss(EPS[i].duration) : 'Script only';
   const k = heads && KO_TITLE[e.title];
   // 팟캐스트는 'EP1: How It Started'처럼 화 번호를 붙인다(2026-11-09 사용자 결정)
-  const t = albumOf(e.course).show ? `EP${n}: ${e.title}` : e.title;
+  const t = albumOf(e.course).pod && !albumOf(e.course).shadow ? `EP${n}: ${e.title}` : e.title;
   const inner = `<span class="tt"><b>${esc(t)}</b>${k ? `<small>${esc(k)}</small>` : ''}</span><span class="tm">${tm}</span>`;
   return `<li class="trk ${on ? 'on' : ''}">${has(i) ? `<button class="trk-go" data-play="${i}" ${on ? 'aria-current="true"' : ''}>${inner}</button>` : `<div class="trk-go">${inner}</div>`}</li>`;
 }
@@ -621,33 +637,54 @@ function renderAlbum() {
   $('albumCover').innerHTML = albumCover(al);
   $('albumInfo').innerHTML = `<h1>${esc(nameOf(al))}</h1>${al.show ? `<p class="show">${esc(al.show)}</p>` : `<p class="about">${esc(al.about)}</p>`}<p class="meta">${made ? `${eps(made)} · ${mins(totalIn(al))} · ${doneIn(al)} played` : `Coming soon · ${eps(al.pats.length)}`}</p>`;
   $('albumPlay').hidden = !made;
-  // 앨범 전체 받기. 이미 다 받은 앨범이면 단추를 숨긴다. 앱 안에 임시로 넣어 둔 소리는 받은 것으로 치지 않는다
-  const mine = SCRIPTS.map((e, i) => i).filter(i => SCRIPTS[i].course === al.name && has(i));
-  $('albumDl').hidden = !made || mine.every(i => S.dled.includes(i)) || dlDemo.has(albumSel);
+  // 앨범 전체 받기. 이미 다 받은 앨범이면 단추를 숨긴다
+  $('albumDl').hidden = !made || dlList(al).every(i => S.dled.includes(i));
   showRing();
   $('tracks').innerHTML = trackRows(al, true);
   icons(); syncPlay();
 }
-/* 앨범 받기(지금은 시늉만). 서버(R2)에 파일이 아직 없어서 진행 막대 움직임만 보여 준다. 받는 중에 다시 누르면 멈춘다.
-   다 받으면 단추를 숨긴다. 시늉이라 기기에는 아무것도 저장하지 않고, 앱을 다시 열면 단추가 다시 보인다 */
-let dl = null; const dlDemo = new Set();
+/* 앨범 받기 (2026-11-10 실제 연결). 앨범의 소리를 R2에서 받아 기기의 audio-v1 저장소에 넣는다.
+   재생할 때 이 저장소에 있으면 인터넷 없이 그것을 쓴다(loadEp, 웹은 sw.js도 같은 저장소를 본다).
+   받는 중에 다시 누르면 멈춘다. 다 받으면 S.dled에 화 번호를 적고 단추를 숨긴다 */
+const AUDIO_CACHE = 'audio-v1';
+const akey = f => { const u = new URL(f, location.href); return u.pathname + u.search };
+const cacheHit = f => self.caches ? caches.open(AUDIO_CACHE).then(c => c.match(akey(f))).catch(() => null) : Promise.resolve(null);
+const dlList = al => SCRIPTS.map((e, i) => i).filter(i => SCRIPTS[i].course === al.name && has(i) && EPS[i].file);
+let dl = null;
 function showRing() {
   const b = $('albumDl'), on = !!dl && dl.al === albumSel;
   b.classList.toggle('ing', on);
   b.setAttribute('aria-label', on ? `Downloading, ${Math.round(dl.p)}%. Tap to cancel` : 'Download album');
   $('dlP').style.strokeDashoffset = 100 - (on ? dl.p : 0);
 }
-function albumDownload() {
-  if (dl && dl.al === albumSel) { clearInterval(dl.t); dl = null; showRing(); return toast('Download canceled.') }
+async function albumDownload() {
+  if (dl && dl.al === albumSel) { dl.ac.abort(); dl = null; showRing(); return toast('Download canceled.') }
   if (dl) return toast('Another album is downloading.');
-  dl = { al: albumSel, p: 0 };
-  dl.t = setInterval(() => {
-    dl.p = Math.min(100, dl.p + 3 + Math.random() * 7); showRing();
-    if (dl.p < 100) return;
-    clearInterval(dl.t); const al = dl.al;
-    setTimeout(() => { dl = null; dlDemo.add(al); if (albumSel === al) $('albumDl').hidden = true; showRing(); toast('Demo only: album files are not on the server yet.') }, 450);
-  }, 220);
-  showRing();
+  if (!self.caches) return toast("This browser can't save albums.");
+  if (S.wifi && navigator.connection && navigator.connection.type === 'cellular') return toast('Wi-Fi only is on. Connect to Wi-Fi to download.');
+  const al = albumSel, list = dlList(ALBUMS[al]), ac = new AbortController(), me = { al, p: 0, ac };
+  dl = me; showRing();
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist() } catch {}
+  let n = 0;
+  try {
+    const c = await caches.open(AUDIO_CACHE), q = [...list];
+    const worker = async () => {
+      while (q.length) {
+        const f = EPS[q.shift()].file, k = akey(f);
+        if (!(await c.match(k))) { const r = await fetch(f, { signal: ac.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); await c.put(k, r) }
+        n++; if (dl === me) { me.p = n / list.length * 100; showRing() }
+      }
+    };
+    await Promise.all([worker(), worker(), worker()]);
+  } catch (e) {
+    if (dl === me) { dl = null; showRing() }
+    if (e.name !== 'AbortError') toast("Couldn't download. Check your connection and try again.");
+    return;
+  }
+  if (dl !== me) return;
+  S.dled = [...new Set([...S.dled, ...list])]; save();
+  dl = null; if (albumSel === al) $('albumDl').hidden = true; showRing();
+  toast('Downloaded. This album plays without internet.');
 }
 $('albumPlay').onclick = () => {
   const al = ALBUMS[albumSel];
@@ -737,7 +774,7 @@ function renderScript() {
 /* 재생 */
 let lastI = -2, manual = 0, raf = 0, ready = false;
 /* 재생 요청이 막히면(새 화를 아직 못 받았을 때 등) 받을 수 있게 되는 순간 한 번 더 시도한다 */
-const play = () => { if (!S.started) { S.started = true; showMini() } a.play().catch(() => { if (a.paused) a.addEventListener('canplay', () => a.play().catch(() => {}), { once: true }) }) };
+const play = () => { asked = true; if (noNet && !blobUrl) showOffline(); if (!S.started) { S.started = true; showMini() } a.play().catch(() => { if (a.paused) a.addEventListener('canplay', () => a.play().catch(() => {}), { once: true }) }) };
 const togglePlay = () => a.paused ? play() : a.pause();
 function syncPlay() {
   document.body.classList.toggle('playing', !a.paused);
@@ -902,7 +939,7 @@ document.addEventListener('click', e => {
   if (t.closest('[data-ko]')) { S.ko = !S.ko; save(); syncKo(); return }
   if (t.closest('[data-wifi]')) { S.wifi = !S.wifi; save(); syncDl(); return }
   if (t.closest('[data-push]')) { S.push = !S.push; save(); syncDl(); return }
-  if (t.closest('[data-deldl]')) { if (CAP) return toast('Episodes are built into the app, so there is nothing to delete.'); return go('del') }
+  if (t.closest('[data-deldl]')) return go('del');
   if (t.closest('[data-delok]')) { closeSheets(); deleteDownloads(); return }
   if (t.closest('[data-albumdl]')) { albumDownload(); return }
   if (t.closest('[data-signin]')) { toast('Sign-in is coming in a later update.'); return }
@@ -980,7 +1017,7 @@ $('script').addEventListener('click', e => {
 });
 ['wheel', 'touchmove'].forEach(ev => $('script').addEventListener(ev, () => { manual = Date.now() }, { passive: true }));
 
-/* 서버가 구간 요청을 안 받아도 건너뛰기가 되도록 음성을 통째로 받아 둔다(웹). 앱 안에 든 음성은 바로 쓴다 */
+/* 서버가 구간 요청을 안 받아도 건너뛰기가 되도록 음성을 통째로 받아 둔다. 받아 둔 앨범이면 기기 저장본을 쓴다 */
 let blobUrl = null;
 function useBlob() {
   if (!blobUrl || !a.paused || a.ended || a.src === blobUrl) return;
@@ -990,13 +1027,20 @@ function useBlob() {
 a.addEventListener('pause', useBlob);
 /* 재생 중 음성이 끊기면 받아 둔 통째 음성으로, 없으면 같은 주소로 그 자리에서 다시 잇는다.
    인터넷이 없어 못 받는 화면 재생 바 위에 알림 띠를 띄운다(10 인터넷 없음) */
-let wantPlay = false, retries = 0;
+/* 안드로이드 앱 안 브라우저는 비행기 모드에서도 navigator.onLine이 true일 때가 있어서(2026-11-10 성범 확인),
+   소리를 실제로 못 받았는지(noNet)를 보고 띠를 띄운다 */
+let wantPlay = false, retries = 0, noNet = false, asked = false, offT = 0;
+/* 재생 화면이 열려 있으면 재생 바 위 띠로, 닫혀 있으면(앨범·홈에서 누른 경우) 토스트로 알린다 */
+function showOffline() {
+  $('offline').hidden = false;
+  if (!isUp() && Date.now() - offT > 4000) { offT = Date.now(); toast("You're offline. This episode isn't downloaded yet.") }
+}
 a.addEventListener('play', () => { wantPlay = true });
 a.addEventListener('pause', () => { if (!a.error) wantPlay = false });
 a.addEventListener('playing', () => { retries = 0 });
 a.addEventListener('error', () => {
   const at = S.pos, again = wantPlay;
-  if (navigator.onLine === false) $('offline').hidden = false;
+  if (!blobUrl && (noNet || navigator.onLine === false)) showOffline();
   if (a.src.startsWith('blob:')) blobUrl = null;
   if (retries++ > 3) return;
   ready = false; S.pos = at;
@@ -1004,20 +1048,19 @@ a.addEventListener('error', () => {
   if (again) setTimeout(play, blobUrl ? 0 : 1500 * retries);
 });
 
-/* 설정 · Downloads. 앱(안드로이드)은 모든 화가 앱 안에 들어 있고, 웹은 들은 화와 다음 화를 기기에 받아 둔다(sw.js의 audio-v1). */
-/* 앱 안에 넣은 소리 크기(MB). build_pwa.py가 채운다. 아티팩트에서는 0 */
-const BUNDLED_MB = +'__BUNDLED_MB__' || 0;
+/* 설정 · Downloads. 소리는 앱 안에 없고(2026-11-10 R2로 옮김), 앨범 받기로 받은 것만 기기(audio-v1)에 있다 */
 function syncDl() {
   document.querySelectorAll('[data-wifi]').forEach(b => b.setAttribute('aria-checked', String(!!S.wifi)));
   document.querySelectorAll('[data-push]').forEach(b => b.setAttribute('aria-checked', String(!!S.push)));
 }
 async function showStorage() {
   let mb = 0;
-  try { if (CAP) mb = BUNDLED_MB; else if (navigator.storage && navigator.storage.estimate) mb = ((await navigator.storage.estimate()).usage || 0) / 1048576; } catch {}
+  try { if (navigator.storage && navigator.storage.estimate) mb = ((await navigator.storage.estimate()).usage || 0) / 1048576; } catch {}
   $('storeVal').textContent = mb.toFixed(1) + ' MB';
 }
 async function deleteDownloads() {
   try { for (const k of await caches.keys()) if (k.startsWith('audio')) await caches.delete(k); } catch {}
+  S.dled = []; save(); if (!$('vAlbum').hidden) renderAlbum();
   showStorage(); toast('Downloads deleted.');
 }
 syncDl();
@@ -1025,7 +1068,7 @@ syncDl();
 function loadEp(i, resume) {
   cur = i; T = EPS[i]; L = T.lines; E = SCRIPTS[i];
   const st = S.eps[i] || {};
-  S.pos = resume ? st.pos || 0 : 0; S.done = !!st.done; lastI = -2; blobUrl = null; ready = false;
+  S.pos = resume ? st.pos || 0 : 0; S.done = !!st.done; lastI = -2; blobUrl = null; ready = false; noNet = false; asked = false; $('offline').hidden = true;
   a.src = T.file; a.load();
   const al = albumOf(E.course);
   document.body.style.setProperty('--c', al.c);
@@ -1041,9 +1084,10 @@ function loadEp(i, resume) {
   if (!$('vAlbum').hidden) renderAlbum();
   if (topV() === 'queue') renderQueue();
   icons(); tick(true); save();
-  if (CAP) return;
+  // 받아 둔 앨범이면 기기 저장본을, 아니면 인터넷에서 통째로 받아 메모리에 둔다(앱도 2026-11-10부터 소리가 R2에 있어서 똑같이)
   const file = T.file;
-  fetch(file).then(r => r.ok ? r.blob() : null).then(b => { if (b && T.file === file) { blobUrl = URL.createObjectURL(b); useBlob() } }).catch(() => {});
+  cacheHit(file).then(hit => hit || fetch(file)).then(r => r && r.ok ? r.blob() : null).then(b => { if (b && T.file === file) { blobUrl = URL.createObjectURL(b); $('offline').hidden = true; useBlob() } })
+    .catch(() => { if (T.file === file) { noNet = true; if (asked) showOffline() } });
 }
 
 try { history.replaceState({ n: 1 }, '') } catch {}

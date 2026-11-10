@@ -15,6 +15,8 @@ HERE = Path(__file__).parent
 APP = HERE / "app"
 WEB = HERE / "web"
 BG, INK = "#5F6B4E", "#F6F3EC"  # 앱 색(--accent, --accent-ink)
+# 소리는 앱 안에 넣지 않고 Cloudflare R2(side-a-audio 통)에서 받는다. 올리기는 upload_r2.py(2026-11-10 성범 요청)
+AUDIO_BASE = "https://pub-54e325ce90af4f1bad3644fc22432096.r2.dev/audio/"
 
 HEAD = """<!doctype html>
 <html lang="ko">
@@ -64,7 +66,7 @@ self.addEventListener('fetch', e => {
   })));
 });
 // 음성: 받아 둔 앨범(audio-v1)에 있으면 저장본을 쓰고, 없으면 인터넷에서 듣기만 한다.
-// 재생할 때 저절로 받아 두지 않는다(2026-11-09 정책). 저장은 앨범 화면의 받기 단추가 맡는다(아직 연결 전).
+// 재생할 때 저절로 받아 두지 않는다(2026-11-09 정책). 저장은 앨범 화면의 받기 단추가 맡는다(2026-11-10 연결).
 // 건너뛰기용 구간 요청(Range)은 저장본에서 잘라 준다.
 async function audio(r) {
   const c = await caches.open(AUDIO), u = new URL(r.url), key = u.pathname + u.search;
@@ -134,12 +136,12 @@ def main():
     # 음성이 다시 만들어지면 주소가 바뀌도록 내용 지문을 붙인다. 폰은 새 주소를 보고 새로 받는다.
     for f in files:
         h = hashlib.sha1(f.read_bytes()).hexdigest()[:8]
-        body = body.replace(f'"{f.name}"', f'"{f.name}?v={h}"')
+        body = body.replace(f'"{f.name}"', f'"{AUDIO_BASE}{f.name}?v={h}"')
     # 설정 · Storage used에 보일, 앱 안에 넣는 소리 크기
-    body = body.replace("__BUNDLED_MB__", f"{sum(f.stat().st_size for f in files) / 1048576:.1f}")
+    body = body.replace("__BUNDLED_MB__", "0")
     (WEB / "index.html").write_text(HEAD + body + TAIL, encoding="utf-8")
     (WEB / "manifest.webmanifest").write_text(json.dumps(MANIFEST, ensure_ascii=False, indent=2), encoding="utf-8")
-    for f in files + [APP / "PretendardVariable.woff2", APP / "lucide.min.js"]:
+    for f in [APP / "PretendardVariable.woff2", APP / "lucide.min.js"]:
         shutil.copy(f, WEB / f.name)
     ver = hashlib.sha1(body.encode()).hexdigest()[:8]  # 화면이 바뀌면 저장본을 새로 받게 한다.
     (WEB / "sw.js").write_text(SW.replace("__VER__", ver), encoding="utf-8")

@@ -4168,3 +4168,200 @@ This summary covers the stretch after the previous compaction. Work moved from f
      5. Send it with SendUserFile so the user can listen.
      6. Report the credits used.
 </summary>
+
+## 2026-11-10 14:31 (자동 압축, 세션 c746a846)
+
+<analysis>
+This session continued from an earlier summary. Here are the user's requests in order and what I did for each.
+
+1. **Spec, APK and report after compaction.** I updated the spec's speaker-label bullet, installed the APK, and reported in Korean.
+
+2. **"play all 이면 … 리스트 열었을때 다른것도 다 보여야하지않나"**
+   - `renderQueue` now shows the whole section while playing via Play all.
+   - It is grouped by album with `trk-h` headers.
+   - I added `secK`.
+
+3. **"상단에 앨범 제목대신 카테고리명이 나을듯"**
+   - `npSub` shows the section name during Play all.
+   - I added a `syncSub()` helper. It is called on Play all, on albumPlay reset, and on track pick.
+   - Fixed bug: the header didn't refresh when the same track was already loaded.
+
+4. **"그 상황에서 플리 열었을때 제목에 하단 서브로들어간건 빠지네?" / "제목아래 서브한글제목이있는것들말야"**
+   - Korean subtitles (KO_TITLE) now show in the queue list via `trackRows(al, true)` / `trackRow(i, n, true)`.
+   - This applies to both the section queue and the album queue.
+   - Recorded in the spec, then installed.
+
+5. **"오케이 다음챕터"**
+   - I marked a chapter.
+   - Drafted the profanity album script `content/stories/shadowing-swearing.md` (Swear Like a Local, 10 tracks).
+   - Recorded it in the spec.
+
+6. **"이대로 만들어"** (approved the script)
+   - Generated 70 lines with ElevenLabs (3,087 credits).
+   - Session ids are in scratchpad `sw-sessions.txt`.
+   - Copied g1/g2 from speak-up.
+   - A download agent fetched the clips.
+   - Registered the album in template, build_page and build_shadowing (s7), with `cover-sh7.webp` and color #055120.
+   - Partner names: Kayla/Brooke. Korean name: '현지인처럼 욕하기'.
+   - Built 10 tracks (88–116 s, ~17 min) and verified in the browser.
+   - Recorded in the spec and installed the APK.
+   - Mid-way the user asked "머더퍼커는 심한욕이야?" and I answered.
+
+7. **"오케이 여기까지 푸시"**
+   - Committed 18010ae on feat/english-voca-pwa and pushed.
+
+8. **"그 클라우드플레어에 사운드파일 올려버리는 작업하자"**
+   - Read the R2 memory: Psblove88 account, `CLOUDFLARE_ACCOUNT_ID=4dca8890d93f9b7b8aeb2d04125427ff`, don't touch tampin-media-prod, free 10 GB.
+   - Created bucket `side-a-audio`.
+   - Enabled the dev URL `https://pub-54e325ce90af4f1bad3644fc22432096.r2.dev`.
+   - Set CORS (GET/HEAD, Range, origin *).
+   - Wrote `upload_r2.py` and started it in the background (task bqziffwwe; log in scratchpad `r2-upload.log`).
+   - Modified `build_pwa.py`: AUDIO_BASE, URLs use base + name + ?v=hash, no audio copied, `__BUNDLED_MB__` set to 0.
+   - Updated the comment in `copy-web.mjs`.
+   - Still to do: wait for the upload, rebuild, check in browser and phone, record in spec and memory.
+
+9. **Questions:**
+   - "한국어로대답해": I must use Korean even for interim status lines.
+   - Questions about browser cache: Samsung Internet clearing doesn't affect the Side A app's webview data.
+
+10. **"피그마에 내 프로필사진 넣어ㅈ둠,"**
+    - I said I'd put it in the home top avatar.
+    - Loaded the use_figma and download_assets tools.
+    - Next: find the node in Figma file `31ndvuyn7Zkf4sScTUgvjq`.
+</analysis>
+
+<summary>
+1. Primary Request and Intent:
+   - **Latest request:** "피그마에 내 프로필사진 넣어ㅈ둠,". The user put their profile photo in Figma. I said I'd apply it to the app's home top avatar (the circle next to "Hi, Seongbeom").
+   - **In-progress request:** "그 클라우드플레어에 사운드파일 올려버리는 작업하자". Move all app sound files to Cloudflare R2 so the app streams from there.
+   - **Language:** "한국어로대답해". All replies, including interim status notes, must be in Korean 해요체.
+   - **Earlier, done this session:**
+     - Play all queue shows the whole section grouped by album.
+     - The header under the title shows the category name during Play all.
+     - Korean subtitles appear in the queue list.
+     - Profanity album ⑦ "현지인처럼 욕하기 / Swear Like a Local" was written, voiced, built and installed.
+     - Pushed commit 18010ae.
+   - **Standing constraints:**
+     - Paid API: state the cost and get consent first, and never re-call a generation that has started.
+     - Record decisions in `docs/superpowers/specs/2026-11-07-story-audio-english-design.md` and search for old wording.
+     - Never commit `signing/`. Commit or push only when asked.
+     - Use Lucide icons and keep existing designs.
+     - Review scripts before making voices.
+     - No slurs in the profanity album.
+     - R2: don't touch the `tampin-media-prod` bucket, and warn the user before usage passes 10 GB.
+
+2. Key Technical Concepts:
+   - **ElevenLabs:** `mcp__67a9ac48…creative_generate_speech`, flow `jnVnLb7w5iKgPNv7CQXU`, model `eleven_v4`, voice A (Me) `7EzWGsX10sAS4c9m9cPf`, voice B (partner) `OYTbf65OHHFELVut7v2H`, `generations_count` 1.
+   - **Clip downloads:** delegated to a background agent that must not generate anything (it only uses `creative_get_flow_run_status` and curl).
+   - **Shadowing build:**
+     ```
+     cd spikes/episode-01; export PYTHONIOENCODING=utf-8
+     python build_shadowing.py <album> N
+     python build_page.py; python build_pwa.py
+     ```
+   - **APK and install:**
+     ```
+     cd D:/project/learn-english/side-a && node scripts/copy-web.mjs && npx cap sync android && cd android && JAVA_HOME="C:/Program Files/Android/Android Studio/jbr" ./gradlew.bat assembleRelease -q && adb -s 192.168.35.135:46857 install -r app/build/outputs/apk/release/app-release.apk
+     ```
+   - **Browser preview:** `story-pwa` on port 8765. Before checking, unregister the service worker, clear caches, then reload.
+   - **Wrangler:**
+     ```
+     CLOUDFLARE_ACCOUNT_ID=4dca8890d93f9b7b8aeb2d04125427ff npx -y wrangler@latest ...
+     ```
+     Always pass `--remote` for object puts.
+   - **R2:**
+     - Bucket `side-a-audio`, public URL `https://pub-54e325ce90af4f1bad3644fc22432096.r2.dev`.
+     - Objects go under `audio/<name>.webm`.
+     - CORS allows GET/HEAD from `*` with the Range header.
+   - **Figma:** file key `31ndvuyn7Zkf4sScTUgvjq`, page 와이어프레임. Use `use_figma` for reads (skillNames "figma-use") and `download_assets` for export.
+   - **Shadow cover 7:** `285:2091`.
+
+3. Files and Code Sections:
+   - **`spikes/episode-01/app/template.html`:**
+     - `let secQ = null, secK = -1;`
+     - The Play all handler sets `secK`, then: `secQ = secList(SHELVES[secK][1]); if (secQ.length) { startEp(secQ[0]); syncSub() }`.
+     - `syncSub` helper:
+       ```
+       const syncSub = () => { $('npSub').textContent = [secQ && secQ.includes(cur) ? SHELVES[secK][0] : nameOf(albumOf(E.course)), E.text && 'Script only'].filter(Boolean).join(' · ') };
+       ```
+       It is called in loadEp's render (replacing the old npSub line), on albumPlay reset, and on track pick (`secQ = null; syncSub();`).
+     - In `renderQueue`, section mode shows title = section name, meta = `${eps(secQ.length)} · mins(sum totalIn)`. Rows are `als.map(al => <li class="trk-h">name</li> + inAlbum(al.name).filter(!alt).map(i => trackRow(i, SCRIPTS[i].n, true)))`.
+     - Album mode uses `trackRows(al, true)`.
+     - New ALBUMS entry: `{ name: '현지인처럼 욕하기', en: 'Swear Like a Local', mark: 'WTF', about: 'Real swearing between friends: surprise, anger, hype, and teasing', c: '#055120', art: 'sh7', pats: [10 titles] }`.
+     - SHADOW_WHO: `'현지인처럼 욕하기': ['Kayla','Brooke','Kayla','Brooke','Kayla','Brooke','Kayla','Kayla','Brooke','Kayla']`.
+     - KO_TITLE: added 10 Korean titles.
+     - `const BUNDLED_MB = +'__BUNDLED_MB__' || 0;` (line ~1009). Storage used shows `storeVal`.
+   - **`content/stories/shadowing-swearing.md`:** new script, 10 tracks of 7 lines each, 3★ per track, all on A lines. Korean meanings use 반말.
+   - **`build_shadowing.py`:** TAG gained `"swearing": "s7"`.
+   - **`build_page.py`:** the shadows dict gained `"swearing": "현지인처럼 욕하기"`.
+   - **`app/cover-sh7.webp`:** copied from scratchpad `covers/sh7.webp`.
+   - **`audio/shadowing/swearing/ep01..10/`:** clips d1–d7 plus g1/g2, and `s7-NN.webm`.
+   - **`spikes/episode-01/upload_r2.py` (new):**
+     - Uploads the app/*.webm files referenced in `episode-01.html`.
+     - Skips a file when its sha1[:8] matches `r2-uploaded.json`.
+     - Uses `npx -y wrangler@latest r2 object put side-a-audio/audio/<name> --file … --remote --content-type audio/webm --cache-control "public, max-age=86400"` with env CLOUDFLARE_ACCOUNT_ID and `shell=True` on win32.
+     - Writes `r2-uploaded.json` after each file.
+   - **`spikes/episode-01/build_pwa.py`:**
+     - Added `AUDIO_BASE = "https://pub-54e325ce90af4f1bad3644fc22432096.r2.dev/audio/"`.
+     - Replace now writes `f'"{AUDIO_BASE}{f.name}?v={h}"'`.
+     - `__BUNDLED_MB__` is set to "0".
+     - It now copies only the font and lucide, no audio.
+     - The service worker's `.webm` path handling still works with absolute URLs.
+   - **`side-a/scripts/copy-web.mjs`:** comment updated (sound comes from R2, not bundled).
+   - **Spec, updated:**
+     - Play all bullet: queue shows the whole section, the header shows the section name, Korean subtitles show in the track list (album queue too, `작성자 판단`).
+     - Speaker-label bullet: per-episode names.
+     - Swearing album bullet: done, 3,087 credits, 1:28–1:56, ~17 min, s7, #055120, Kayla/Brooke.
+     - Cover bullet: cover 7 is used by the swearing album.
+     - R2 migration is NOT recorded yet.
+
+4. Errors and fixes:
+   - **Header didn't refresh:** `npSub` didn't update when the Play all target was already the current track, because `loadEp` was skipped. Fixed with `syncSub()` called explicitly.
+   - **Interim notes in English:** the user said "한국어로대답해". From now on, all text is in Korean.
+
+5. Problem Solving:
+   - **Checked in the browser:**
+     - Shadowing queue: 60 episodes, 88 min, 6 album headers.
+     - The npSub line shows "Basic Expressions" or "Shadowing" during Play all.
+     - The swearing album card shows 17 min, the lyrics show "Kayla: … / Me: Holy shit…", and the Korean subtitles appear.
+   - **Explained to the user:**
+     - Clearing Samsung Internet or Chrome data does not affect the Side A app's webview storage.
+     - After the move to R2, new episodes need internet. The current episode is prefetched as a blob. The album download button is still a demo.
+
+6. All user messages:
+   - "play all 이면 이제 플레이 상황에서 리스트 열었을때 다른것도 다 보여야하지않나"
+   - "상단에 앨범 제목대신 카테고리명이 나을듯"
+   - "그 상황에서 플리 열었을때 제목에 하단 서브로들어간건 빠지네?"
+   - "제목아래 서브한글제목이있는것들말야"
+   - "오케이 다음챕터"
+   - "이대로 만들어"
+   - "머더퍼커는 심한욕이야?"
+   - "오케이 여기까지 푸시"
+   - "그 클라우드플레어에 사운드파일 올려버리는 작업하자"
+   - "한국어로대답해"
+   - "만약 내폰 브라우저의 캐시 및 히스토리 제거하면 이 side a 앱의 웹앱 속 웹도 같이 지워져?"
+   - "크롬말고 폰 삼성브라우저 말하는거야"
+   - "별도의 내장 브라우저 영역이라는거지 ?"
+   - "피그마에 내 프로필사진 넣어ㅈ둠,"
+
+7. Pending Tasks:
+   - **Profile photo:** find the user's profile photo in Figma file `31ndvuyn7Zkf4sScTUgvjq`, export it (download_assets), and convert it to webp with PIL (use `D:/` paths). Apply it to the home top avatar in `template.html`, which currently shows a placeholder icon circle next to "Hi, Seongbeom". Rebuild, verify, install, and record in the spec.
+   - **R2 migration:**
+     - Wait for the background upload (task bqziffwwe; log at `E:/Temp/claude/12f846cde673f19c/c746a846-390f-44b9-a261-a4d6c9c43e7d/scratchpad/r2-upload.log`) to finish.
+     - Rerun build_page and build_pwa, then check that `web/` has no .webm.
+     - Check in the browser that audio plays from the R2 URL (CORS fetch for the blob prefetch), then build and install the APK and check on the phone.
+     - Record in the spec: bucket name, URL, `upload_r2.py`, and that the app no longer bundles audio. Update the old lines saying "나중에 R2로 옮김" and the "음성 파일은 앱과 함께 웹에 올리고" wording.
+     - Update the memory file `audio-storage-cloudflare-r2.md` to say the upload is done.
+     - Decide whether `r2-uploaded.json` should be committed. Do not commit unless asked.
+   - **Possible follow-up:** make the album download button really save audio for offline gym use. Only mentioned so far, not requested.
+
+8. Current Work:
+   - The last user message was "피그마에 내 프로필사진 넣어ㅈ둠,". I replied "프로필 사진을 앱 홈 위쪽(Hi, Seongbeom 옆 동그라미)에 넣을게요. 먼저 피그마에서 사진을 찾아볼게요." and loaded the `use_figma` and `download_assets` tools.
+   - Meanwhile the R2 upload of 158 files is still running in the background.
+
+9. Optional Next Step:
+   - Run a read-only `use_figma` script on file `31ndvuyn7Zkf4sScTUgvjq` (page 와이어프레임, skillNames "figma-use"). It should find the profile photo: nodes with IMAGE fills or names like 프로필/profile/avatar, ideally recently added.
+   - Then export it with download_assets, convert it to a small webp in `spikes/episode-01/app/`, and replace the home avatar in `template.html` while keeping the existing circle design.
+   - Write all status notes in Korean.
+   - When the upload task notifies completion, also finish the R2 verification, install, and spec record.
+</summary>
