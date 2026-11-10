@@ -48,7 +48,7 @@ if ('serviceWorker' in navigator) addEventListener('load', () => navigator.servi
 
 SW = r"""// 이야기 영어 오프라인 저장. 음성은 받아 둔 앨범만 저장본으로 쓰고, 화면 파일은 새 판이 있으면 바꾼다.
 const SHELL = 'shell-__VER__', AUDIO = 'audio-v1';
-const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'PretendardVariable.woff2', 'lucide.min.js'];
+const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'PretendardVariable.woff2', 'Outfit-Bold.woff2', 'lucide.min.js'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(SHELL).then(c => c.addAll(CORE))); self.skipWaiting() });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('shell-') && k !== SHELL).map(k => caches.delete(k)))));
@@ -141,7 +141,7 @@ def main():
     body = body.replace("__BUNDLED_MB__", "0")
     (WEB / "index.html").write_text(HEAD + body + TAIL, encoding="utf-8")
     (WEB / "manifest.webmanifest").write_text(json.dumps(MANIFEST, ensure_ascii=False, indent=2), encoding="utf-8")
-    for f in [APP / "PretendardVariable.woff2", APP / "lucide.min.js"]:
+    for f in [APP / "PretendardVariable.woff2", APP / "Outfit-Bold.woff2", APP / "lucide.min.js"]:
         shutil.copy(f, WEB / f.name)
     ver = hashlib.sha1(body.encode()).hexdigest()[:8]  # 화면이 바뀌면 저장본을 새로 받게 한다.
     (WEB / "sw.js").write_text(SW.replace("__VER__", ver), encoding="utf-8")

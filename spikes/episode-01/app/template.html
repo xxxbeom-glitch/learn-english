@@ -1,9 +1,12 @@
 <title>Side A</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preload" href="PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="Outfit-Bold.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* 글꼴: 한글과 영어 모두 Pretendard 하나(앱과 같은 폴더의 파일). */
 @font-face { font-family: "Pretendard"; src: url("PretendardVariable.woff2") format("woff2-variations"), url("PretendardVariable.woff2") format("woff2"); font-weight: 45 920; font-display: swap }
+/* 가사 영어 줄: Outfit Bold (2026-11-10 성범 요청, Google Fonts 라틴 글자만 받아 앱에 넣음. 같은 날 Redaction 20을 먼저 써 봤다). 한글은 Pretendard로 이어진다 */
+@font-face { font-family: "Outfit"; src: url("Outfit-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD }
 /* Side A. 화면은 Figma 'EN-AudioBook' 시안(2026-11-09 디자인 개편)을 따른다. 기준 문서: 설계 문서 7장 'Figma 디자인 개편'.
    글자 단계, 색, 4px 간격, 모서리 기준은 아래 변수만 쓴다. 화면 글자는 한국어 해설과 한국어 해석 줄만 한국어, 나머지는 영어다. */
 :root {
@@ -223,7 +226,7 @@ body.textonly .ln { opacity: .75 }
 .ln.now, body.textonly .ln.now { opacity: 1 }
 .ln-go { display: block; width: 100%; min-width: 0 }
 .ln .cl { display: inline-block }
-.ln .en { display: block; font: 700 var(--lyr)/1.5 var(--sans); letter-spacing: -.02em }
+.ln .en { display: block; font: 700 var(--lyr)/1.5 "Outfit", var(--sans); letter-spacing: -.01em }
 .ln .ko { display: block; margin-top: 4px; font: var(--t-body) }
 .ln .who { opacity: .6 }
 .ln[data-s="dialogue"] .ko, body.noko .ln .ko { display: none }
