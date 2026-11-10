@@ -176,6 +176,20 @@ def main():
             eps.append(e)
             tl.append(json.loads((d / "timeline.json").read_text(encoding="utf-8")))
             shutil.copy(d / f"{tag}-{n:02d}.webm", HERE / "app" / f"{tag}-{n:02d}.webm")
+    # 쉐도잉(build_shadowing.py로 만든 화). 2026-11-10 스몰토크 1화를 처음 넣었다. 들은 기록 자리 번호가 밀리지 않게 맨 뒤에 붙인다.
+    # 앨범 이름(course)은 템플릿의 SHADOWS와 같아야 한다.
+    from build_shadowing import TAG as SHADOW_TAG, script as shadow_script
+    shadows = {"small-talk": "스몰토크", "daily-routine": "하루 일과", "about-me": "나를 소개하기", "social-skills": "사람 사이 기술", "eating-out": "식당과 카페", "speak-up": "항의와 언쟁", "swearing": "현지인처럼 욕하기"}
+    for album, name in shadows.items():
+        for d in sorted((HERE / "audio" / "shadowing" / album).glob("ep[0-9][0-9]")):
+            if not (d / "timeline.json").exists():
+                continue
+            n = int(d.name[2:])
+            title, _ = shadow_script(album, n)
+            eps.append({"n": n, "title": title, "keys": [], "again": [], "notes": [], "sections": [], "kolines": [], "course": name})
+            f = f"{SHADOW_TAG[album]}-{n:02d}.webm"
+            tl.append(json.loads((d / "timeline.json").read_text(encoding="utf-8")) | {"file": f})
+            shutil.copy(d / f, HERE / "app" / f)
     # 해설을 쓰기 전의 화는 대화만 대본에 넣는다.
     have = {e["n"] for e in eps if e["course"] == "초급"}
     for n, title, lines in parse_draft(DRAFT.read_text(encoding="utf-8")) if DRAFT.exists() else []:

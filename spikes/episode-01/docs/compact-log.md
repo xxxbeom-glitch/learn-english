@@ -3913,3 +3913,258 @@ Security: the signing key is in learn-english/signing/; never commit it or print
    5. Update the outdated doc passages and code comments, per the user's "Yes, fix them" to "Fix the 5 bugs (A1–A5) and the outdated docs here?".
    6. Wrap up and report in Korean.
 </summary>
+
+## 2026-11-10 12:06 (자동 압축, 세션 c746a846)
+
+<analysis>
+This summary covers the stretch after the previous compaction. Work moved from finishing the 고급 audio to designing shadowing, then to producing the first shadowing track.
+
+**Shadowing design discussion**
+- I recalled the earlier spec section "쉐도잉 섹션".
+- The user said all sounds should be English, with Korean only on the lyrics screen. The flow is: dialogue → English guide → sentence → repeat pause.
+- I proposed an optional English scene intro and asked "all lines vs. some". The user said to just record it, so I wrote it in the spec.
+
+**ElevenLabs test and 고급 production**
+- The user asked to test ElevenLabs. The daily limit had reset. I made 고급 ep03 n15 (20 credits) on the old connector 761d98d3.
+- The user said "해", so I ran 5 agents for 고급's 19 remaining episodes. They hit the daily limit again.
+- Completed episodes 3, 4, 8, 9, 13, 15, 17, 19, 21, 23 were built. The app was built and the APK made.
+- The phone was not connected at first. The user gave the pairing info. Pairing used 192.168.35.135:34473 with code 108147. A screenshot showed the connect port 46857. `adb connect 192.168.35.135:46857` worked and the install succeeded.
+
+**New problems the user found**
+- **Cost question:** the user asked the credit cost to fix the remaining 고급 and the 초급 반말 lines.
+  - My heuristic found 30 real 반말 narrator clips in beginner2 (1,055 chars).
+  - 고급 had 144 missing clips (8,049 chars).
+- **Spaced names cause a sigh-like pause:** "카디 비" in 고급 ep04 n02 and ep15 n04. Fixed by joining to "카디비" in the script and clips.json.
+- **New account:** the user switched ElevenLabs to the lumianthecompany account. It was free at first (10k credits); I warned about library voices and commercial use. The user then upgraded to paid.
+  - The new connector is 67a9ac48.
+  - Tested by regenerating ep04 n02 with "카디비" (93 credits). It worked with Mina and eleven_v4.
+  - Saved the new clip, kept the old one, and sent it as compare/cardi-b-fixed.mp3.
+  - Updated memory tts-engine-split and the MEMORY.md line.
+- **"or" read as 오르:** found in intermediate ep15 n05 and n10.
+- **Other spaced names:** found "젠슨 황" and others, and joined names in 10 narrator clips (clips.json only).
+- **Audit:** I audited the narrator lines. The user then decided not to fix the Korean narrator's pronunciation of English words. I recorded that in the spec.
+- **User questions:** the user asked whether 심화 sounds fine; I can't hear audio. The user asked whether I wrote "오르"; I did not, the text was literal "or".
+- **Go-ahead:** the user said "그건어쩔수가없군 일단 그럼 위에말한거 진행해서 앱 집어넣는거까지 해".
+  - Applied 존댓말 to 42 places in course-beginner.md and 30 clips.
+  - Moved old clips to scratchpad/old-clips.
+  - 5 agents made all clips: about 10,200 credits, no limit hit.
+  - A check found no duplicate audio in 516 clips.
+  - Rebuilt 15 고급, 2 심화 and 12 초급 episodes, then build_page (88 tracks) and build_pwa.
+  - APK installed. The spec was updated.
+
+**Commit and push**
+- Commit 1e5c713 pushed. docs/compact-log.md was excluded because it was not mine.
+
+**Shadowing albums**
+- The user picked 5 albums: 스몰토크, 하루 일과, 나를 소개하기, 사람 사이 기술 (including 작업멘트 / asking a number), and 식당·카페 (order and complaints). Recorded in the spec.
+- The user asked "한 트랙에 한 어휘?". No: one scene per track. Then: only the key lines (2–3). Recorded.
+- I wrote Small Talk with 10 tracks and the ep1 script in content/stories/shadowing-small-talk.md.
+- The user asked about situation, emotion and place categories. I explained and asked whether to add an emotion album.
+- The user said "일단 대본부터 보여줘 1화만". I mistakenly wrote shadowing-feelings.md. The user said "감정말고, 방금전 정한걸로", so I deleted it and re-showed Small Talk ep1.
+- The user said "풀 스크립트 말이야". I showed the full audio flow with "Now, repeat after me." and "One more time.", each key line twice with pauses.
+
+**Sounds**
+- The user said to insert the vocab-learning click sound between the repeat lines and use UIMisc-Create_a_short_1.5_s-Elevenlabs.mp3 as the intro.
+- I found it in D:\project\uiux-study\sounds and copied it to audio/raw/sfx-start-shadowing.mp3. It is actually 3s long, with mean -24.1 dB vs sfx-start -19.2 dB.
+- The click is sfx-next-soft.mp3. Recorded in the script and spec.
+- The user said no end sound. Recorded.
+
+**Current: track 1 audio test**
+- The user said "응 일단 1화 음성만 제작해봐 들어볼게".
+- I created flow jnVnLb7w5iKgPNv7CQXU on connector 67a9ac48 and started 4 of 9 generations:
+  - d1 "[casual] Hey! How's it going?", voice 7EzWGsX10sAS4c9m9cPf, session Q3Kp2vhmLL0fOfEZJDQt, 29 credits
+  - d2 "[casual] Oh, hey! Not bad. You?", voice OYTbf65OHHFELVut7v2H, session 1z4Ovt5QM8L9rzHHFyjr, 31 credits
+  - d3 "[casual] Pretty good. Just grabbing some coffee.", voice 7EzW…, session eh83xxkPlz7khY6kdXpN, 48 credits
+  - d4 "[casual] Same here. I can't function without it.", voice OYTb…, session h8ZEqbg3qrO6QHaWjhWb, 48 credits
+- Remaining to generate:
+  - d5 "I feel you." (남1)
+  - d6 "Alright, I gotta run. See you around!" (여1)
+  - d7 "See you!" (남1)
+  - the guide lines "Now, repeat after me." and "One more time."
+- Guide voice: I planned 여2 ZIlrSGI4jZqobxRKprJz, a native English voice, instead of the Korean Mina. Not yet confirmed with the user.
+- Then poll creative_get_flow_run_status with flow_id and session_ids, curl the files, and assemble with ffmpeg in the beginner_v2 style:
+  - 24 kHz mono
+  - start sfx at a volume to match the 초급 start sound, about +-4 dB
+  - pauses about 1.2× the clip length
+  - sfx-next-soft click trimmed: `atrim=0:1.0,afade=t=out:st=0.9:d=0.1,volume=-4dB`
+  - loudnorm I=-16:TP=-1.5:LRA=11, then mp3 128k and webm libopus 24k
+- Then send the file to the user to listen. Not added to the app yet.
+</analysis>
+
+<summary>
+1. Primary Request and Intent:
+   - **Session role:** this is a child session (of local_550c27d0, in the top family local_d179db5d) working on the Side A English learning app for 성범.
+     - Talk in simple Korean 해요체.
+     - Record decisions in `docs/superpowers/specs/2026-11-07-story-audio-english-design.md`.
+   - **Completed in this stretch:**
+     - 고급 1–25 audio fully done.
+     - 초급 반말 → 해요체 (30 clips, 42 script places).
+     - Spaced celebrity names joined in narrator clips (11 lines, including 카디비).
+     - Built, installed on the phone, committed and pushed (1e5c713).
+   - **Shadowing design (decided by the user):**
+     - All audible sound is English. Korean meanings and situation notes appear only on the lyrics screen.
+     - Each track is one short scene. Only 2–3 key lines (★) are repeated, mostly "my" lines.
+     - The first 5 albums are 스몰토크, 하루 일과, 나를 소개하기, 사람 사이 기술 (including 작업 멘트 such as asking for a number), and 식당과 카페 (ordering and complaints).
+     - Intro sound: `UIMisc-Create_a_short_1.5_s-Elevenlabs.mp3`.
+     - Click sound `sfx-next-soft.mp3` between repeated lines.
+     - **No end sound.**
+     - The emotion album was rejected ("감정말고").
+   - **Latest request:** "응 일단 1화 음성만 제작해봐 들어볼게". Produce only Small Talk track 1 audio so the user can listen.
+
+2. Key Technical Concepts:
+   - **ElevenLabs connector:** now `mcp__67a9ac48-eafa-432e-a0d2-857b2dc152bb__*`, the lumianthecompany paid account. The old 761d98d3 connector was removed.
+   - **Generation:**
+     - Settings: eleven_v4, `[casual]` tag, generations_count 1.
+     - Poll `creative_get_flow_run_status`, then curl the content_url (expires about 2h).
+     - Never re-call a started generation. Only a 429 queue refusal (no session_id) can be resent once.
+   - **Voices:**
+     - Narrator Mina `aiUUgjHa4mpHf6UenZuf`
+     - 남1 `7EzWGsX10sAS4c9m9cPf`
+     - 여1 `OYTbf65OHHFELVut7v2H`
+     - 남2 `bIHbv24MWmeRgasZH58o`
+     - 여2 `ZIlrSGI4jZqobxRKprJz`
+   - **Pipeline:**
+     - `course_v2.py build intermediate|advanced N`; `beginner_v2.py build N` (outputs `app/b1-NN-v2.webm`).
+     - Then `build_page.py` and `build_pwa.py`.
+     - Then in side-a: `node scripts/copy-web.mjs; npx cap sync android`.
+     - Then in side-a/android (PowerShell): `$env:JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"; .\gradlew.bat assembleRelease`.
+     - Then `adb -s 192.168.35.135:46857 install -r app\build\outputs\apk\release\app-release.apk`.
+     - The wireless connect port changes. The pairing port is different from the connect port shown on the 무선 디버깅 main screen.
+   - **beginner_v2 audio conventions:**
+     - SR mono, silence via `anullsrc`.
+     - Start sfx `volume=-9dB`.
+     - Click: `sfx-next-soft.mp3` with `atrim=0:1.0,afade=t=out:st=0.9:d=0.1,volume=-4dB`.
+     - Final `loudnorm=I=-16:TP=-1.5:LRA=11`, mp3 128k, webm libopus 24k mono.
+   - **TTS pitfalls:**
+     - Spaced Korean names cause a sigh-like pause. Join them in clips.json and keep spacing in the lyrics.
+     - English words inside Korean narration are sometimes read Korean-style ("오르"). The user decided not to fix this.
+   - **App contents and listening records:** the app has 88 tracks (초급 25, podcasts 13, 심화 25, 고급 25). Listening records are keyed by index, so inserting 고급 episodes shifted 고급 records.
+
+3. Files and Code Sections:
+   - **`docs/superpowers/specs/2026-11-07-story-audio-english-design.md`**
+     - 고급 progress and completion.
+     - Pronunciation rule (join names; don't fix English pronunciation; new paid account).
+     - 존댓말 applied to 초급.
+     - Shadowing section bullets: track structure (all English); 정할 것; 첫 앨범 5개; 따라 할 줄 (key lines only); 트랙 소리 (start sfx, click, flow "시작음 → 대화 → "Now, repeat after me." → 핵심 줄마다(듣기, 멈춤, 듣기, 멈춤, 클릭음) → "One more time." → 대화로 끝난다(끝음 없음, 성범 결정).").
+   - **`content/stories/course-advanced.md`:** "카디 비" changed to "카디비" in 4 places.
+   - **`content/stories/course-beginner.md`:** 42 반말 phrases changed to 해요체. Examples:
+     - 나 돈 없어. → 저 돈 없어요.
+     - 너 기다리고 있어. → 기다리고 있어요.
+     - 장난해? → 장난하는 거예요?
+     - 내 폰 어디 있지? → 제 폰 어디 있죠?
+   - **clips.json files changed:**
+     - advanced ep04, ep15 (카디비)
+     - name joins in advanced ep02, 08, 09, 16, 19 (3 lines), beginner2 ep07, intermediate ep08, ep14
+     - 존댓말 in beginner2 ep01, 02, 04, 08, 09, 15, 17, 18, 19, 20, 24
+   - **Old clips:** backed up in `E:\Temp\claude\12f846cde673f19c\c746a846-390f-44b9-a261-a4d6c9c43e7d\scratchpad\old-clips\` (and `ep04-n02-old.mp3`).
+   - **`content/stories/shadowing-small-talk.md`** (new):
+     - Rules and sound notes ("끝음은 넣지 않는다(성범 결정)").
+     - 10-track list: How's It Going?, Long Time No See, How Was Your Weekend?, Crazy Weather, Busy Week, What Are You Into?, Any Plans?, Stuck in Line, Big News, I Should Get Going.
+     - Track 1 script. Situation: 아침, 회사 1층 카페에서 아는 동료와 마주쳤어요. A = me (남1), B = partner (여1).
+       - A: Hey! How's it going? ★ (어, 안녕하세요! 잘 지내요?)
+       - B: Oh, hey! Not bad. You?
+       - A: Pretty good. Just grabbing some coffee. ★ (note: grabbing some은 '그래빙썸'처럼 붙어요)
+       - B: Same here. I can't function without it.
+       - A: I feel you. ★ (공감할 때 쓰는 편한 말이에요)
+       - B: Alright, I gotta run. See you around!
+       - A: See you!
+   - **`spikes/episode-01/audio/raw/sfx-start-shadowing.mp3`** (new): copied from `D:\project\uiux-study\sounds\UIMisc-Create_a_short_1.5_s-Elevenlabs.mp3`. Actual length 3.0s, mean -24.1 dB (sfx-start.mp3 is -19.2 dB).
+   - **`spikes/episode-01/audio/compare/cardi-b-fixed.mp3`:** sent to the user.
+   - **Memory:** `tts-engine-split.md` and the `MEMORY.md` line now say paid connector 67a9ac48 from 11-10.
+   - `content/stories/shadowing-feelings.md` was created by mistake and then deleted.
+
+4. Errors and fixes:
+   - **Daily generation limit** (old account): agents stopped. Built only the complete episodes. Later used the new paid account.
+   - **adb "no devices":** paired with the pairing port and code, then connected with the main-screen IP:port (192.168.35.135:46857).
+   - **cp949 encoding errors in Python prints:** used PYTHONIOENCODING=utf-8 or wrote to UTF-8 files. A regex backslash issue was fixed by writing the script to a file.
+   - **Agents shared a `dl.sh` file and overwrote each other:** they re-downloaded. I verified with md5 duplicates and duration/char ratios. No duplicates, and ratios were normal.
+   - **I misread "1화만" as the emotion album:** the user corrected "감정말고 / 방금전 정한걸로". I deleted the file and showed Small Talk ep1.
+   - **User feedback:** don't fix the Korean narrator's English pronunciation. No end sound.
+
+5. Problem Solving:
+   - All 고급 episodes are complete and in the app.
+   - The phone has the latest APK (88 tracks).
+   - Commit 1e5c713 is pushed on branch feat/english-voca-pwa. `docs/compact-log.md` remains modified and uncommitted (not this session's change).
+   - Uncommitted now: `shadowing-small-talk.md`, the spec shadowing edits, `sfx-start-shadowing.mp3` (audio is gitignored).
+
+6. All user messages (this stretch):
+   - "쉐도잉은 한국어 해설은 가사화면에만 두고 들리는 사운드를 따라하라고 하면될거같은데, 상황예제 > 따라해보라는 영어 안내사운드 > 예제 > 따라하기 해설은 그냥 그 아래에 뜻만 배치하면 될거같은데 어때?"
+   - "쉐도잉은 사운드를 all 영어로 하면어떨까하는 의견이었어"
+   - "이것도 일단 기록만해놔 아직할건아니니까"
+   - "일레븐 진행되는지 테스트해바"
+   - "헤" / "해"
+   - "남은 고급과 초급의 반말부분을 존댓말로 고치는데 드는 예상 크레딧은 몇이야"
+   - "연결했어, 설치해"
+   - "192.168.35.135:34473     코드ㅜ 108147"
+   - (screenshot of 무선 디버깅 showing 192.168.35.135:46857)
+   - "카디비를 얘기할때 카디 (한숨쉬고) 비 이렇게 한국어로 말하는데"
+   - "무튼 그래서 앞으로할거 예상 크레딧이 몇이라고?"
+   - "지금 일레븐랩스 lumianthecompany@gmail.com 계정으로 다시 연결했는데 이게 무료플랜이고 무료는 한도크레딧 10,000이야"
+   - "유료플랜으로 올렸어"
+   - "그리고 한글로 or 를 얘기할때 오르 라고 말하는게 맞아? 발음이 말야. 오아 라고 하는거 아냐ㅕ?"
+   - "그리고 젠슨 띄고 황 이라고 한국어 말하네["
+   - "다른것도 체크해봐야할게 있을까 이런비슷한류"
+   - "한국어 해설 스크립트고 한국어 성우가 영어그대로 읽게해도될거같은데 굳이 한국어발음으로 고칠필요는 없어보여"
+   - "심화에서는 한국어 해설에서 영어들어가면 영어발음으로 잘 한거같은데, 그치?"
+   - "일단 그럼 고급남은거랑 방금 수정이필요한 부분 진행해"
+   - "이게 어떤건 한국식으로 딱딱하게 발음하고 어떤건 영어발음으로 자연스럽게 하는데 니가 명령을 잘못해서 뽑아낸음성이야?"
+   - "그러니까 니가 or를  오아 혹은 오르 라고 쓴게 아니라는거야 ?"
+   - "그건어쩔수가없군 일단 그럼 위에말한거 진행해서 앱 집어넣는거까지 해"
+   - "커밋하고 푸시해"
+   - "이제 아까말한 쉐도잉, 단어 등으로 얘기를 해보자, 쉐도잉을 어떤느낌으로 하면될까? 우리가 평상시 자주 사용하고 자주 발생하는 상황등이 좋을까"
+   - "다른 후보군으로 더 찾아봐 인터넷 뒤져서"
+   - "스몰토크, 하루일과, 나를 소개하기, 사림 사이 기술 (+여자 번호달라는등의 작업멘트도 포함), 식당이나 카페에서 주문하고 클레임걸고 뭐 이런 상황들"
+   - "한 트랙에 한 어휘 쉐도잉이야?"
+   - "그럼 그 대화 전체를 다 따라할건 아니고 그 중 이 부분 정도만 핵심인거자나?"
+   - "그러면 스몰토크부터 트랙이랑 대본보여줘"
+   - "상황별, 감정별, 장소별 머 이런분류로도 할수있나"
+   - "일단 대본부터 보여줘 1화만"
+   - "감정말고" / "방금전 정한걸로"
+   - "풀 스크립트 말이야"
+   - "그 따라말하기 사이에 어휘학습에 쓰인 사운드 넣어주고, 시작 인트로 사운드는 UIMisc-Create_a_short_1.5_s-Elevenlabs.mp3 이걸로 해줘"
+   - "끝음 사운드는 안할거야."
+   - "응 일단 1화 음성만 제작해봐 들어볼게"
+   - **Standing constraints:**
+     - Paid API or credits need cost disclosure and consent first; never retry a started generation.
+     - Record decision changes in the spec.
+     - Reply in Korean 해요체.
+     - Never commit `signing/`, which is gitignored.
+     - Commit only files this session changed.
+     - Don't fix the Korean narrator's English pronunciation.
+
+7. Pending Tasks:
+   - Finish Small Talk track 1 audio and send it to the user to listen. It is not yet going into the app.
+   - Afterwards, if the user approves: write tracks 2–10 and the other albums.
+   - **Earlier, unresolved:** the vocab album design (not approved); 고급 app TOC cleanup.
+
+8. Current Work:
+   - Producing Small Talk track 1 test audio on connector 67a9ac48, flow `jnVnLb7w5iKgPNv7CQXU`.
+   - **Started** (generations_count 1):
+     - d1 "[casual] Hey! How's it going?" (남1 7EzW…), session `Q3Kp2vhmLL0fOfEZJDQt`, 29 credits
+     - d2 "[casual] Oh, hey! Not bad. You?" (여1 OYTb…), session `1z4Ovt5QM8L9rzHHFyjr`, 31 credits
+     - d3 "[casual] Pretty good. Just grabbing some coffee." (남1), session `eh83xxkPlz7khY6kdXpN`, 48 credits
+     - d4 "[casual] Same here. I can't function without it." (여1), session `h8ZEqbg3qrO6QHaWjhWb`, 48 credits
+   - **Not yet started:**
+     - d5 "[casual] I feel you." (남1)
+     - d6 "[casual] Alright, I gotta run. See you around!" (여1)
+     - d7 "[casual] See you!" (남1)
+     - guide g1 "Now, repeat after me." and g2 "One more time.", planned with 여2 `ZIlrSGI4jZqobxRKprJz` (a native English voice rather than Korean Mina; mention this to the user).
+   - The total estimate given to the user was about 220 credits.
+
+9. Optional Next Step:
+   - Continue the user's request "응 일단 1화 음성만 제작해봐 들어볼게":
+     1. Generate d5–d7, g1 and g2 in the same flow.
+     2. Poll `mcp__67a9ac48-eafa-432e-a0d2-857b2dc152bb__creative_get_flow_run_status` (load via ToolSearch) for all session_ids.
+     3. Curl the files into e.g. `spikes/episode-01/audio/shadowing/small-talk/ep01/clips/`.
+     4. Assemble with ffmpeg, in this order:
+        - `sfx-start-shadowing.mp3` (volume raised to match the 초급 start sound)
+        - the dialogue d1–d7 with short gaps
+        - g1
+        - for each key line (d1, d3, d5): line, pause (~1.2× length + 0.5s), line, pause, then the click `sfx-next-soft.mp3` (`atrim=0:1.0,afade=t=out:st=0.9:d=0.1,volume=-4dB`). No click after the last key line.
+        - g2
+        - the dialogue again
+        - no end sound
+        - finally `loudnorm=I=-16:TP=-1.5:LRA=11`, output mp3
+     5. Send it with SendUserFile so the user can listen.
+     6. Report the credits used.
+</summary>

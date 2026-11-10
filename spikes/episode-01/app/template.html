@@ -62,7 +62,11 @@ body:not(.playing) .ic-pause, body.playing .ic-play { display: none }
 .hello .icon { margin-right: -12px }
 .hello .icon svg { width: 20px; height: 20px }
 .shelf + .shelf { padding-top: 32px }
-.shelf h2 { font: var(--t-title); letter-spacing: -.02em; padding-bottom: 12px }
+.shelf-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 12px }
+.shelf h2 { font: var(--t-title); letter-spacing: -.02em }
+/* Play all: 그 섹션의 모든 화를 앨범 순서대로 이어 듣는다(2026-11-10 사용자 요청) */
+.play-all { font: var(--t-head); color: rgb(255 255 255 / .7); padding: 6px 0 6px 12px; margin-block: -6px }
+.play-all:active { color: #fff }
 .rail { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
   margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px }
 .rail::-webkit-scrollbar { display: none }
@@ -87,6 +91,8 @@ body:not(.playing) .ic-pause, body.playing .ic-play { display: none }
 #albumDl.ing .dl-ring { display: block }
 .al-cover { display: grid; place-items: center; padding-block: 8px 24px }
 .al-cover .cv { width: 200px; border-radius: 4px; box-shadow: 0 8px 24px rgb(0 0 0 / .4) }
+/* 올리면 표지가 작아지며 흐려진다. 상태 표시줄 띠에 닿을 때쯤 다 사라져 잘린 선이 안 보인다 (2026-11-10 성범 결정) */
+.al-cover .cv { transform-origin: 50% 100%; opacity: var(--cvo, 1); transform: scale(var(--cvs, 1)); will-change: opacity, transform }
 .al-info { display: grid; grid-template-columns: minmax(0, 1fr) 56px; gap: 12px; align-items: center; padding-bottom: 12px }
 .al-info .txt { display: grid; gap: 4px; min-width: 0 }
 .al-info h1 { font: var(--t-display); letter-spacing: -.025em }
@@ -141,7 +147,8 @@ body:not(.playing) .ic-pause, body.playing .ic-play { display: none }
 .sbar { position: fixed; z-index: 9; top: 0; left: 0; right: 0; height: var(--top); background: var(--sb, #121212); pointer-events: none; opacity: 0 }
 .sbar.on { opacity: 1 }
 /* 앨범 화면에서는 배경과 똑같은 그라데이션을 스크롤만큼 밀어 칠해, 띠와 화면 배경 사이에 경계가 생기지 않게 한다 */
-.sbar.alb { background: linear-gradient(to bottom, var(--c) 0, color-mix(in srgb, var(--c) 55%, #000) 260px, #121212 520px) no-repeat 0 var(--sy, 0px) / 100% 600px, #121212 }
+/* 그림 아래 바탕색을 두면 띠 아래 끝 한 줄이 어둡게 섞인다. 그림을 길게 깔고 바탕은 비운다 (2026-11-10) */
+.sbar.alb { background: linear-gradient(to bottom, var(--c) 0, color-mix(in srgb, var(--c) 55%, #000) 260px, #121212 520px) no-repeat 0 var(--sy, 0px) / 100% 100000px transparent }
 /* 09 내려받기 지우기 확인 창 */
 .dlg { position: fixed; z-index: 31; left: 50%; top: 50%; width: min(calc(100% - 48px), 320px); padding: 24px 20px 16px; border-radius: 16px; background: var(--sheet);
   opacity: 0; transform: translate(-50%, -46%) scale(.96); pointer-events: none; transition: opacity .2s, transform .2s cubic-bezier(.2,.8,.2,1) }
@@ -217,6 +224,7 @@ body.textonly .ln { opacity: .75 }
 .ln .cl { display: inline-block }
 .ln .en { display: block; font: 700 var(--lyr)/1.5 var(--sans); letter-spacing: -.02em }
 .ln .ko { display: block; margin-top: 4px; font: var(--t-body) }
+.ln .who { opacity: .6 }
 .ln[data-s="dialogue"] .ko, body.noko .ln .ko { display: none }
 .ln mark { background: none; color: inherit; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px }
 /* 말해보기 정답: 나오기 전에는 줄 자체가 없고, 정답 음성이 나오면 그 자리에 생긴다(2026-11-10 성범 요청, 흐림·밑줄 대신).
@@ -307,7 +315,7 @@ body.textonly .ln { opacity: .75 }
       <button class="row" data-sheet="size"><b>Lyrics text size</b><span><em id="sizeVal" style="font-style:normal">Default</em><i data-lucide="chevron-right"></i></span></button>
       <div class="row"><b>Korean translation</b><button class="sw" role="switch" data-ko aria-checked="true" aria-label="Korean translation"></button></div>
     </div>
-    <p class="grp-d">Korean translation shows the meaning under each podcast line. You can also change the text size with the zoom button on the player.</p>
+    <p class="grp-d">Korean translation shows the meaning under each podcast and shadowing line. You can also change the text size with the zoom button on the player.</p>
     <h2 class="grp-t">Downloads</h2>
     <div class="grp">
       <div class="row"><b>Wi-Fi only</b><button class="sw" role="switch" data-wifi aria-checked="false" aria-label="Wi-Fi only"></button></div>
@@ -418,19 +426,45 @@ const PODCASTS = [
   { name: '영떡과 YSL 재판', en: 'Young Thug and the YSL Trial', show: 'The Replay', mark: 'YSL', about: 'The longest trial in Georgia', c: '#b48563', art: 'replay2', pats: ['The Arrest', 'The Longest Trial', 'Gunna', 'The Plea'] },
   { name: '매디의 서울 여행', en: "Maddie's Seoul Era", show: 'Seoul, Actually', mark: 'SEOUL', about: 'Solo trip, no cap', c: '#8f8c7a', art: 'seoul', pats: ['Day One', 'Day Two', 'Day Three', 'Day Four', 'Day Five'] },
 ];
+/* 쉐도잉 앨범(2026-11-10): 들리는 소리는 모두 영어, 가사에 한글 뜻을 함께 보이고 팟캐스트처럼 끄고 켤 수 있다(pod).
+   이름(name)은 build_page.py와 대본을 잇는 열쇠다 */
+const SHADOWS = [
+  { name: '스몰토크', en: 'Small Talk', mark: 'TALK', about: 'Easy chats you have every day', c: '#a50110', art: 'sh1', pats: ["How's It Going?", 'Long Time No See', 'How Was Your Weekend?', 'Crazy Weather', 'Busy Week', 'What Are You Into?', 'Any Plans?', 'Stuck in Line', 'Which Way?', 'I Should Get Going'] },
+  { name: '하루 일과', en: 'Daily Routine', mark: 'DAY', about: 'From your morning alarm to lights out', c: '#0c0c0c', art: 'sh2', pats: ['Early Bird', 'Gym Before Work', 'Running Late', 'Coffee First', 'Lunch Break', 'Swamped', 'Calling It a Day', "What's for Dinner?", 'Laundry Day', 'Lights Out'] },
+  { name: '나를 소개하기', en: 'About Me', mark: 'ME', about: 'Talk about who you are, from your name to your weekends', c: '#013195', art: 'sh3', pats: ['Nice to Meet You', 'How Do You Spell That?', 'Where Are You From?', 'What Do You Do?', "How's Work?", 'In My Free Time', 'My Kind of Music', "I'm a Foodie", 'My Family', 'Tell Me About Yourself'] },
+  { name: '사람 사이 기술', en: 'People Skills', mark: 'YOU', about: 'Compliment, say no, say sorry, and make new friends', c: '#e55317', art: 'sh4', pats: ['Nice Shoes!', 'You Nailed It', "I'll Pass Tonight", 'I Wish I Could', 'My Bad', "I'm So Sorry", 'I See Your Point', 'Agree to Disagree', 'Is This Seat Taken?', 'Can I Get Your Number?'] },
+  { name: '식당과 카페', en: 'Eating Out', mark: 'EAT', about: "Order at Starbucks, McDonald's and Subway, and handle the check", c: '#f02778', art: 'sh5', pats: ['Light Ice, Please', 'Oat Milk Instead', 'Make It a Meal', 'No Pickles', 'For Here or To Go?', 'Footlong, Toasted', 'Table for Two', "This Isn't What I Ordered", 'Check, Please', "It's on Me"] },
+  { name: '항의와 언쟁', en: 'Speak Up', mark: 'UP', about: 'Complain, push back, argue, and make up', c: '#4a0379', art: 'sh6', pats: ['Excuse Me, I Was Here First', 'Can You Keep It Down?', 'You Charged Me Twice', "I'd Like to Speak to the Manager", "Don't Talk to Me Like That", "That's Not What I Said", 'You Always Do This', "Let's Not Fight", 'I Was Hurt', 'Are We Good?'] },
+  { name: '현지인처럼 욕하기', en: 'Swear Like a Local', mark: 'WTF', about: 'Real swearing between friends: surprise, anger, hype, and teasing', c: '#055120', art: 'sh7', pats: ['Holy Shit', 'What the Hell?', "Damn, That's Good", 'Are You Fucking Kidding Me?', 'This Is Bullshit', 'Screw It', 'Shut Up! No Way', 'So Fucking Tired', "I'm So Pissed", "Don't Be a Dick"] },
+];
+/* 쉐도잉 상대(B, 여자 목소리)의 이름. 화마다 상황에 맞게 정했고, 같은 사람이 이어 나오면 같은 이름이다(2026-11-10 성범 요청, 이름은 작성자 판단) */
+const SHADOW_WHO = {
+  '스몰토크': ['Sarah', 'Jessica', 'Rachel', 'Linda', 'Amy', 'Olivia', 'Rachel', 'Kate', 'Sophie', 'Jessica'],
+  '하루 일과': ['Amy', 'Lauren', 'Diane', 'Amy', 'Rachel', 'Megan', 'Megan', 'Mia', 'Jessica', 'Jessica'],
+  '나를 소개하기': ['Emma', 'Zoe', 'Lena', 'Grace', 'Jessica', 'Natalie', 'Ashley', 'Hannah', 'Sophie', 'Claire'],
+  '사람 사이 기술': ['Amy', 'Rachel', 'Megan', 'Jessica', 'Jessica', 'Laura', 'Olivia', 'Jessica', 'Sienna', 'Sienna'],
+  '식당과 카페': ['Zoe', 'Ivy', 'Tina', 'Tina', 'Tina', 'Rosa', 'Nicole', 'Nicole', 'Nicole', 'Jessica'],
+  '항의와 언쟁': ['Brittany', 'Kelsey', 'Paula', 'Tiffany', 'Vanessa', 'Erin', 'Chloe', 'Chloe', 'Chloe', 'Chloe'],
+  '현지인처럼 욕하기': ['Kayla', 'Brooke', 'Kayla', 'Brooke', 'Kayla', 'Brooke', 'Kayla', 'Kayla', 'Brooke', 'Kayla'] };
 /* 화의 한국어 제목. 앨범 화면 트랙 목록에서만 영어 제목 아래 캡션으로 보인다(2026-11-09 사용자 요청) */
-const KO_TITLE = {"I'm / I'm not ~": "나에 대해 말하기", "I'm ~ing": "지금 하는 일 말하기", "I'm from ~": "어디 출신인지 말하기", "I'm good at ~": "잘하는 것 말하기", "I like / don't like ~": "좋아하는 것, 싫어하는 것", "I have / don't have ~": "있는 것, 없는 것", "I want / want to ~": "갖고 싶은 것, 하고 싶은 것", "Are you ~?": "상대에 대해 묻기", "Are you ~ing?": "지금 뭐 하는지 묻기", "Do you ~?": "평소에 하는 일 묻기", "Is it ~?": "어떤지 묻기", "Do you like ~?": "좋아하는지 묻기", "Do you have ~?": "있는지 묻기", "Is there ~?": "그곳에 있는지 묻기", "Do you know ~?": "아는지 묻기", "Do you want (to) ~?": "권하고 같이 하자고 하기", "What's ~?": "무엇인지 묻기", "That's ~": "듣고 반응하기", "Where is ~?": "어디 있는지 묻기", "Who is ~?": "누구인지 묻기", "What do you ~?": "무엇을 하는지 묻기", "Where do you ~?": "어디서 하는지 묻기", "How's ~?": "요즘 어떤지 묻기", "Did you ~?": "했는지 묻기", "How was ~?": "어땠는지 묻기", "I was / wasn't ~": "지난 상태 말하기", "Were you ~?": "지난 상태 묻기", "I went to ~": "다녀온 곳 말하기", "I ~ed / didn't ~": "한 일, 안 한 일", "What did you ~?": "무엇을 했는지 묻기", "Why did you ~?": "왜 했는지 묻기", "Where / When did you ~?": "어디서, 언제 했는지 묻기", "Have you ever ~? / I've never ~": "해 본 적 있는지", "What kind of ~?": "어떤 종류인지 묻기", "When is / do you ~?": "언제인지 묻기", "Why are / do you ~?": "왜 그런지 묻기", "How much / long / many ~?": "얼마나인지 묻기", "How do you ~?": "어떻게 하는지 묻기", "I'm going to ~": "할 계획 말하기", "Are you going to ~?": "할 계획 묻기", "I'll ~": "그 자리에서 정한 일", "Let's ~": "같이 하자고 하기", "How about ~?": "제안하기", "Why don't we ~?": "부드럽게 제안하기", "Can / Could you ~?": "부탁하기", "Can I ~?": "해도 되는지 묻기", "I'm looking for ~": "찾는 것 말하기", "I'd like to ~ / Would you like ~?": "정중하게 말하고 권하기", "Do you want me to ~?": "해 줄지 묻기", "Don't ~": "하지 말라고 하기", "I think / don't think ~": "내 생각 말하기", "Do you think ~?": "상대 생각 묻기", "I feel / feel like ~": "기분과 느낌 말하기", "Are you into ~?": "빠져 있는지 묻기", "I can / can't ~": "할 수 있는 것, 없는 것", "I have to / don't have to ~": "해야 하는 일", "You should / shouldn't ~": "조언하기", "It looks / sounds ~": "보이는 것, 들리는 것", "I hope ~": "바라는 것 말하기", "I'm sure / not sure ~": "확실한지 말하기", "I'm worried about ~": "걱정 말하기", "I'm sorry for ~": "사과하기", "and / but": "그리고, 하지만", "because": "왜냐하면", "so": "그래서", "when": "~할 때", "if": "만약 ~하면", "before / after": "전에, 후에", "I used to ~": "예전에 하던 일", "I'm about to ~": "막 하려는 일", "It depends on ~": "~에 따라 달라요", "I don't know what ~": "모르는 것 말하기", "How It Started": "불씨는 2013년에 붙었다", "The Songs": "곡으로 주고받은 펀치", "The Tea": "소송까지 간 무대 밖 이야기", "Who Won": "차트, 그래미, 그리고 슈퍼볼", "The Arrest": "28명이 한꺼번에 기소된 날", "The Longest Trial": "조지아 역사상 가장 긴 재판", "Gunna": "먼저 걸어 나간 한 사람", "The Plea": "아무도 예상 못 한 유죄 인정", "Day One": "스물둘, 처음 혼자 떠난 서울", "Day Two": "노트북을 두고 가도 괜찮은 도시", "Day Three": "비 오는 아침, 팬미팅 가는 길", "Day Four": "새벽부터 줄 선 음악방송", "Day Five": "광장시장에서 보낸 마지막 날"};
+const KO_TITLE = {"I'm / I'm not ~": "나에 대해 말하기", "I'm ~ing": "지금 하는 일 말하기", "I'm from ~": "어디 출신인지 말하기", "I'm good at ~": "잘하는 것 말하기", "I like / don't like ~": "좋아하는 것, 싫어하는 것", "I have / don't have ~": "있는 것, 없는 것", "I want / want to ~": "갖고 싶은 것, 하고 싶은 것", "Are you ~?": "상대에 대해 묻기", "Are you ~ing?": "지금 뭐 하는지 묻기", "Do you ~?": "평소에 하는 일 묻기", "Is it ~?": "어떤지 묻기", "Do you like ~?": "좋아하는지 묻기", "Do you have ~?": "있는지 묻기", "Is there ~?": "그곳에 있는지 묻기", "Do you know ~?": "아는지 묻기", "Do you want (to) ~?": "권하고 같이 하자고 하기", "What's ~?": "무엇인지 묻기", "That's ~": "듣고 반응하기", "Where is ~?": "어디 있는지 묻기", "Who is ~?": "누구인지 묻기", "What do you ~?": "무엇을 하는지 묻기", "Where do you ~?": "어디서 하는지 묻기", "How's ~?": "요즘 어떤지 묻기", "Did you ~?": "했는지 묻기", "How was ~?": "어땠는지 묻기", "I was / wasn't ~": "지난 상태 말하기", "Were you ~?": "지난 상태 묻기", "I went to ~": "다녀온 곳 말하기", "I ~ed / didn't ~": "한 일, 안 한 일", "What did you ~?": "무엇을 했는지 묻기", "Why did you ~?": "왜 했는지 묻기", "Where / When did you ~?": "어디서, 언제 했는지 묻기", "Have you ever ~? / I've never ~": "해 본 적 있는지", "What kind of ~?": "어떤 종류인지 묻기", "When is / do you ~?": "언제인지 묻기", "Why are / do you ~?": "왜 그런지 묻기", "How much / long / many ~?": "얼마나인지 묻기", "How do you ~?": "어떻게 하는지 묻기", "I'm going to ~": "할 계획 말하기", "Are you going to ~?": "할 계획 묻기", "I'll ~": "그 자리에서 정한 일", "Let's ~": "같이 하자고 하기", "How about ~?": "제안하기", "Why don't we ~?": "부드럽게 제안하기", "Can / Could you ~?": "부탁하기", "Can I ~?": "해도 되는지 묻기", "I'm looking for ~": "찾는 것 말하기", "I'd like to ~ / Would you like ~?": "정중하게 말하고 권하기", "Do you want me to ~?": "해 줄지 묻기", "Don't ~": "하지 말라고 하기", "I think / don't think ~": "내 생각 말하기", "Do you think ~?": "상대 생각 묻기", "I feel / feel like ~": "기분과 느낌 말하기", "Are you into ~?": "빠져 있는지 묻기", "I can / can't ~": "할 수 있는 것, 없는 것", "I have to / don't have to ~": "해야 하는 일", "You should / shouldn't ~": "조언하기", "It looks / sounds ~": "보이는 것, 들리는 것", "I hope ~": "바라는 것 말하기", "I'm sure / not sure ~": "확실한지 말하기", "I'm worried about ~": "걱정 말하기", "I'm sorry for ~": "사과하기", "and / but": "그리고, 하지만", "because": "왜냐하면", "so": "그래서", "when": "~할 때", "if": "만약 ~하면", "before / after": "전에, 후에", "I used to ~": "예전에 하던 일", "I'm about to ~": "막 하려는 일", "It depends on ~": "~에 따라 달라요", "I don't know what ~": "모르는 것 말하기", "How It Started": "불씨는 2013년에 붙었다", "The Songs": "곡으로 주고받은 펀치", "The Tea": "소송까지 간 무대 밖 이야기", "Who Won": "차트, 그래미, 그리고 슈퍼볼", "The Arrest": "28명이 한꺼번에 기소된 날", "The Longest Trial": "조지아 역사상 가장 긴 재판", "Gunna": "먼저 걸어 나간 한 사람", "The Plea": "아무도 예상 못 한 유죄 인정", "Day One": "스물둘, 처음 혼자 떠난 서울", "Day Two": "노트북을 두고 가도 괜찮은 도시", "Day Three": "비 오는 아침, 팬미팅 가는 길", "Day Four": "새벽부터 줄 선 음악방송", "Day Five": "광장시장에서 보낸 마지막 날", "How's It Going?": "아는 사람과 가볍게 인사", "Long Time No See": "오랜만에 만난 친구", "How Was Your Weekend?": "주말 얘기", "Crazy Weather": "날씨로 말 꺼내기", "Busy Week": "요즘 바쁘다는 얘기", "What Are You Into?": "요즘 빠진 것", "Any Plans?": "계획 묻기", "Stuck in Line": "줄 서다 나누는 짧은 대화", "Which Way?": "외국인에게 길 알려 주기", "I Should Get Going": "대화 마무리하기", "Early Bird": "몇 시에 일어나는지", "Gym Before Work": "출근 전 운동", "Running Late": "늦는다고 연락하기", "Coffee First": "출근해서 일 시작 전", "Lunch Break": "점심 메뉴 정하기", "Swamped": "일이 밀려 바쁠 때", "Calling It a Day": "퇴근 인사", "What's for Dinner?": "저녁 뭐 먹을지", "Laundry Day": "집안일로 약속 미루기", "Lights Out": "이제 자러 갈게요", "Nice to Meet You": "처음 만나 인사하기", "How Do You Spell That?": "이름 철자 알려 주기", "Where Are You From?": "어디서 왔는지 말하기", "What Do You Do?": "하는 일 말하기", "How's Work?": "회사 생활 얘기하기", "In My Free Time": "쉬는 날 하는 것", "My Kind of Music": "좋아하는 음악", "I'm a Foodie": "좋아하는 음식", "My Family": "가족 얘기", "Tell Me About Yourself": "짧게 자기소개하기", "Nice Shoes!": "가볍게 칭찬하기", "You Nailed It": "동료 칭찬하기", "I'll Pass Tonight": "2차 정중하게 거절하기", "I Wish I Could": "부탁 거절하기", "My Bad": "늦어서 사과하기", "I'm So Sorry": "실수했을 때 사과하기", "I See Your Point": "부드럽게 반대하기", "Agree to Disagree": "의견이 다를 때", "Is This Seat Taken?": "마음에 드는 사람에게 말 걸기", "Can I Get Your Number?": "번호 묻기", "Light Ice, Please": "스타벅스 얼음 적게", "Oat Milk Instead": "스타벅스 우유 바꾸기", "Make It a Meal": "맥도날드 세트 주문", "No Pickles": "맥도날드 피클 빼기", "For Here or To Go?": "포장 주문하기", "Footlong, Toasted": "서브웨이 주문하기", "Table for Two": "자리 안내 받기", "This Isn't What I Ordered": "주문이 잘못 나왔을 때", "Check, Please": "계산하기", "It's on Me": "친구에게 한턱내기", "Excuse Me, I Was Here First": "새치기당했을 때", "Can You Keep It Down?": "시끄러운 옆집", "You Charged Me Twice": "결제가 두 번 됐을 때", "I'd Like to Speak to the Manager": "매니저 부르기", "Don't Talk to Me Like That": "무례한 말투에 선 긋기", "That's Not What I Said": "내 말을 왜곡할 때", "You Always Do This": "또 약속을 깬 친구", "Let's Not Fight": "말싸움 멈추기", "I Was Hurt": "서운했던 점 말하기", "Are We Good?": "화해하기", "Holy Shit": "깜짝 놀랐을 때", "What the Hell?": "황당할 때", "Damn, That's Good": "좋은 걸 보고 감탄할 때", "Are You Fucking Kidding Me?": "어이없을 때", "This Is Bullshit": "부당하다고 느낄 때", "Screw It": "될 대로 되라 할 때", "Shut Up! No Way": "믿기지 않는 좋은 소식", "So Fucking Tired": "말에 힘을 줄 때", "I'm So Pissed": "화난 이유 털어놓기", "Don't Be a Dick": "친구끼리 놀릴 때"};
 /* 목차 묶음의 영어 이름. 앨범 화면 트랙 목록에서만 묶음 머리에 작게 보인다(2026-11-09 사용자 요청) */
 const GROUP_EN = { '내 얘기': 'About me', '상대에게 묻기': 'Asking others', '자세히 묻기': 'Asking for details', '지난 일': 'The past', '더 자세히 묻기': 'More questions', '앞일, 제안, 부탁': 'Plans, offers and requests', '생각, 감정, 조언': 'Thoughts, feelings and advice', '문장 잇기': 'Linking sentences', '자연스러운 말': 'Natural phrases' };
 const ALBUMS = [...TOC.map(([name, en, about, groups]) => ({ name, en, about, c: COLOR[name][0], art: COLOR[name][1], pats: groups.flatMap(g => g[1]).filter(x => x !== '나중에 정해요'),
   groups: groups.map(([g, ps]) => [GROUP_EN[g] || g, ps.filter(x => x !== '나중에 정해요').length]).filter(g => g[1]) })),
-  ...PODCASTS.map(p => ({ ...p, pod: true }))];
-const SHELVES = [['Basic Expressions', ALBUMS.slice(0, TOC.length)], ['Podcasts', ALBUMS.slice(TOC.length)]];
+  ...PODCASTS.map(p => ({ ...p, pod: true })), ...SHADOWS.map(p => ({ ...p, pod: true, shadow: true }))];
+const SHELVES = [['Basic Expressions', ALBUMS.slice(0, TOC.length)], ['Podcasts', ALBUMS.filter(a => a.pod && !a.shadow)], ['Shadowing', ALBUMS.filter(a => a.shadow)]];
 const albumOf = c => ALBUMS.find(x => x.name === c) || ALBUMS[0];
 const nameOf = al => al.en || al.name;
 /* 같은 앨범의 음성 있는 화. 다음 화 자동 재생과 이전, 다음 버튼은 앨범 안에서만 움직인다 */
-const sibs = () => SCRIPTS.map((e, i) => i).filter(i => has(i) && SCRIPTS[i].course === E.course)
+const inAlbum = name => SCRIPTS.map((e, i) => i).filter(i => has(i) && SCRIPTS[i].course === name)
   .sort((a, b) => SCRIPTS[a].n - SCRIPTS[b].n || !!SCRIPTS[a].alt - !!SCRIPTS[b].alt);
+/* Play all로 섹션 전체를 듣는 중이면 그 순서(섹션 안 앨범 차례대로, 앨범 안은 화 차례)를 따른다. 다른 화나 앨범을 직접 고르면 풀린다 */
+let secQ = null, secK = -1;
+const secList = list => list.flatMap(al => inAlbum(al.name).filter(i => !SCRIPTS[i].alt));
+/* 재생 화면 제목 아래 줄: Play all로 섹션을 듣는 중이면 앨범 이름 대신 섹션 이름(2026-11-10 성범 요청) */
+const syncSub = () => { $('npSub').textContent = [secQ && secQ.includes(cur) ? SHELVES[secK][0] : nameOf(albumOf(E.course)), E.text && 'Script only'].filter(Boolean).join(' · ') };
+const sibs = () => secQ && secQ.includes(cur) ? secQ : inAlbum(E.course);
 const nextIn = n => { const l = sibs(); return l[l.indexOf(cur) + n] };
 
 const store = { get() { try { return JSON.parse(localStorage.getItem('course-1') || '{}') } catch { return {} } },
@@ -516,6 +550,16 @@ function syncSbar() {
   const v = document.querySelector('main.view:not([hidden])'), b = $('sbar'), alb = v?.id === 'vAlbum' && !isUp() && !SHEETS[topV()];
   b.classList.toggle('on', !!v && v.scrollTop > 0); b.classList.toggle('alb', alb);
   if (alb) { b.style.setProperty('--c', ALBUMS[albumSel].c); b.style.setProperty('--sy', -v.scrollTop + 'px') }
+  if (v?.id === 'vAlbum') fadeCover(v, b);
+}
+function fadeCover(v, b) {
+  const box = $('albumCover'), cv = box.querySelector('.cv');
+  if (!cv) return;
+  const bottom = box.getBoundingClientRect().bottom - parseFloat(getComputedStyle(box).paddingBottom);
+  /* 올리기 시작하자마자 흐려지기 시작해, 표지 아래 끝이 띠에 닿을 때 다 사라진다 */
+  const range = bottom + v.scrollTop - b.offsetHeight, vis = range > 0 ? Math.min(1, Math.max(0, (bottom - b.offsetHeight) / range)) : 1;
+  box.style.setProperty('--cvo', (vis * vis).toFixed(3));
+  box.style.setProperty('--cvs', (.88 + .12 * vis).toFixed(3));
 }
 document.addEventListener('scroll', e => { if (e.target.matches?.('main.view')) syncSbar() }, { capture: true, passive: true });
 /* 가사를 보는 동안은 화면이 꺼지지 않게 한다. 다른 화면으로 가거나 앱을 내리면 풀린다 */
@@ -540,7 +584,7 @@ function setBarColor(c) {
 
 /* 홈 */
 function renderHome() {
-  $('shelves').innerHTML = SHELVES.map(([title, list]) => `<section class="shelf"><h2>${title}</h2><ul class="rail">${list.map(al => {
+  $('shelves').innerHTML = SHELVES.map(([title, list]) => `<section class="shelf"><div class="shelf-h"><h2>${title}</h2>${secList(list).length ? `<button class="play-all" data-playall="${SHELVES.findIndex(x => x[1] === list)}">Play all</button>` : ''}</div><ul class="rail">${list.map(al => {
     const k = ALBUMS.indexOf(al), made = madeIn(al);
     return `<li><button class="card ${made ? '' : 'soon'}" ${made ? `data-album="${k}"` : 'aria-disabled="true"'} aria-label="${esc(nameOf(al))}">${albumCover(al)}<span class="card-t"><b>${esc(nameOf(al))}</b><span>${made ? (al.show ? esc(al.show) : mins(totalIn(al))) : 'Coming soon'}</span></span></button></li>`;
   }).join('')}</ul></section>`).join('');
@@ -565,7 +609,7 @@ function trackRow(i, n, heads) {
   const tm = has(i) ? mmss(EPS[i].duration) : 'Script only';
   const k = heads && KO_TITLE[e.title];
   // 팟캐스트는 'EP1: How It Started'처럼 화 번호를 붙인다(2026-11-09 사용자 결정)
-  const t = isPod(e) ? `EP${n}: ${e.title}` : e.title;
+  const t = albumOf(e.course).show ? `EP${n}: ${e.title}` : e.title;
   const inner = `<span class="tt"><b>${esc(t)}</b>${k ? `<small>${esc(k)}</small>` : ''}</span><span class="tm">${tm}</span>`;
   return `<li class="trk ${on ? 'on' : ''}">${has(i) ? `<button class="trk-go" data-play="${i}" ${on ? 'aria-current="true"' : ''}>${inner}</button>` : `<div class="trk-go">${inner}</div>`}</li>`;
 }
@@ -573,7 +617,7 @@ function trackRow(i, n, heads) {
 /* 앨범 */
 function renderAlbum() {
   const al = ALBUMS[albumSel], made = madeIn(al);
-  $('vAlbum').style.setProperty('--c', al.c);
+  $('vAlbum').style.setProperty('--c', al.c); $('albumCover').style.removeProperty('--cvo'); $('albumCover').style.removeProperty('--cvs');
   $('albumCover').innerHTML = albumCover(al);
   $('albumInfo').innerHTML = `<h1>${esc(nameOf(al))}</h1>${al.show ? `<p class="show">${esc(al.show)}</p>` : `<p class="about">${esc(al.about)}</p>`}<p class="meta">${made ? `${eps(made)} · ${mins(totalIn(al))} · ${doneIn(al)} played` : `Coming soon · ${eps(al.pats.length)}`}</p>`;
   $('albumPlay').hidden = !made;
@@ -607,6 +651,7 @@ function albumDownload() {
 }
 $('albumPlay').onclick = () => {
   const al = ALBUMS[albumSel];
+  if (!(E.course === al.name && S.started)) { secQ = null; syncSub() }
   if (E.course === al.name && S.started) return togglePlay();
   const list = SCRIPTS.map((e, i) => i).filter(i => SCRIPTS[i].course === al.name && has(i));
   startEp(list.find(i => !(S.eps[i] || {}).done) ?? list[0]);
@@ -618,7 +663,7 @@ function renderSettings() { $('sizeVal').textContent = SIZES[S.size][0]; syncKo(
 function setSize(k) { S.size = k; document.documentElement.style.setProperty('--lyr', SIZES[k][1] + 'px'); $('sizeVal').textContent = SIZES[k][0]; renderSize(); save(); if (isUp()) { lastI = -2; requestAnimationFrame(() => tick(true)) } }
 /* 취침 타이머와 같은 고르기 목록. 누르면 바로 바뀌고 시트가 닫히므로 라디오 단추 대신 고른 줄에 체크를 단다 */
 function renderSize() { $('sizeList').innerHTML = SIZES.map(([t], k) => `<button class="opt ${k === S.size ? 'sel' : ''}" data-size="${k}"><b>${t}</b>${k === S.size ? '<i class="ck" data-lucide="check"></i>' : ''}</button>`).join(''); icons() }
-/* 한국어 해석: 팟캐스트 가사에만 쓴다. 설정과 더보기 시트의 스위치가 같은 값이다 */
+/* 한국어 해석: 팟캐스트와 쉐도잉 가사에만 쓴다. 설정과 더보기 시트의 스위치가 같은 값이다 */
 const isPod = e => !!albumOf(e.course).pod;
 function syncKo() {
   document.querySelectorAll('[data-ko]').forEach(b => b.setAttribute('aria-checked', String(!!S.ko)));
@@ -653,9 +698,17 @@ function renderTimer() {
 
 /* 트랙리스트 시트 */
 function renderQueue() {
+  /* Play all로 섹션을 듣는 중이면 그 섹션 전체를 앨범별로 묶어 보여 준다(2026-11-10 성범 요청) */
+  if (secQ && secQ.includes(cur)) {
+    const als = SHELVES[secK][1].filter(al => madeIn(al));
+    $('qTitle').textContent = SHELVES[secK][0]; $('qMeta').textContent = `${eps(secQ.length)} · ${mins(als.reduce((t, al) => t + totalIn(al), 0))}`;
+    $('queue').innerHTML = als.map(al => `<li class="trk-h">${esc(nameOf(al))}</li>` + inAlbum(al.name).filter(i => !SCRIPTS[i].alt).map(i => trackRow(i, SCRIPTS[i].n, true)).join('')).join(''); icons();
+    const on = $('queue').querySelector('[aria-current]'); if (on) on.scrollIntoView({ block: 'center' });
+    return;
+  }
   const al = albumOf(E.course);
   $('qTitle').textContent = nameOf(al); $('qMeta').textContent = `${eps(madeIn(al))} · ${mins(totalIn(al))}`;
-  $('queue').innerHTML = trackRows(al); icons();
+  $('queue').innerHTML = trackRows(al, true); icons();
   const on = $('queue').querySelector('[aria-current]'); if (on) on.scrollIntoView({ block: 'center' });
 }
 
@@ -668,6 +721,8 @@ function lineHtml(l, i) {
   if (l.speaker === '해설자') return wrap(`say ${l.kind}`, `<span class="en">${clauses(l.text)}</span>`);
   let t = esc(l.text);
   if (l.section === 'dialogue' || l.section === 'replay') E.keys.forEach(k => { const r = findPhrase(t, k, true); if (r) t = t.replace(r, '<mark>$&</mark>') });
+  /* 쉐도잉은 줄 앞에 누가 말하는지 적는다: 나는 Me, 상대는 화마다 정한 이름(SHADOW_WHO). 따라 하기 부분(repeat)에는 붙이지 않는다. 2026-11-10 성범 요청 */
+  if (albumOf(E.course).shadow && (l.speaker === 'Me' || l.speaker === 'Partner') && l.section !== 'repeat') t = `<span class="who">${l.speaker === 'Me' ? 'Me' : (SHADOW_WHO[E.course] || [])[E.n - 1] || 'Partner'}:</span> ${t}`;
   return wrap(l.kind, `<span class="en">${t}</span>${l.meaning ? `<span class="ko">${esc(l.meaning)}</span>` : ''}`, ` data-s="${l.section}"`);
 }
 function renderScript() {
@@ -855,6 +910,7 @@ document.addEventListener('click', e => {
   const sh = t.closest('[data-sheet]');
   if (sh) { const v = sh.dataset.sheet; if (SHEETS[topV()]) { stack.pop(); stack.push(v); history.replaceState({ n: stack.length }, ''); render() } else go(v); return }
   const g = t.closest('[data-go]'); if (g) return go(g.dataset.go);
+  const pa = t.closest('[data-playall]'); if (pa) { secK = +pa.dataset.playall; secQ = secList(SHELVES[secK][1]); if (secQ.length) { startEp(secQ[0]); syncSub() } return }
   const al = t.closest('[data-album]'); if (al) { albumSel = +al.dataset.album; return go('album') }
   const tm = t.closest('[data-timer]'); if (tm) { setTimer(+tm.dataset.timer); return closeSheets() }
   const sz = t.closest('[data-size]'); if (sz) { setSize(+sz.dataset.size); return closeSheets() }
@@ -862,6 +918,7 @@ document.addEventListener('click', e => {
   if (pl) {
     const i = +pl.dataset.play;
     if (pl.closest('#queue')) { if (i !== cur) startEp(i); return closeSheets() }
+    secQ = null; syncSub();
     return i === cur && S.started ? go('now') : (startEp(i), go('now'));
   }
   if (t.closest('#miniOpen')) return go('now');
@@ -975,7 +1032,7 @@ function loadEp(i, resume) {
   renderScript();
   $('npArt').innerHTML = albumCover(al, 'xs');
   document.body.classList.toggle('textonly', !!E.text);
-  $('npTitle').textContent = E.title; $('npSub').textContent = [nameOf(al), E.text && 'Script only'].filter(Boolean).join(' · ');
+  $('npTitle').textContent = E.title; syncSub();
   $('miniArt').innerHTML = albumCover(al, 'xs'); $('miniTitle').textContent = E.title; $('miniSub').textContent = nameOf(al);
   $('seek').max = T.duration; $('dur').textContent = mmss(T.duration);
   $('prev').disabled = nextIn(-1) === undefined; $('next').disabled = nextIn(1) === undefined;

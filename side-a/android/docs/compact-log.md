@@ -256,3 +256,164 @@ Pending: the Figma 08 slider sheet, docs updates, Figma placement of the downloa
      - Rebuild, install, and verify on the phone.
    - Then finish the Figma 08 slider sheet and the docs updates. Restore the phone's screen timeout to 60000 at the end.
 </summary>
+
+## 2026-11-10 14:04 (자동 압축, 세션 c746a846)
+
+<analysis>
+Chronological recap of this segment:
+- Continued the Speak Up voice generation: 70 calls across ep1–10, session ids recorded in the scratchpad file su-sessions.txt. Total cost 2,919 credits.
+- User mid-turn: "그리고 피그마에 쉐도우용 앨범커버만들어둠. 같이 앱에 적용해". Found the Figma file 31ndvuyn7Zkf4sScTUgvjq with frames cover_쉐도잉1–7. Downloaded them at 2x (720px), converted to WebP as app/cover-sh1..6.webp (7 is reserved for the profanity album) and pulled colors from them. Updated SHADOWS in template.html (c and art), added the Speak Up entry and KO_TITLE.
+- User mid-turn: Play all on each home section. Implemented with secQ, secList, inAlbum and the shelf-h header. Tested in the browser: 50 tracks, playback crosses albums.
+- The background agent downloaded all 70 clips and they verified fine. Built the 10 Speak Up tracks (s6-01..10, 83.7–104s, ~16 min). Ran build_page and build_pwa (148 audio), built the APK and installed it.
+- User: show speaker names in shadowing lyrics, e.g. "Jane : …" / "Me : …". Implemented the `.who` label. User then: "이름은 니가 정한 이름으로 넣어 나 말고 다른 캐릭터들". Added a SHADOW_WHO map of names per episode.
+- User: "이제 따라해보세요 는 화자 표시 필요없어". Excluded the repeat section, then also restricted labels to the Me/Partner speakers so Guide lines like "One more time." get none. Browser check passes.
+- The spec was updated for covers, Play all, Speak Up, the profanity test, and speaker labels. But the spec labels bullet still says Jane for all; it needs updating to per-episode names and to no labels in the repeat section and on guide lines.
+- The latest changes (per-episode names, repeat exclusion, Guide exclusion) are NOT yet in an APK or installed on the phone. The final report is pending.
+</analysis>
+
+<summary>
+1. Primary Request and Intent:
+   - **Album ⑥ "Speak Up" (항의와 언쟁):** the user approved the script with "이대로 만들어". It is now voiced, built, registered and installed (first install).
+   - **Figma shadowing covers:** apply the covers the user made in Figma to the app ("피그마에 쉐도우용 앨범커버만들어둠. 같이 앱에 적용해"). Done.
+   - **Play all:** add Play all at the right end of each home section header. It plays all tracks of that section in order. Done.
+   - **Speaker labels in shadowing lyrics:** show who is speaking (e.g. "Jane : …", "Me : …").
+     - Follow-up: partner names are mine to choose per character ("나 말고 다른 캐릭터들").
+     - Follow-up: no speaker label in the "이제 따라해보세요" (repeat) part.
+   - **Standing constraints:**
+     - Reply in Korean 해요체.
+     - Paid API: disclose cost and get consent first, and never re-call a generation that has started.
+     - Record decisions and changes in `docs/superpowers/specs/2026-11-07-story-audio-english-design.md` and search for old wording.
+     - Never commit `signing/`. Commit only when asked; nothing is committed yet.
+     - Use Lucide for icons and keep existing designs.
+     - Review scripts before making voices.
+   - **Earlier pending:** the user hasn't said whether the profanity test audio sounds clear. The profanity album ⑦ comes later. Rule: no slurs (racial, gender or orientation).
+
+2. Key Technical Concepts:
+   - **ElevenLabs connector** (`mcp__67a9ac48…creative_generate_speech`):
+     - flow `jnVnLb7w5iKgPNv7CQXU`, model `eleven_v4`
+     - voices: A (male, "Me") `7EzWGsX10sAS4c9m9cPf`; B (female, Partner) `OYTbf65OHHFELVut7v2H`
+     - tags `[casual]`, `[annoyed]`, `[firm]`
+   - **Clip downloads** are delegated to a background agent that must not generate anything.
+   - **Figma:**
+     - MCP `mcp__d8583ef6…`: `use_figma` for reads, `download_assets` (png, scale 2) for exports.
+     - File key `31ndvuyn7Zkf4sScTUgvjq`, page 와이어프레임.
+     - Covers: cover_쉐도잉1 `285:2079`, 2 `285:2099`, 3 `285:2089`, 4 `285:2023`, 5 `285:2077`, 6 `285:2083`, 7 `285:2091`.
+   - **WebP conversion:** PIL, quality 80. Use Windows paths (`D:/...`) in Python, not `/d/...`.
+   - **Build:**
+     ```
+     cd spikes/episode-01; export PYTHONIOENCODING=utf-8
+     python build_shadowing.py speak-up N
+     python build_page.py; python build_pwa.py
+     ```
+   - **APK and install:**
+     ```
+     cd D:/project/learn-english/side-a && node scripts/copy-web.mjs && npx cap sync android && cd android && JAVA_HOME="C:/Program Files/Android/Android Studio/jbr" ./gradlew.bat assembleRelease -q && adb -s 192.168.35.135:46857 install -r app/build/outputs/apk/release/app-release.apk
+     ```
+     Launch with `adb shell am start -n com.seongbeom.sidea/.MainActivity`.
+   - **Browser preview:** `story-pwa` on port 8765 (serves `spikes/episode-01/web`). The service worker caches old builds, so unregister it and clear caches, then reload.
+
+3. Files and Code Sections:
+   - **`spikes/episode-01/app/template.html`** (main edits):
+     - SHADOWS entries now have new colors and covers:
+
+       | Album | Color | Cover |
+       |---|---|---|
+       | 스몰토크 | `#a50110` | sh1 |
+       | 하루 일과 | `#0c0c0c` | sh2 |
+       | 나를 소개하기 | `#013195` | sh3 |
+       | 사람 사이 기술 | `#e55317` | sh4 |
+       | 식당과 카페 | `#f02778` | sh5 |
+       | 항의와 언쟁 | `#4a0379` | sh6 |
+
+     - New entry: `{ name: '항의와 언쟁', en: 'Speak Up', mark: 'UP', about: 'Complain, push back, argue, and make up', c: '#4a0379', art: 'sh6', pats: [10 titles] }`.
+     - KO_TITLE gained the 10 Speak Up Korean titles (145 keys total).
+     - SHADOW_WHO, inserted before `/* 화의 한국어 제목.`:
+       ```
+       const SHADOW_WHO = {
+         '스몰토크': ['Sarah','Jessica','Rachel','Linda','Amy','Olivia','Rachel','Kate','Sophie','Jessica'],
+         '하루 일과': ['Amy','Lauren','Diane','Amy','Rachel','Megan','Megan','Mia','Jessica','Jessica'],
+         '나를 소개하기': ['Emma','Zoe','Lena','Grace','Jessica','Natalie','Ashley','Hannah','Sophie','Claire'],
+         '사람 사이 기술': ['Amy','Rachel','Megan','Jessica','Jessica','Laura','Olivia','Jessica','Sienna','Sienna'],
+         '식당과 카페': ['Zoe','Ivy','Tina','Tina','Tina','Rosa','Nicole','Nicole','Nicole','Jessica'],
+         '항의와 언쟁': ['Brittany','Kelsey','Paula','Tiffany','Vanessa','Erin','Chloe','Chloe','Chloe','Chloe'] };
+       ```
+     - In `lineHtml`, before the final return:
+       ```
+       if (albumOf(E.course).shadow && (l.speaker === 'Me' || l.speaker === 'Partner') && l.section !== 'repeat') t = `<span class="who">${l.speaker === 'Me' ? 'Me' : (SHADOW_WHO[E.course] || [])[E.n - 1] || 'Partner'}:</span> ${t}`;
+       ```
+       CSS: `.ln .who { opacity: .6 }`.
+     - Play all CSS:
+       ```
+       .shelf-h { display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding-bottom:12px }
+       .shelf h2 { font: var(--t-title); letter-spacing: -.02em }
+       .play-all { font: var(--t-head); color: rgb(255 255 255 / .7); padding: 6px 0 6px 12px; margin-block: -6px }
+       ```
+     - `renderHome` header: `<div class="shelf-h"><h2>${title}</h2>${secList(list).length ? <button class="play-all" data-playall="${SHELVES.findIndex(x => x[1] === list)}">Play all</button> : ''}</div>`.
+     - Queue logic replaced sibs:
+       ```
+       const inAlbum = name => SCRIPTS.map((e,i)=>i).filter(i => has(i) && SCRIPTS[i].course === name).sort((a,b)=> SCRIPTS[a].n - SCRIPTS[b].n || !!SCRIPTS[a].alt - !!SCRIPTS[b].alt);
+       let secQ = null;
+       const secList = list => list.flatMap(al => inAlbum(al.name).filter(i => !SCRIPTS[i].alt));
+       const sibs = () => secQ && secQ.includes(cur) ? secQ : inAlbum(E.course);
+       ```
+     - Click handler: `[data-playall]` sets `secQ = secList(SHELVES[k][1])` and calls `startEp(secQ[0])`. Tapping a track outside the queue sets `secQ = null`. albumPlay clears secQ unless the same album is already playing.
+   - **`spikes/episode-01/build_shadowing.py`:**
+     ```
+     TAG = {..., "eating-out": "s5", "speak-up": "s6"}
+     ```
+   - **`spikes/episode-01/build_page.py`:** the shadows dict now includes `"speak-up": "항의와 언쟁"`. Covers glob `app/cover-*.webp`.
+   - **`spikes/episode-01/app/cover-sh1..6.webp`** are new files (6–8 KB each). The 7th export (s7, green) is in `E:/Temp/claude/12f846cde673f19c/c746a846-390f-44b9-a261-a4d6c9c43e7d/scratchpad/covers/sh7.webp`, kept for the profanity album.
+   - **`spikes/episode-01/audio/shadowing/speak-up/ep01..10/`:** clips d1–d7 plus g1/g2, and s6-NN.webm with timeline.json. Timeline speakers are "Partner", "Me" and "Guide". Sections are talk, repeat and replay.
+   - **Spec `docs/superpowers/specs/2026-11-07-story-audio-english-design.md`:**
+     - Old "(표지 글자 ME/YOU/EAT…)" mentions were marked 옛, now Figma covers.
+     - Added bullets after "이것으로 첫 앨범 5개가 모두 나왔다.":
+       - 쉐도잉 앨범 커버
+       - 홈 섹션 Play all
+       - 항의와 언쟁(Speak Up) 10화 완성 (2,919 credits, 1:24–1:44 per track, ~16 min, s6, cover_쉐도잉6 #4a0379)
+       - 욕 음성 시험 (355 credits)
+       - 쉐도잉 가사에 말하는 사람
+     - The last bullet is OUTDATED: it says Jane for every album. It must change to per-episode names (SHADOW_WHO) and say labels are not shown in the repeat section or on Guide lines.
+
+4. Errors and fixes:
+   - **WebP save path:** PIL failed with FileNotFoundError on `/d/...` paths. Fixed by using `D:/...`.
+   - **Stale browser build:** the preview showed the old build from the service worker cache. Fixed by unregistering it and clearing caches.
+   - **innerText empty:** JS checks on hidden views returned empty `innerText`. Used `textContent` instead.
+   - **Guide line labeled:** "One more time." got a partner name. Fixed by labeling only the Me and Partner speakers.
+   - **User feedback:** names should be my own choices per character, not Jane for all. The repeat section should have no labels.
+
+5. Problem Solving:
+   - Play all was verified in the browser: Shadowing has 50 queued tracks, and ep10 of 스몰토크 is followed by 하루 일과 1.
+   - Labels were verified: Emma for About Me ep1 and Chloe for Speak Up ep7. The repeat section and Guide lines have no label.
+
+6. All user messages:
+   - "이대로 만들어" (Speak Up script approval, before this segment)
+   - "그리고 피그마에 쉐도우용 앨범커버만들어둠. 같이 앱에 적용해"
+   - "그리고 각 홈 각 섹션 우측 끝에 Play all 넣어줘, 그럼 이걸 누르면 해당 섹션의 트랙을 전부 순차적으로 듣는 기능이되는거야."
+   - "아 그리고 쉐도잉에서 대화예제에서 내가 보는 화면에는 화자가 누군지는 적어줘 Jane : 어쩌고 저쩌고 Me : 어쩌고 저쩌고 이렇게"
+   - "이름은 니가 정한 이름으로 넣어 나 말고 다른 캐릭터들"
+   - "이제 따라해보세요 는 화자 표시 필요없어"
+
+7. Pending Tasks:
+   1. Rebuild the APK with the latest template (per-episode names, no labels in repeat or on Guide lines) and install it on the phone. The web/PWA build is already up to date.
+   2. Update the spec's speaker-label bullet: names per episode from SHADOW_WHO, chosen by me (`작성자 판단`), with no labels in the repeat section or on Guide lines. Replace the Jane wording.
+   3. Report to the user in Korean:
+      - Speak Up is done (2,919 credits, ~16 min).
+      - Figma covers are applied; cover 7 (green) is reserved for the profanity album.
+      - Play all is added.
+      - Speaker labels are added, with the names chosen.
+   4. Call `wrap_up`.
+   5. Later: the profanity album ⑦, after the user confirms the test audio. Don't commit unless asked.
+
+8. Current Work:
+   - Just finished the user's latest request: "이제 따라해보세요 는 화자 표시 필요없어". The template condition now excludes `l.section === 'repeat'` and labels only the 'Me' and 'Partner' speakers. Ran build_page and build_pwa (148 audio).
+   - The browser check of Speak Up ep7 showed: "Chloe: Sorry, I can't make it tonight.", "Me: Seriously? You always do this.", …, "Now, repeat after me.", "One more time." (no label), and replay lines labeled.
+   - The phone still has the earlier APK, which uses Jane labels everywhere.
+
+9. Optional Next Step:
+   - Rebuild and install the APK so the phone has the per-episode names and no labels in the repeat part:
+     ```
+     cd D:/project/learn-english/side-a && node scripts/copy-web.mjs && npx cap sync android && cd android && JAVA_HOME="C:/Program Files/Android/Android Studio/jbr" ./gradlew.bat assembleRelease -q && adb -s 192.168.35.135:46857 install -r app/build/outputs/apk/release/app-release.apk
+     ```
+   - Then fix the spec's "쉐도잉 가사에 말하는 사람" bullet to match "이름은 니가 정한 이름으로 넣어 나 말고 다른 캐릭터들" and "이제 따라해보세요 는 화자 표시 필요없어".
+   - Then send the wrap_up and the Korean report.
+</summary>
