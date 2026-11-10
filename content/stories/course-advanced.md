@@ -1,6 +1,6 @@
 # 고급
 
-기준 문서는 `docs/superpowers/specs/2026-11-07-story-audio-english-design.md`의 "예문 방향과 단어 고르기"와 "심화와 고급의 짜임"이다. 짜임은 초급과 같고, 예문은 12단어 안팎으로 because나 if 등으로 두 문장을 잇는다. 대본은 음성을 만들기 전에 글로 먼저 검수한다.
+기준 문서는 `docs/superpowers/specs/side-a-rules.md`의 "예문 방향과 단어 고르기"와 `docs/superpowers/specs/side-a-courses.md`의 "한 화의 짜임"이다. 짜임은 초급과 같고, 예문은 12단어 안팎으로 because나 if 등으로 두 문장을 잇는다. 대본은 음성을 만들기 전에 글로 먼저 검수한다.
 
 ---
 

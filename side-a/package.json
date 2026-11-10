@@ -12,6 +12,7 @@
     "@capacitor/android": "^8.6.0",
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.6.0",
+    "@capacitor/network": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.2",
     "@capgo/capacitor-media-session": "^8.1.8"
   },

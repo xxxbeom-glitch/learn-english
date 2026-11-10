@@ -1,6 +1,6 @@
 # 시즌 1 · 1화 지하철에서 길을 잃다 (시험 제작)
 
-버리는 시험판이다. 기준 문서는 `docs/superpowers/specs/2026-11-07-story-audio-english-design.md`.
+버리는 시험판이다. 기준 문서는 옛 설계 전문 `docs/superpowers/specs/archive/2026-11-07-story-audio-english-design-snapshot-2026-11-10.md`.
 
 익힐 문장 3개: `Where are you going?` / `Let me help you.` / `You're all set.`
 중심 감정: 당황, 용기, 수줍음

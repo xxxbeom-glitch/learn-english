@@ -7,7 +7,7 @@
 @font-face { font-family: "Pretendard"; src: url("PretendardVariable.woff2") format("woff2-variations"), url("PretendardVariable.woff2") format("woff2"); font-weight: 45 920; font-display: swap }
 /* 가사 영어 줄: Outfit Bold (2026-11-10 성범 요청, Google Fonts 라틴 글자만 받아 앱에 넣음. 같은 날 Redaction 20을 먼저 써 봤다). 한글은 Pretendard로 이어진다 */
 @font-face { font-family: "Outfit"; src: url("Outfit-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD }
-/* Side A. 화면은 Figma 'EN-AudioBook' 시안(2026-11-09 디자인 개편)을 따른다. 기준 문서: 설계 문서 7장 'Figma 디자인 개편'.
+/* Side A. 화면은 Figma 'EN-AudioBook' 시안(2026-11-09 디자인 개편)을 따른다. 기준 문서: docs/superpowers/specs/side-a-app-screens.md.
    글자 단계, 색, 4px 간격, 모서리 기준은 아래 변수만 쓴다. 화면 글자는 한국어 해설과 한국어 해석 줄만 한국어, 나머지는 영어다. */
 :root {
   --bg: #121212; --raise: #1d1d1d; --sheet: #242424; --ink: #fff; --muted: #a7a7a7; --faint: #6a6a6a; --danger: #ff453a;
@@ -244,6 +244,8 @@ body.textonly .ln { opacity: .75 }
 .ln.prompt .ln-go, .ln.answer .ln-go { text-align: right }
 /* 말해보기 멈춤 줄(마이크, 안내, 흐르는 막대)은 2026-11-10 성범 요청으로 화면에서 뺐다. 멈추는 동안은 앞 줄(한국어 문제)이 밝게 남는다 */
 .ln.pause { display: none }
+/* 단어 오디오북: 단어 하나(단어, 뜻, 예문, 반복)가 한 묶음으로 보이게 묶음 사이만 넓힌다(2026-11-10 성범 요청 "딱 구분이 되면 좋겠어". 선은 넣지 않는다) */
+.ln.word:not(.gap) { margin-top: 56px }
 
 /* 바텀시트(더보기, 취침 타이머, 트랙리스트, 가사 글자 크기): 한 번에 하나, 다음 시트는 앞 시트가 내려간 뒤 올라온다 */
 .scrim { position: fixed; z-index: 30; inset: 0; background: rgb(0 0 0 / .5); opacity: 0; pointer-events: none; transition: opacity .25s }
@@ -444,6 +446,12 @@ const SHADOWS = [
   { name: '항의와 언쟁', en: 'Speak Up', mark: 'UP', about: 'Complain, push back, argue, and make up', c: '#4a0379', art: 'sh6', pats: ['Excuse Me, I Was Here First', 'Can You Keep It Down?', 'You Charged Me Twice', "I'd Like to Speak to the Manager", "Don't Talk to Me Like That", "That's Not What I Said", 'You Always Do This', "Let's Not Fight", 'I Was Hurt', 'Are We Good?'] },
   { name: '현지인처럼 욕하기', en: 'Swear Like a Local', mark: 'WTF', about: 'Real swearing between friends: surprise, anger, hype, and teasing', c: '#055120', art: 'sh7', pats: ['Holy Shit', 'What the Hell?', "Damn, That's Good", 'Are You Fucking Kidding Me?', 'This Is Bullshit', 'Screw It', 'Shut Up! No Way', 'So Fucking Tired', "I'm So Pissed", "Don't Be a Dick"] },
 ];
+/* 단어 오디오북(2026-11-10): 많이 쓰는 순서로 500단어씩 앨범 하나, 한 화에 단어 20개. 가사에 한글 뜻을 함께 보이고 끌 수 있다(pod).
+   이름(name)은 build_page.py와 대본(content/stories/words-NN.md)을 잇는 열쇠다 */
+/* 2026-11-10 성범 요청으로 Words는 일단 앱에서 뺐다(빈 선반은 홈에 안 보인다). 다시 넣으려면 아래 줄의 주석을 풀고 build_page.py의 WORDS_IN_APP을 True로 */
+const WORDS = [
+  // { name: '단어 1', en: 'Words 1', mark: 'W1', about: 'The everyday words you hear most, 20 at a time', c: '#1d5c63', pats: ['Morning Routine'] },
+];
 /* 쉐도잉 상대(B, 여자 목소리)의 이름. 화마다 상황에 맞게 정했고, 같은 사람이 이어 나오면 같은 이름이다(2026-11-10 성범 요청, 이름은 작성자 판단) */
 const SHADOW_WHO = {
   '스몰토크': ['Sarah', 'Jessica', 'Rachel', 'Linda', 'Amy', 'Olivia', 'Rachel', 'Kate', 'Sophie', 'Jessica'],
@@ -454,13 +462,13 @@ const SHADOW_WHO = {
   '항의와 언쟁': ['Brittany', 'Kelsey', 'Paula', 'Tiffany', 'Vanessa', 'Erin', 'Chloe', 'Chloe', 'Chloe', 'Chloe'],
   '현지인처럼 욕하기': ['Kayla', 'Brooke', 'Kayla', 'Brooke', 'Kayla', 'Brooke', 'Kayla', 'Kayla', 'Brooke', 'Kayla'] };
 /* 화의 한국어 제목. 앨범 화면 트랙 목록에서만 영어 제목 아래 캡션으로 보인다(2026-11-09 사용자 요청) */
-const KO_TITLE = {"I'm / I'm not ~": "나에 대해 말하기", "I'm ~ing": "지금 하는 일 말하기", "I'm from ~": "어디 출신인지 말하기", "I'm good at ~": "잘하는 것 말하기", "I like / don't like ~": "좋아하는 것, 싫어하는 것", "I have / don't have ~": "있는 것, 없는 것", "I want / want to ~": "갖고 싶은 것, 하고 싶은 것", "Are you ~?": "상대에 대해 묻기", "Are you ~ing?": "지금 뭐 하는지 묻기", "Do you ~?": "평소에 하는 일 묻기", "Is it ~?": "어떤지 묻기", "Do you like ~?": "좋아하는지 묻기", "Do you have ~?": "있는지 묻기", "Is there ~?": "그곳에 있는지 묻기", "Do you know ~?": "아는지 묻기", "Do you want (to) ~?": "권하고 같이 하자고 하기", "What's ~?": "무엇인지 묻기", "That's ~": "듣고 반응하기", "Where is ~?": "어디 있는지 묻기", "Who is ~?": "누구인지 묻기", "What do you ~?": "무엇을 하는지 묻기", "Where do you ~?": "어디서 하는지 묻기", "How's ~?": "요즘 어떤지 묻기", "Did you ~?": "했는지 묻기", "How was ~?": "어땠는지 묻기", "I was / wasn't ~": "지난 상태 말하기", "Were you ~?": "지난 상태 묻기", "I went to ~": "다녀온 곳 말하기", "I ~ed / didn't ~": "한 일, 안 한 일", "What did you ~?": "무엇을 했는지 묻기", "Why did you ~?": "왜 했는지 묻기", "Where / When did you ~?": "어디서, 언제 했는지 묻기", "Have you ever ~? / I've never ~": "해 본 적 있는지", "What kind of ~?": "어떤 종류인지 묻기", "When is / do you ~?": "언제인지 묻기", "Why are / do you ~?": "왜 그런지 묻기", "How much / long / many ~?": "얼마나인지 묻기", "How do you ~?": "어떻게 하는지 묻기", "I'm going to ~": "할 계획 말하기", "Are you going to ~?": "할 계획 묻기", "I'll ~": "그 자리에서 정한 일", "Let's ~": "같이 하자고 하기", "How about ~?": "제안하기", "Why don't we ~?": "부드럽게 제안하기", "Can / Could you ~?": "부탁하기", "Can I ~?": "해도 되는지 묻기", "I'm looking for ~": "찾는 것 말하기", "I'd like to ~ / Would you like ~?": "정중하게 말하고 권하기", "Do you want me to ~?": "해 줄지 묻기", "Don't ~": "하지 말라고 하기", "I think / don't think ~": "내 생각 말하기", "Do you think ~?": "상대 생각 묻기", "I feel / feel like ~": "기분과 느낌 말하기", "Are you into ~?": "빠져 있는지 묻기", "I can / can't ~": "할 수 있는 것, 없는 것", "I have to / don't have to ~": "해야 하는 일", "You should / shouldn't ~": "조언하기", "It looks / sounds ~": "보이는 것, 들리는 것", "I hope ~": "바라는 것 말하기", "I'm sure / not sure ~": "확실한지 말하기", "I'm worried about ~": "걱정 말하기", "I'm sorry for ~": "사과하기", "and / but": "그리고, 하지만", "because": "왜냐하면", "so": "그래서", "when": "~할 때", "if": "만약 ~하면", "before / after": "전에, 후에", "I used to ~": "예전에 하던 일", "I'm about to ~": "막 하려는 일", "It depends on ~": "~에 따라 달라요", "I don't know what ~": "모르는 것 말하기", "Drake vs Kendrick": "드레이크와 켄드릭의 디스전", "Young Thug and the YSL Trial": "래퍼 영떡의 YSL 갱단 재판", "How It Started": "불씨는 2013년에 붙었다", "The Songs": "곡으로 주고받은 펀치", "The Tea": "소송까지 간 무대 밖 이야기", "Who Won": "차트, 그래미, 그리고 슈퍼볼", "The Arrest": "28명이 한꺼번에 기소된 날", "The Longest Trial": "조지아 역사상 가장 긴 재판", "Gunna": "먼저 걸어 나간 한 사람", "The Plea": "아무도 예상 못 한 유죄 인정", "Day One": "스물둘, 처음 혼자 떠난 서울", "Day Two": "노트북을 두고 가도 괜찮은 도시", "Day Three": "비 오는 아침, 팬미팅 가는 길", "Day Four": "새벽부터 줄 선 음악방송", "Day Five": "광장시장에서 보낸 마지막 날", "How's It Going?": "아는 사람과 가볍게 인사", "Long Time No See": "오랜만에 만난 친구", "How Was Your Weekend?": "주말 얘기", "Crazy Weather": "날씨로 말 꺼내기", "Busy Week": "요즘 바쁘다는 얘기", "What Are You Into?": "요즘 빠진 것", "Any Plans?": "계획 묻기", "Stuck in Line": "줄 서다 나누는 짧은 대화", "Which Way?": "외국인에게 길 알려 주기", "I Should Get Going": "대화 마무리하기", "Early Bird": "몇 시에 일어나는지", "Gym Before Work": "출근 전 운동", "Running Late": "늦는다고 연락하기", "Coffee First": "출근해서 일 시작 전", "Lunch Break": "점심 메뉴 정하기", "Swamped": "일이 밀려 바쁠 때", "Calling It a Day": "퇴근 인사", "What's for Dinner?": "저녁 뭐 먹을지", "Laundry Day": "집안일로 약속 미루기", "Lights Out": "이제 자러 갈게요", "Nice to Meet You": "처음 만나 인사하기", "How Do You Spell That?": "이름 철자 알려 주기", "Where Are You From?": "어디서 왔는지 말하기", "What Do You Do?": "하는 일 말하기", "How's Work?": "회사 생활 얘기하기", "In My Free Time": "쉬는 날 하는 것", "My Kind of Music": "좋아하는 음악", "I'm a Foodie": "좋아하는 음식", "My Family": "가족 얘기", "Tell Me About Yourself": "짧게 자기소개하기", "Nice Shoes!": "가볍게 칭찬하기", "You Nailed It": "동료 칭찬하기", "I'll Pass Tonight": "2차 정중하게 거절하기", "I Wish I Could": "부탁 거절하기", "My Bad": "늦어서 사과하기", "I'm So Sorry": "실수했을 때 사과하기", "I See Your Point": "부드럽게 반대하기", "Agree to Disagree": "의견이 다를 때", "Is This Seat Taken?": "마음에 드는 사람에게 말 걸기", "Can I Get Your Number?": "번호 묻기", "Light Ice, Please": "스타벅스 얼음 적게", "Oat Milk Instead": "스타벅스 우유 바꾸기", "Make It a Meal": "맥도날드 세트 주문", "No Pickles": "맥도날드 피클 빼기", "For Here or To Go?": "포장 주문하기", "Footlong, Toasted": "서브웨이 주문하기", "Table for Two": "자리 안내 받기", "This Isn't What I Ordered": "주문이 잘못 나왔을 때", "Check, Please": "계산하기", "It's on Me": "친구에게 한턱내기", "Excuse Me, I Was Here First": "새치기당했을 때", "Can You Keep It Down?": "시끄러운 옆집", "You Charged Me Twice": "결제가 두 번 됐을 때", "I'd Like to Speak to the Manager": "매니저 부르기", "Don't Talk to Me Like That": "무례한 말투에 선 긋기", "That's Not What I Said": "내 말을 왜곡할 때", "You Always Do This": "또 약속을 깬 친구", "Let's Not Fight": "말싸움 멈추기", "I Was Hurt": "서운했던 점 말하기", "Are We Good?": "화해하기", "Holy Shit": "깜짝 놀랐을 때", "What the Hell?": "황당할 때", "Damn, That's Good": "좋은 걸 보고 감탄할 때", "Are You Fucking Kidding Me?": "어이없을 때", "This Is Bullshit": "부당하다고 느낄 때", "Screw It": "될 대로 되라 할 때", "Shut Up! No Way": "믿기지 않는 좋은 소식", "So Fucking Tired": "말에 힘을 줄 때", "I'm So Pissed": "화난 이유 털어놓기", "Don't Be a Dick": "친구끼리 놀릴 때"};
+const KO_TITLE = {"I'm / I'm not ~": "나에 대해 말하기", "I'm ~ing": "지금 하는 일 말하기", "I'm from ~": "어디 출신인지 말하기", "I'm good at ~": "잘하는 것 말하기", "I like / don't like ~": "좋아하는 것, 싫어하는 것", "I have / don't have ~": "있는 것, 없는 것", "I want / want to ~": "갖고 싶은 것, 하고 싶은 것", "Are you ~?": "상대에 대해 묻기", "Are you ~ing?": "지금 뭐 하는지 묻기", "Do you ~?": "평소에 하는 일 묻기", "Is it ~?": "어떤지 묻기", "Do you like ~?": "좋아하는지 묻기", "Do you have ~?": "있는지 묻기", "Is there ~?": "그곳에 있는지 묻기", "Do you know ~?": "아는지 묻기", "Do you want (to) ~?": "권하고 같이 하자고 하기", "What's ~?": "무엇인지 묻기", "That's ~": "듣고 반응하기", "Where is ~?": "어디 있는지 묻기", "Who is ~?": "누구인지 묻기", "What do you ~?": "무엇을 하는지 묻기", "Where do you ~?": "어디서 하는지 묻기", "How's ~?": "요즘 어떤지 묻기", "Did you ~?": "했는지 묻기", "How was ~?": "어땠는지 묻기", "I was / wasn't ~": "지난 상태 말하기", "Were you ~?": "지난 상태 묻기", "I went to ~": "다녀온 곳 말하기", "I ~ed / didn't ~": "한 일, 안 한 일", "What did you ~?": "무엇을 했는지 묻기", "Why did you ~?": "왜 했는지 묻기", "Where / When did you ~?": "어디서, 언제 했는지 묻기", "Have you ever ~? / I've never ~": "해 본 적 있는지", "What kind of ~?": "어떤 종류인지 묻기", "When is / do you ~?": "언제인지 묻기", "Why are / do you ~?": "왜 그런지 묻기", "How much / long / many ~?": "얼마나인지 묻기", "How do you ~?": "어떻게 하는지 묻기", "I'm going to ~": "할 계획 말하기", "Are you going to ~?": "할 계획 묻기", "I'll ~": "그 자리에서 정한 일", "Let's ~": "같이 하자고 하기", "How about ~?": "제안하기", "Why don't we ~?": "부드럽게 제안하기", "Can / Could you ~?": "부탁하기", "Can I ~?": "해도 되는지 묻기", "I'm looking for ~": "찾는 것 말하기", "I'd like to ~ / Would you like ~?": "정중하게 말하고 권하기", "Do you want me to ~?": "해 줄지 묻기", "Don't ~": "하지 말라고 하기", "I think / don't think ~": "내 생각 말하기", "Do you think ~?": "상대 생각 묻기", "I feel / feel like ~": "기분과 느낌 말하기", "Are you into ~?": "빠져 있는지 묻기", "I can / can't ~": "할 수 있는 것, 없는 것", "I have to / don't have to ~": "해야 하는 일", "You should / shouldn't ~": "조언하기", "It looks / sounds ~": "보이는 것, 들리는 것", "I hope ~": "바라는 것 말하기", "I'm sure / not sure ~": "확실한지 말하기", "I'm worried about ~": "걱정 말하기", "I'm sorry for ~": "사과하기", "and / but": "그리고, 하지만", "because": "왜냐하면", "so": "그래서", "when": "~할 때", "if": "만약 ~하면", "before / after": "전에, 후에", "I used to ~": "예전에 하던 일", "I'm about to ~": "막 하려는 일", "It depends on ~": "~에 따라 달라요", "I don't know what ~": "모르는 것 말하기", "Drake vs Kendrick": "드레이크와 켄드릭의 디스전", "Young Thug and the YSL Trial": "래퍼 영떡의 YSL 갱단 재판", "How It Started": "불씨는 2013년에 붙었다", "The Songs": "곡으로 주고받은 펀치", "The Tea": "소송까지 간 무대 밖 이야기", "Who Won": "차트, 그래미, 그리고 슈퍼볼", "The Arrest": "28명이 한꺼번에 기소된 날", "The Longest Trial": "조지아 역사상 가장 긴 재판", "Gunna": "먼저 걸어 나간 한 사람", "The Plea": "아무도 예상 못 한 유죄 인정", "Day One": "스물둘, 처음 혼자 떠난 서울", "Day Two": "노트북을 두고 가도 괜찮은 도시", "Day Three": "비 오는 아침, 팬미팅 가는 길", "Day Four": "새벽부터 줄 선 음악방송", "Day Five": "광장시장에서 보낸 마지막 날", "How's It Going?": "아는 사람과 가볍게 인사", "Long Time No See": "오랜만에 만난 친구", "How Was Your Weekend?": "주말 얘기", "Crazy Weather": "날씨로 말 꺼내기", "Busy Week": "요즘 바쁘다는 얘기", "What Are You Into?": "요즘 빠진 것", "Any Plans?": "계획 묻기", "Stuck in Line": "줄 서다 나누는 짧은 대화", "Which Way?": "외국인에게 길 알려 주기", "I Should Get Going": "대화 마무리하기", "Early Bird": "몇 시에 일어나는지", "Gym Before Work": "출근 전 운동", "Running Late": "늦는다고 연락하기", "Coffee First": "출근해서 일 시작 전", "Lunch Break": "점심 메뉴 정하기", "Swamped": "일이 밀려 바쁠 때", "Calling It a Day": "퇴근 인사", "What's for Dinner?": "저녁 뭐 먹을지", "Laundry Day": "집안일로 약속 미루기", "Lights Out": "이제 자러 갈게요", "Nice to Meet You": "처음 만나 인사하기", "How Do You Spell That?": "이름 철자 알려 주기", "Where Are You From?": "어디서 왔는지 말하기", "What Do You Do?": "하는 일 말하기", "How's Work?": "회사 생활 얘기하기", "In My Free Time": "쉬는 날 하는 것", "My Kind of Music": "좋아하는 음악", "I'm a Foodie": "좋아하는 음식", "My Family": "가족 얘기", "Tell Me About Yourself": "짧게 자기소개하기", "Nice Shoes!": "가볍게 칭찬하기", "You Nailed It": "동료 칭찬하기", "I'll Pass Tonight": "2차 정중하게 거절하기", "I Wish I Could": "부탁 거절하기", "My Bad": "늦어서 사과하기", "I'm So Sorry": "실수했을 때 사과하기", "I See Your Point": "부드럽게 반대하기", "Agree to Disagree": "의견이 다를 때", "Is This Seat Taken?": "마음에 드는 사람에게 말 걸기", "Can I Get Your Number?": "번호 묻기", "Light Ice, Please": "스타벅스 얼음 적게", "Oat Milk Instead": "스타벅스 우유 바꾸기", "Make It a Meal": "맥도날드 세트 주문", "No Pickles": "맥도날드 피클 빼기", "For Here or To Go?": "포장 주문하기", "Footlong, Toasted": "서브웨이 주문하기", "Table for Two": "자리 안내 받기", "This Isn't What I Ordered": "주문이 잘못 나왔을 때", "Check, Please": "계산하기", "It's on Me": "친구에게 한턱내기", "Excuse Me, I Was Here First": "새치기당했을 때", "Can You Keep It Down?": "시끄러운 옆집", "You Charged Me Twice": "결제가 두 번 됐을 때", "I'd Like to Speak to the Manager": "매니저 부르기", "Don't Talk to Me Like That": "무례한 말투에 선 긋기", "That's Not What I Said": "내 말을 왜곡할 때", "You Always Do This": "또 약속을 깬 친구", "Let's Not Fight": "말싸움 멈추기", "I Was Hurt": "서운했던 점 말하기", "Are We Good?": "화해하기", "Holy Shit": "깜짝 놀랐을 때", "What the Hell?": "황당할 때", "Damn, That's Good": "좋은 걸 보고 감탄할 때", "Are You Fucking Kidding Me?": "어이없을 때", "This Is Bullshit": "부당하다고 느낄 때", "Screw It": "될 대로 되라 할 때", "Shut Up! No Way": "믿기지 않는 좋은 소식", "So Fucking Tired": "말에 힘을 줄 때", "I'm So Pissed": "화난 이유 털어놓기", "Don't Be a Dick": "친구끼리 놀릴 때", "Morning Routine": "아침 일과"};
 /* 목차 묶음의 영어 이름. 앨범 화면 트랙 목록에서만 묶음 머리에 작게 보인다(2026-11-09 사용자 요청) */
 const GROUP_EN = { '내 얘기': 'About me', '상대에게 묻기': 'Asking others', '자세히 묻기': 'Asking for details', '지난 일': 'The past', '더 자세히 묻기': 'More questions', '앞일, 제안, 부탁': 'Plans, offers and requests', '생각, 감정, 조언': 'Thoughts, feelings and advice', '문장 잇기': 'Linking sentences', '자연스러운 말': 'Natural phrases' };
 const ALBUMS = [...TOC.map(([name, en, about, groups]) => ({ name, en, about, c: COLOR[name][0], art: COLOR[name][1], pats: groups.flatMap(g => g[1]).filter(x => x !== '나중에 정해요'),
   groups: groups.map(([g, ps]) => [GROUP_EN[g] || g, ps.filter(x => x !== '나중에 정해요').length]).filter(g => g[1]) })),
-  ...PODCASTS.map(p => ({ ...p, pod: true })), ...SHADOWS.map(p => ({ ...p, pod: true, shadow: true }))];
-const SHELVES = [['Basic Expressions', ALBUMS.slice(0, TOC.length)], ['Podcasts', ALBUMS.filter(a => a.pod && !a.shadow)], ['Shadowing', ALBUMS.filter(a => a.shadow)]];
+  ...PODCASTS.map(p => ({ ...p, pod: true })), ...SHADOWS.map(p => ({ ...p, pod: true, shadow: true })), ...WORDS.map(p => ({ ...p, pod: true, words: true }))];
+const SHELVES = [['Basic Expressions', ALBUMS.slice(0, TOC.length)], ['Podcasts', ALBUMS.filter(a => a.pod && !a.shadow && !a.words)], ['Shadowing', ALBUMS.filter(a => a.shadow)], ['Words', ALBUMS.filter(a => a.words)]];
 const albumOf = c => ALBUMS.find(x => x.name === c) || ALBUMS[0];
 const nameOf = al => al.en || al.name;
 /* 같은 앨범의 음성 있는 화. 다음 화 자동 재생과 이전, 다음 버튼은 앨범 안에서만 움직인다 */
@@ -604,7 +612,7 @@ function setBarColor(c) {
 
 /* 홈 */
 function renderHome() {
-  $('shelves').innerHTML = SHELVES.map(([title, list]) => `<section class="shelf"><div class="shelf-h"><h2>${title}</h2>${secList(list).length ? `<button class="play-all" data-playall="${SHELVES.findIndex(x => x[1] === list)}">Play all</button>` : ''}</div><ul class="rail">${list.map(al => {
+  $('shelves').innerHTML = SHELVES.filter(([, list]) => list.length).map(([title, list]) => `<section class="shelf"><div class="shelf-h"><h2>${title}</h2>${secList(list).length ? `<button class="play-all" data-playall="${SHELVES.findIndex(x => x[1] === list)}">Play all</button>` : ''}</div><ul class="rail">${list.map(al => {
     const k = ALBUMS.indexOf(al), made = madeIn(al);
     return `<li><button class="card ${made ? '' : 'soon'}" ${made ? `data-album="${k}"` : 'aria-disabled="true"'} aria-label="${esc(nameOf(al))}">${albumCover(al)}<span class="card-t"><b>${esc(nameOf(al))}</b><span>${made ? (al.show ? esc(al.show) : mins(totalIn(al))) : 'Coming soon'}</span></span></button></li>`;
   }).join('')}</ul></section>`).join('');
@@ -629,7 +637,7 @@ function trackRow(i, n, heads) {
   const tm = has(i) ? mmss(EPS[i].duration) : 'Script only';
   const k = heads && KO_TITLE[e.title];
   // 팟캐스트는 'EP1: How It Started'처럼 화 번호를 붙인다(2026-11-09 사용자 결정)
-  const t = albumOf(e.course).pod && !albumOf(e.course).shadow ? `EP${n}: ${e.title}` : e.title;
+  const t = albumOf(e.course).pod && !albumOf(e.course).shadow && !albumOf(e.course).words ? `EP${n}: ${e.title}` : e.title;
   const inner = `<span class="tt"><b>${esc(t)}</b>${k ? `<small>${esc(k)}</small>` : ''}</span><span class="tm">${tm}</span>`;
   return `<li class="trk ${on ? 'on' : ''}">${has(i) ? `<button class="trk-go" data-play="${i}" ${on ? 'aria-current="true"' : ''}>${inner}</button>` : `<div class="trk-go">${inner}</div>`}</li>`;
 }
@@ -661,11 +669,21 @@ function showRing() {
   b.setAttribute('aria-label', on ? `Downloading, ${Math.round(dl.p)}%. Tap to cancel` : 'Download album');
   $('dlP').style.strokeDashoffset = 100 - (on ? dl.p : 0);
 }
+/* 지금 모바일 데이터인지. 안드로이드 앱 WebView는 navigator.connection.type을 주지 않아 Wi-Fi only가 막지 못했다(2026-11-10 성범 제보).
+   앱에서는 @capacitor/network로 실제 연결 종류를 묻고, 브라우저에서만 navigator.connection을 쓴다 */
+async function onCellular() {
+  const C = window.Capacitor;
+  if (C && C.isNativePlatform && C.isNativePlatform() && C.isPluginAvailable('Network')) {
+    try { const s = await C.nativePromise('Network', 'getStatus', {}); return s.connectionType !== 'wifi' } catch { return true }
+  }
+  return !!(navigator.connection && navigator.connection.type === 'cellular');
+}
 async function albumDownload() {
   if (dl && dl.al === albumSel) { dl.ac.abort(); dl = null; showRing(); return toast('Download canceled.') }
   if (dl) return toast('Another album is downloading.');
   if (!self.caches) return toast("This browser can't save albums.");
-  if (S.wifi && navigator.connection && navigator.connection.type === 'cellular') return toast('Wi-Fi only is on. Connect to Wi-Fi to download.');
+  const WIFI_MSG = 'Wi-Fi only is on. Connect to Wi-Fi to download.';
+  if (S.wifi && await onCellular()) return toast(WIFI_MSG);
   const al = albumSel, list = dlList(ALBUMS[al]), ac = new AbortController(), me = { al, p: 0, ac };
   dl = me; showRing();
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist() } catch {}
@@ -675,6 +693,8 @@ async function albumDownload() {
     const worker = async () => {
       while (q.length) {
         const f = EPS[q.shift()].file, k = akey(f);
+        /* 받는 도중 와이파이가 끊겨 데이터로 바뀌어도 멈춘다 */
+        if (S.wifi && await onCellular()) throw Object.assign(new Error('cellular'), { name: 'WifiOnly' });
         if (!(await c.match(k))) { const r = await fetch(f, { signal: ac.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); await c.put(k, r) }
         n++; if (dl === me) { me.p = n / list.length * 100; showRing() }
       }
@@ -682,7 +702,8 @@ async function albumDownload() {
     await Promise.all([worker(), worker(), worker()]);
   } catch (e) {
     if (dl === me) { dl = null; showRing() }
-    if (e.name !== 'AbortError') toast("Couldn't download. Check your connection and try again.");
+    if (e.name === 'WifiOnly') { ac.abort(); toast(WIFI_MSG) }
+    else if (e.name !== 'AbortError') toast("Couldn't download. Check your connection and try again.");
     return;
   }
   if (dl !== me) return;
@@ -764,6 +785,9 @@ function lineHtml(l, i) {
   if (l.section === 'dialogue' || l.section === 'replay') E.keys.forEach(k => { const r = findPhrase(t, k, true); if (r) t = t.replace(r, '<mark>$&</mark>') });
   /* 쉐도잉은 줄 앞에 누가 말하는지 적는다: 나는 Me, 상대는 화마다 정한 이름(SHADOW_WHO). 따라 하기 부분(repeat)에는 붙이지 않는다. 2026-11-10 성범 요청 */
   if (albumOf(E.course).shadow && (l.speaker === 'Me' || l.speaker === 'Partner') && l.section !== 'repeat') t = `<span class="who">${l.speaker === 'Me' ? 'Me' : (SHADOW_WHO[E.course] || [])[E.n - 1] || 'Partner'}:</span> ${t}`;
+  /* 팟캐스트도 둘 이상이 대화하는 화(The Replay)는 쉐도잉과 같은 모양으로 화자 이름을 단다. 이름은 시간표의 speaker(대본의 **Mike:** 등) 그대로.
+     매디 혼자 말하는 Seoul, Actually에는 달지 않는다. 2026-11-10 성범 요청 */
+  else if (albumOf(E.course).pod && (E.cast || []).length > 1 && l.speaker) t = `<span class="who">${esc(l.speaker)}:</span> ${t}`;
   return wrap(l.kind, `<span class="en">${t}</span>${l.meaning ? `<span class="ko">${esc(l.meaning)}</span>` : ''}`, ` data-s="${l.section}"`);
 }
 function renderScript() {

@@ -1,6 +1,6 @@
 # 초급
 
-기준 문서는 `docs/superpowers/specs/2026-11-07-story-audio-english-design.md`다. 패턴 하나가 한 화다. 대본은 음성을 만들기 전에 글로 먼저 검수한다.
+기준 문서는 옛 설계 전문 `docs/superpowers/specs/archive/2026-11-07-story-audio-english-design-snapshot-2026-11-10.md`다. 패턴 하나가 한 화다. 대본은 음성을 만들기 전에 글로 먼저 검수한다.
 
 ---
 

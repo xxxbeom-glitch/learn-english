@@ -1,6 +1,6 @@
 # 시즌 1. Got a minute? Part 1 잡담
 
-기준 문서는 `docs/superpowers/specs/2026-11-07-story-audio-english-design.md`다. 대화의 기준은 `season-1-part-1-ko.md`이고, 이 파일은 그 한글 대본을 영어로 옮긴 것이다.
+기준 문서는 옛 설계 전문 `docs/superpowers/specs/archive/2026-11-07-story-audio-english-design-snapshot-2026-11-10.md`다. 대화의 기준은 `season-1-part-1-ko.md`이고, 이 파일은 그 한글 대본을 영어로 옮긴 것이다.
 
 **인물**
 - 성범: UIUX 디자이너, INTJ. 필요한 말만 하고 스몰토크를 어색해한다. 영어는 초보지만 건조한 농담을 한다.

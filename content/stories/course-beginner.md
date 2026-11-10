@@ -1,6 +1,6 @@
 # 초급
 
-기준 문서는 `docs/superpowers/specs/2026-11-07-story-audio-english-design.md`다. 패턴 하나가 한 화다. 대본은 음성을 만들기 전에 글로 먼저 검수한다.
+기준 문서는 `docs/superpowers/specs/side-a-courses.md`(코스)와 `docs/superpowers/specs/side-a-rules.md`(공통 규칙)다. 패턴 하나가 한 화다. 대본은 음성을 만들기 전에 글로 먼저 검수한다.
 
 2026-11-09에 짜임을 바꿨다. 성범의 하루 이야기와 대화를 빼고, 도입 → 예문 8개와 짧은 해설 → 정리 → 말해보기 순서로 간다. 예문 목소리는 남1, 여1, 남2, 여2가 돌아가며 맡는다. 이전 대본은 `archive/course-beginner-v1-story.md`에 있다.
 

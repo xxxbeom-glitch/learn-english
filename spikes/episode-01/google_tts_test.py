@@ -1,6 +1,6 @@
 """구글 Gemini TTS 시험 (2026-11-09). 1화 영어 문장 몇 개를 만들어 일레븐랩스 조각과 비교한다. 시험판 코드다.
 
-python google_tts_test.py MODEL  → audio/google-test/MODEL/<id>.mp3
+python google_tts_test.py MODEL  → audio/unused/google-test/MODEL/<id>.mp3
 키는 learn-english/.env의 GEMINI_API_KEY에서 읽고, 화면에 찍지 않는다.
 """
 import base64
@@ -31,7 +31,7 @@ def key():
 
 
 def main(model, only=None):
-    out = HERE / "audio" / "google-test" / (model + "-v2")
+    out = HERE / "audio" / "unused" / "google-test" / (model + "-v2")
     out.mkdir(parents=True, exist_ok=True)
     k = key()
     clips = {c["id"]: c for c in json.loads(CLIPS.read_text(encoding="utf-8"))}

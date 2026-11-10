@@ -84,7 +84,7 @@ def dur(p):
 
 # 비교용 판: 영어 조각만 다른 엔진으로 바꾼다. 한국어 해설 조각은 원래 것을 그대로 쓴다. (2026-11-09 성범 요청)
 # 판 이름: (조각 폴더, 바꿀 조각 id 머리글자). g는 영어만, gk는 한국어 해설까지 구글 Gemini 3.8 Flash TTS.
-GOOGLE = HERE / "audio" / "google-test" / "gemini-3.8-flash-tts-v2"
+GOOGLE = HERE / "audio" / "unused" / "google-test" / "gemini-3.8-flash-tts-v2"  # 구글 시험, 취소되어 unused로 옮김
 VARIANTS = {"g": (GOOGLE, ("e",)), "gk": (GOOGLE, ("e", "n"))}
 
 

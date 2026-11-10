@@ -4,7 +4,7 @@ python merge_replay.py
 
 대본과 녹음은 화마다 끊기는 것을 전제로 만들었다("Okay, we're back. Last time ..."). 그래서 2~4부 첫머리의
 다시 왔다는 말과 지난 이야기 요약, 앞 부 끝과 겹치는 질문을 잘라 내고 이어 붙인다. 새로 녹음하지 않는다.
-원본은 화마다 이어 붙인 MP3(uiux-study/sounds/album-0N-part-K.mp3)와 build_podcast.py가 만든 시간표
+원본은 화마다 이어 붙인 MP3(audio/podcast/masters/album-0N-part-K.mp3)와 build_podcast.py가 만든 시간표
 (audio/podcast/rN-0K.json)다. 결과는 rN-01.json, app/rN-01.webm 하나이고 rN-02~04는 지운다.
 한 번 합친 뒤 다시 돌리려면 시간표 원본(rN-0K.json)이 필요하므로, 합치기 전 원본을 audio/podcast/parts/에 옮겨 둔다.
 """
@@ -16,11 +16,11 @@ from pathlib import Path
 HERE = Path(__file__).parent
 POD = HERE / "audio" / "podcast"
 PARTS = POD / "parts"
-SRC = Path("D:/project/uiux-study/sounds")
+SRC = POD / "masters"  # 화마다 이어 붙인 원본 MP3 (2026-11-10 이 프로젝트 안으로 옮김)
 APP = HERE / "app"
 GAP = 0.4
 # 인트로 음악(2026-11-10 성범 요청): 힙합 비트를 앞에 깔고 인사가 시작되면 작게 줄였다가 페이드아웃한다
-MUSIC = SRC / "MUSCSmpl-playing_old_samples_-Elevenlabs.mp3"
+MUSIC = HERE / "audio" / "downloads" / "MUSCSmpl-playing_old_samples_-Elevenlabs.mp3"
 INTRO = 2.5   # 음악만 나오는 시간. 목소리와 시간표를 이만큼 뒤로 민다
 # 음악 파일이 6.7초라 금방 끝났다(2026-11-10 성범: 페이드아웃이 너무 빠르다). 비트를 반복해 깔고 FADE_AT초부터 FADE초 동안 줄인다
 FADE_AT, FADE = 11.0, 6.0

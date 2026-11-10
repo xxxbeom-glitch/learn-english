@@ -7,7 +7,7 @@
 
 사용: python build_podcast.py <조각 폴더 상위> <트랙 MP3 폴더> [앨범 번호, 기본 1]
   조각 폴더 상위 아래에 p1/, p2/ ... 가 있고 그 안에 01.mp3, 02.mp3 ... 가 있다.
-  트랙 MP3 폴더에는 album-01-part-1.mp3 ... 가 있다.
+  트랙 MP3 폴더에는 album-01-part-1.mp3 ... 가 있다. 지금 자리는 audio/podcast/masters/다(2026-11-10 옮김).
 """
 import json
 import re

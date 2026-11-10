@@ -1,7 +1,7 @@
 # The Replay — Part 1: How It Started
 
 앨범 1 드레이크 vs 켄드릭, 1부. 줄거리와 출처는 `album-01-drake-kendrick-outline.md`.
-상태: 검수 반영 글, 음성 완성(2026-11-09, uiux-study/sounds/album-01-part-N.mp3). 2026-11-09 사용자가 듣고 괜찮다고 했다.
+상태: 검수 반영 글, 음성 완성(2026-11-09, spikes/episode-01/audio/podcast/masters/album-01-part-N.mp3). 2026-11-09 사용자가 듣고 괜찮다고 했다.
 
 - Mike: 남자 사회자, E. 잘 놀라고 말이 많다.
 - Dana: 여자 힙합 기자, I. 짧고 건조하다.

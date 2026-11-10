@@ -1,6 +1,6 @@
 """해설자 목소리 고르기 (2026-11-09). 1화 도입 해설 한 덩어리를 구글 Gemini 목소리 몇 개로 읽혀 짧은 트랙 하나로 잇는다. 시험판 코드다.
 
-python voice_audition.py  → audio/google-test/narrator-audition/<목소리>.mp3, app/b1-01-voices.webm, 시간표 json
+python voice_audition.py  → audio/unused/google-test/narrator-audition/<목소리>.mp3, app/b1-01-voices.webm, 시간표 json
 성범 요청: 20대 중후반 여성 목소리. 지금 Sulafat은 너무 어려 보이고, 줄마다 억양이 달라 두 사람 같다.
 """
 import base64
@@ -13,7 +13,7 @@ from pathlib import Path
 from google_tts_test import key
 
 HERE = Path(__file__).parent
-OUT = HERE / "audio" / "google-test" / "narrator-audition"
+OUT = HERE / "audio" / "unused" / "google-test" / "narrator-audition"
 APP = HERE / "app"
 MODEL = "gemini-3.8-flash-tts"
 CLIP = json.loads((HERE / "audio" / "beginner2" / "ep01" / "clips.json").read_text(encoding="utf-8"))[0]

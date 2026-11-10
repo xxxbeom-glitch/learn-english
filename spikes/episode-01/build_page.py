@@ -193,6 +193,19 @@ def main():
             f = f"{SHADOW_TAG[album]}-{n:02d}.webm"
             tl.append(json.loads((d / "timeline.json").read_text(encoding="utf-8")) | {"file": f})
             shutil.copy(d / f, HERE / "app" / f)
+    # 단어 오디오북(build_words.py로 만든 화). 2026-11-10 Words 1의 1화를 처음 넣었다. 들은 기록 자리 번호가 밀리지 않게 쉐도잉 뒤, 맨 뒤에 붙인다.
+    # 앨범 이름(course)은 템플릿의 WORDS와 같아야 한다.
+    # 2026-11-10 성범 요청으로 Words는 일단 앱에서 뺐다. 다시 넣으려면 WORDS_IN_APP을 True로, 템플릿의 WORDS 목록도 되살린다.
+    WORDS_IN_APP = False
+    from build_words import script as words_script
+    for d in sorted((HERE / "audio" / "words").glob("ep[0-9][0-9]")) if WORDS_IN_APP else []:
+        if not (d / "timeline.json").exists():
+            continue
+        n = int(d.name[2:])
+        eps.append({"n": n, "title": words_script(n)["title"], "keys": [], "again": [], "notes": [], "sections": [], "kolines": [], "course": "단어 1"})
+        f = f"w1-{n:02d}.webm"
+        tl.append(json.loads((d / "timeline.json").read_text(encoding="utf-8")) | {"file": f})
+        shutil.copy(d / f, HERE / "app" / f)
     # 해설을 쓰기 전의 화는 대화만 대본에 넣는다.
     have = {e["n"] for e in eps if e["course"] == "초급"}
     for n, title, lines in parse_draft(DRAFT.read_text(encoding="utf-8")) if DRAFT.exists() else []:

@@ -1,7 +1,7 @@
 # 쉐도잉 앨범 1: Small Talk (초안, 2026-11-10)
 
 규칙: 들리는 소리는 모두 영어다. 한국어 뜻과 상황 설명은 가사 화면에만 둔다. 핵심 줄(★)은 2~3개이고, 대화 뒤에 "Now, repeat after me." 다음 줄마다 들려주기 → 멈춤 → 한 번 더 → 멈춤으로 따라 한다. 마지막에 대화 전체를 한 번 더 들려준다. 나 = A(남1), 상대 = B(여1). 한국어 뜻은 해요체.
-소리 (2026-11-10 성범 결정): 시작음은 `audio/raw/sfx-start-shadowing.mp3`(원본 uiux-study/sounds/UIMisc-Create_a_short_1.5_s-Elevenlabs.mp3). 따라 하기에서 한 줄을 마치고 다음 줄로 넘어갈 때 말해보기와 같은 클릭음 `sfx-next-soft.mp3`를 넣는다. 끝음은 넣지 않는다(성범 결정). 안내 소리는 "Now, repeat after me."와 "One more time." 두 개다.
+소리 (2026-11-10 성범 결정): 시작음은 `audio/raw/sfx-start-shadowing.mp3`(원본 `audio/downloads/UIMisc-Create_a_short_1.5_s-Elevenlabs.mp3`). 따라 하기에서 한 줄을 마치고 다음 줄로 넘어갈 때 말해보기와 같은 클릭음 `sfx-next-soft.mp3`를 넣는다. 끝음은 넣지 않는다(성범 결정). 안내 소리는 "Now, repeat after me."와 "One more time." 두 개다.
 
 ## 트랙 목록
 

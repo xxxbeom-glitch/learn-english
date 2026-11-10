@@ -1,5 +1,7 @@
 # 개인 영어 어휘 학습 PWA 개발 계획
 
+> 2026-11-10 보관: 어휘 PWA는 개발이 멈춘 상태다. 다시 시작하면 시안 확정 뒤 계획을 새로 쓴다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 갤럭시 폰 크롬에 설치해서, 한글 뜻을 보고 영어 문장의 빈칸을 직접 쓰며 생활회화 어휘를 익히는 1인용 앱을 만든다.
@@ -9,7 +11,7 @@
 **Tech Stack:** TypeScript, React, Vite, React Router, vite-plugin-pwa, Dexie, lucide-react, Vitest, Testing Library, fake-indexeddb, Playwright, Vercel Functions, `@anthropic-ai/sdk`
 
 **Spec:** [개인 영어 학습 웹앱 기획서](https://claude.ai/artifact/QtTP9oy2WzCtictebBS2M3)
-**디자인 레퍼런스:** `docs/design/2026-11-07-design-references.md`
+**디자인 레퍼런스:** `docs/archive/design/2026-11-07-design-references.md`
 
 ## Global Constraints
 
@@ -445,7 +447,7 @@ export function finishPlacement(s: PlacementState, now: number): { startLevel: n
 - Modify: `src/styles/*`, `src/screens/**/*`
 - Create: `DESIGN.md`
 
-- [ ] **Step 1:** 사용자가 `docs/design/2026-11-07-design-references.md`의 시각 방향을 고른다.
+- [ ] **Step 1:** 사용자가 `docs/archive/design/2026-11-07-design-references.md`의 시각 방향을 고른다.
 - [ ] **Step 2:** Taste Skill로 색, 글꼴, 간격 토큰을 정하고 C1, C4, B1 시안을 먼저 보여준다.
 - [ ] **Step 3:** 사용자 승인 뒤 전체 화면에 적용한다. 동작 시험은 그대로 통과해야 한다.
 - [ ] **Step 4:** 피그마에서 A1, 표현과 문법 카드, 사전을 지우고 B2 표시와 듣기 버튼을 맞춘다.
