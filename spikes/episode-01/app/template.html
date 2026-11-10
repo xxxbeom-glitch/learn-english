@@ -427,7 +427,8 @@ if (COVERS.profile) document.getElementById('avatar').innerHTML = `<img src="${C
 const PODCASTS = [
   // 2026-11-10 성범 요청: 4부작 두 개를 각각 한 트랙으로 합치고 채널 하나로 묶었다(옛: 드레이크 vs 켄드릭, 영떡과 YSL 재판 두 앨범)
   { name: '더 리플레이', en: 'The Replay', mark: 'TR', about: "Rap's biggest stories, retold", c: '#b78564', art: 'replay1', pats: ['Drake vs Kendrick', 'Young Thug and the YSL Trial'] },
-  { name: '매디의 서울 여행', en: "Maddie's Seoul Era", show: 'Seoul, Actually', mark: 'SEOUL', about: 'Solo trip, no cap', c: '#8f8c7a', art: 'seoul', pats: ['Day One', 'Day Two', 'Day Three', 'Day Four', 'Day Five'] },
+  // 2026-11-10 성범 요청: 홈 카드에 The Replay처럼 팟캐스트 이름과 길이를 보인다(옛: 제목 Maddie's Seoul Era, 아래 Seoul, Actually)
+  { name: '매디의 서울 여행', en: 'Seoul, Actually', mark: 'SEOUL', about: "Maddie's solo trip to Seoul, no cap", c: '#8f8c7a', art: 'seoul', pats: ['Day One', 'Day Two', 'Day Three', 'Day Four', 'Day Five'] },
 ];
 /* 쉐도잉 앨범(2026-11-10): 들리는 소리는 모두 영어, 가사에 한글 뜻을 함께 보이고 팟캐스트처럼 끄고 켤 수 있다(pod).
    이름(name)은 build_page.py와 대본을 잇는 열쇠다 */
