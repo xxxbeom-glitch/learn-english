@@ -4,6 +4,7 @@ build_pwa.py가 web/index.html을 만들면서 부르고, 결과를 data-pack/�
   manifest.json            목록. 판 번호 v(올린 날짜와 시간, 예 202611131305)와 아래 파일들의 이름
   content-지문.json        { eps: 시간표, scripts: 대본, mb: 전체 소리 크기 }. 소리 주소는 R2 주소 + ?v=지문이라 소리와 시간표가 한 판으로 묶인다
   game-지문.json           { ver, audio, bank }. app/game-data.js와 같은 내용
+  albums-지문.json         앨범 목록(albums.json과 같은 내용, 해설 소리 이름만 R2 주소로 바뀐다). 2026-11-13에 코드에서 빼서 옮겼다
   cover-이름-지문.webp     app/cover-*.webp
 파일 이름에 내용 지문이 들어가서 이름이 같으면 내용도 같다. 앱은 목록의 이름이 달라진 파일만 받는다.
 판 번호: 지난번에 올린 것(data-published.json)과 파일 이름이 모두 같으면 그 번호를 그대로 쓰고, 하나라도 다르면 지금 시각으로 새로 매긴다.
@@ -20,11 +21,30 @@ APP = HERE / "app"
 PACK = HERE / "data-pack"
 PUBLISHED = HERE / "data-published.json"
 DATA_URL = "https://pub-54e325ce90af4f1bad3644fc22432096.r2.dev/data/"
+ALBUMS = HERE / "albums.json"  # 앨범 목록의 원본. 사람이 고치는 파일이다
 FMT = 1  # 묶음 모양이 바뀌어 옛 앱이 읽지 못하게 되면 올린다(template.html 부팅 코드의 FMT와 같아야 한다)
 
 
 def sig(b):
     return hashlib.sha1(b).hexdigest()[:8]
+
+
+def albums_line():
+    """albums.json을 한 줄로 줄여 돌려준다(template.html의 __ALBUMS__ 자리에 넣는다). 빠진 것이 있으면 멈춘다."""
+    d = json.loads(ALBUMS.read_text(encoding="utf-8"))
+    kinds = {s["kind"] for s in d["shelves"]}
+    names = [a.get("name") for a in d["albums"]]
+    if len(set(names)) != len(names):
+        raise SystemExit("albums.json에 이름(name)이 같은 앨범이 있어요.")
+    for a in d["albums"]:
+        for k in ("kind", "name", "en", "color"):
+            if not a.get(k):
+                raise SystemExit(f"albums.json의 앨범 {a.get('name')}에 {k}가 없어요.")
+        if a["kind"] not in kinds:
+            raise SystemExit(f"albums.json의 앨범 {a['name']}의 종류 {a['kind']}가 shelves에 없어요.")
+        if ("groups" in a) != (a["kind"] == "course"):
+            raise SystemExit(f"albums.json의 앨범 {a['name']}: 과정(course)은 groups, 나머지는 tracks로 적어요.")
+    return json.dumps(d, ensure_ascii=False, separators=(",", ":"))
 
 
 def pack(body, mb):
@@ -39,13 +59,19 @@ def pack(body, mb):
     ids = [f"{e['course']}|{e['n']}|{bool(e.get('alt'))}|{bool(e.get('draft'))}" for e in scripts]
     if len(set(ids)) != len(ids):
         raise SystemExit("과정과 화 번호가 같은 화가 있어요. 들은 기록의 이름표가 겹쳐요: " + str([i for i in ids if ids.count(i) > 1][:4]))
+    albums = line("ALBUM_DATA")
+    known = {a["name"] for a in json.loads(albums)["albums"]}
+    lost = sorted({e["course"] for e in scripts} - known)
+    if lost:
+        raise SystemExit("albums.json에 없는 앨범의 화가 있어요(홈에 안 보여요): " + ", ".join(lost))
+    albums = albums.encode("utf-8")
     content = ('{"eps":' + line("EPS") + ',"scripts":' + line("SCRIPTS") + ',"mb":' + str(mb) + "}").encode("utf-8")
     js = (APP / "game-data.js").read_text(encoding="utf-8")
     names = (("ver", "GAME_VER"), ("audio", "GAME_AUDIO"), ("bank", "GAME_BANK"))
     g = {k: json.loads(re.search(rf"^window\.{n} = (.*);$", js, re.M).group(1)) for k, n in names}
     game = json.dumps(g, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-    mf = {"fmt": FMT, "v": 0, "content": f"content-{sig(content)}.json", "game": f"game-{sig(game)}.json", "covers": {}}
-    files = {mf["content"]: content, mf["game"]: game}
+    mf = {"fmt": FMT, "v": 0, "content": f"content-{sig(content)}.json", "game": f"game-{sig(game)}.json", "albums": f"albums-{sig(albums)}.json", "covers": {}}
+    files = {mf["content"]: content, mf["game"]: game, mf["albums"]: albums}
     for f in sorted(APP.glob("cover-*.webp")):
         b = f.read_bytes()
         name = f"{f.stem}-{sig(b)}.webp"

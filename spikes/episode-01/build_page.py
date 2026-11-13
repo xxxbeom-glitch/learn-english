@@ -4,6 +4,8 @@ import re
 import subprocess
 from pathlib import Path
 
+from data_pack import albums_line
+
 HERE = Path(__file__).parent
 STORY = HERE.parent.parent / "content" / "stories" / "season-1-part-1.md"
 STORY_KO = HERE.parent.parent / "content" / "stories" / "season-1-part-1-ko.md"
@@ -143,7 +145,7 @@ def main():
         eps.append(e)
         tl.append(v or text_timeline(e))
     # 팟캐스트 앨범(build_podcast.py가 만든 시간표). 시간표와 대본은 같은 자리에 있어야 하므로,
-    # 음성 있는 화 바로 뒤, 음성 없는 화 앞에 끼운다. 앨범 이름(course)은 템플릿의 PODCASTS와 같아야 한다.
+    # 음성 있는 화 바로 뒤, 음성 없는 화 앞에 끼운다. 앨범 이름(course)은 albums.json의 name과 같아야 한다.
     # 주의: 초급 화의 음성이 새로 생기면 팟캐스트 트랙의 자리 번호가 밀려, 폰에 저장된 들은 기록이 어긋날 수 있다.
     pods_e, pods_t = [], []
     # 앨범 번호(r1, r2 ...)마다 이름과 출연자. 새 앨범은 기존 앨범 뒤에 붙어서 앞 트랙의 자리 번호를 밀지 않는다.
@@ -180,7 +182,7 @@ def main():
             tl.append(json.loads((d / "timeline.json").read_text(encoding="utf-8")))
             shutil.copy(d / f"{tag}-{n:02d}.webm", HERE / "app" / f"{tag}-{n:02d}.webm")
     # 쉐도잉(build_shadowing.py로 만든 화). 2026-11-10 스몰토크 1화를 처음 넣었다. 들은 기록 자리 번호가 밀리지 않게 맨 뒤에 붙인다.
-    # 앨범 이름(course)은 템플릿의 SHADOWS와 같아야 한다.
+    # 앨범 이름(course)은 albums.json의 name과 같아야 한다.
     from build_shadowing import TAG as SHADOW_TAG, script as shadow_script
     shadows = {"small-talk": "스몰토크", "daily-routine": "하루 일과", "about-me": "나를 소개하기", "social-skills": "사람 사이 기술", "eating-out": "식당과 카페", "speak-up": "항의와 언쟁", "swearing": "현지인처럼 욕하기"}
     for album, name in shadows.items():
@@ -222,7 +224,7 @@ def main():
     import base64
     covers = {f.stem[6:]: "data:image/webp;base64," + base64.b64encode(f.read_bytes()).decode()
               for f in sorted((HERE / "app").glob("cover-*.webp"))}
-    out = t.replace("__TIMELINE__", shown(tl)).replace("__SCRIPTS__", shown(eps)).replace("__COVERS__", json.dumps(covers)).replace("__POD_AT__", str(pod_at))
+    out = t.replace("__TIMELINE__", shown(tl)).replace("__SCRIPTS__", shown(eps)).replace("__COVERS__", json.dumps(covers)).replace("__POD_AT__", str(pod_at)).replace("__ALBUMS__", albums_line())
     (HERE / "app" / "episode-01.html").write_text(out, encoding="utf-8")
     print(len(eps), [sum(len(s["lines"]) for s in e["sections"]) for e in eps])
 

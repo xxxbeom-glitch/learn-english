@@ -1,8 +1,9 @@
 {
  "fmt": 1,
- "v": 202611131324,
+ "v": 202611131336,
  "content": "content-fab7ffeb.json",
  "game": "game-aaabfe1e.json",
+ "albums": "albums-2c22c38c.json",
  "covers": {
   "b1": "cover-b1-c22a457d.webp",
   "b2": "cover-b2-37c2c96f.webp",

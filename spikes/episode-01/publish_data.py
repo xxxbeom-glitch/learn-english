@@ -35,8 +35,8 @@ def main():
     if old == mf:
         print("바뀐 것이 없어요. 판", mf["v"])
         return
-    had = {old.get("content"), old.get("game"), *old.get("covers", {}).values()}
-    todo = [f for f in [mf["content"], mf["game"], *mf["covers"].values()] if f not in had]
+    had = {old.get("content"), old.get("game"), old.get("albums"), *old.get("covers", {}).values()}
+    todo = [f for f in [mf["content"], mf["game"], mf["albums"], *mf["covers"].values()] if f not in had]
     for k, name in enumerate(todo, 1):
         put(PACK / name, "public, max-age=31536000, immutable")  # 이름에 지문이 있어 내용이 바뀌지 않는다
         print(f"{k}/{len(todo)} {name}", flush=True)
