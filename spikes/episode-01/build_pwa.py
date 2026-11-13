@@ -11,6 +11,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
+from data_pack import DATA_URL, pack
+
 HERE = Path(__file__).parent
 APP = HERE / "app"
 WEB = HERE / "web"
@@ -48,7 +50,7 @@ if ('serviceWorker' in navigator) addEventListener('load', () => navigator.servi
 
 SW = r"""// 이야기 영어 오프라인 저장. 음성은 받아 둔 앨범만 저장본으로 쓰고, 화면 파일은 새 판이 있으면 바꾼다.
 const SHELL = 'shell-__VER__', AUDIO = 'audio-v1';
-const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'PretendardVariable.woff2', 'Outfit-Bold.woff2', 'lucide.min.js'];
+const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'PretendardVariable.woff2', 'Outfit-Bold.woff2', 'lucide.min.js', 'sfx-correct.mp3', 'sfx-wrong.mp3', 'game-data.js'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(SHELL).then(c => c.addAll(CORE))); self.skipWaiting() });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('shell-') && k !== SHELL).map(k => caches.delete(k)))));
@@ -59,6 +61,7 @@ self.addEventListener('fetch', e => {
   if (r.method !== 'GET') return;
   const url = new URL(r.url);
   if (url.pathname.endsWith('.webm')) { e.respondWith(audio(r)); return }
+  if (url.origin !== location.origin && url.pathname.startsWith('/data/')) return;  // R2의 내용 묶음은 앱이 직접 받아 data-v1에 넣는다
   // 화면, 글꼴, 아이콘 라이브러리: 저장본을 먼저 보여 주고 뒤에서 새로 받아 둔다.
   e.respondWith(caches.open(SHELL).then(c => c.match(r, { ignoreSearch: url.origin === location.origin }).then(hit => {
     const net = fetch(r).then(res => { if (res.ok || res.type === 'opaque') c.put(r, res.clone()); return res }).catch(() => hit);
@@ -139,9 +142,17 @@ def main():
         body = body.replace(f'"{f.name}"', f'"{AUDIO_BASE}{f.name}?v={h}"')
     # 설정 · Storage used에 보일, 앱 안에 넣는 소리 크기
     body = body.replace("__BUNDLED_MB__", "0")
+    # 설정 · Download all audio에 보일 전체 소리 크기(화의 소리와 해설 + 문장 게임 소리). 게임 소리는 R2의 audio/game/에 있다(upload_game_r2.py)
+    total = sum(f.stat().st_size for f in files) + sum(f.stat().st_size for f in (APP / "game").glob("*.webm"))
+    body = body.replace("__ALL_MB__", str(round(total / 1048576)))
+    # 내용 묶음(대본·시간표, 게임 문장, 커버)을 data-pack/에 만들고, 그 목록을 이 앱의 기본 복사본 표시로 넣는다.
+    # 앱은 켤 때 R2의 목록과 견주어 새 판이면 바뀐 파일만 받는다(2026-11-13 성범 요청). 올리기는 publish_data.py
+    mf = pack(body, round(total / 1048576))
+    body = body.replace("__MANIFEST__", json.dumps(mf, ensure_ascii=False)).replace("__DATA_URL__", DATA_URL)
     (WEB / "index.html").write_text(HEAD + body + TAIL, encoding="utf-8")
     (WEB / "manifest.webmanifest").write_text(json.dumps(MANIFEST, ensure_ascii=False, indent=2), encoding="utf-8")
-    for f in [APP / "PretendardVariable.woff2", APP / "Outfit-Bold.woff2", APP / "lucide.min.js"]:
+    # sfx-*.mp3: 문장 게임의 정답·오답 효과음(2026-11-13). 작아서 R2가 아니라 앱 안에 넣는다
+    for f in [APP / "PretendardVariable.woff2", APP / "Outfit-Bold.woff2", APP / "lucide.min.js", APP / "sfx-correct.mp3", APP / "sfx-wrong.mp3", APP / "game-data.js"]:
         shutil.copy(f, WEB / f.name)
     ver = hashlib.sha1(body.encode()).hexdigest()[:8]  # 화면이 바뀌면 저장본을 새로 받게 한다.
     (WEB / "sw.js").write_text(SW.replace("__VER__", ver), encoding="utf-8")
@@ -152,6 +163,7 @@ def main():
         {"source": "/sw.js", "headers": [{"key": "Cache-Control", "value": "no-cache"}]},
         {"source": "/(.*)", "headers": [{"key": "X-Robots-Tag", "value": "noindex"}]},
     ]}, indent=2), encoding="utf-8")
+    print("내용 판", mf["v"], "(올리기: python publish_data.py)")
     print(len(files), "audio,", sum(f.stat().st_size for f in WEB.iterdir() if f.is_file()) // 1024, "KB")
 
 

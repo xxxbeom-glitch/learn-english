@@ -1,0 +1,22 @@
+{
+ "fmt": 1,
+ "v": 202611131324,
+ "content": "content-fab7ffeb.json",
+ "game": "game-aaabfe1e.json",
+ "covers": {
+  "b1": "cover-b1-c22a457d.webp",
+  "b2": "cover-b2-37c2c96f.webp",
+  "b3": "cover-b3-b4167ebc.webp",
+  "profile": "cover-profile-0887b612.webp",
+  "replay1": "cover-replay1-aa73d4eb.webp",
+  "replay2": "cover-replay2-108d6d39.webp",
+  "seoul": "cover-seoul-e16add94.webp",
+  "sh1": "cover-sh1-79614405.webp",
+  "sh2": "cover-sh2-8c88a844.webp",
+  "sh3": "cover-sh3-3e6fba5a.webp",
+  "sh4": "cover-sh4-902d10aa.webp",
+  "sh5": "cover-sh5-d2d1af69.webp",
+  "sh6": "cover-sh6-c0ddad1b.webp",
+  "sh7": "cover-sh7-97212ee4.webp"
+ }
+}
