@@ -7,6 +7,7 @@
 - 한국어(해설)와 영어 모두 **일레븐랩스 Eleven v4**로 만든다. (2026-11-09 저녁 "그냥 일레븐랩스로 하자". Words도 2026-11-10 "그냥 전부 일레븐랩스")
 - 구글 Gemini TTS로 영어를 만드는 안은 2026-11-09에 시험하고 취소했다. 시험 기록(배역, 키, 비교 파일)은 [archive 스냅숏](archive/2026-11-07-story-audio-english-design-snapshot-2026-11-10.md) 6장에 있다. `.env`의 `GEMINI_API_KEY`와 `spikes/episode-01/google_tts_test.py`, `voice_audition.py`, `audio/unused/google-test/`, `audio/unused/beginner2-variants/`는 시험 기록으로만 남는다.
 - 계정: 2026-11-10부터 성범이 유료로 올린 lumianthecompany 계정 연결(`67a9ac48`)로 만든다. 예전 xxx.beom 연결(`761d98d3`)과 크리에이터 워크스페이스(`73061a6b…`)도 썼다. 유료 API는 쓰기 전에 실제 비용을 확인하고, 돈이 나가면 미리 말하고 동의를 받는다.
+- 계정 바뀜(2026-11-12 밤): 성범이 연결을 다시 해서 iamsushyy 계정(Starter 구독, 작업 공간 `be14612e…`)으로 만든다. 연결 이름 `67a9ac48`은 그대로다. JISOO 목소리와 eleven_v4가 그대로 되는 것을 확인했다. lumianthecompany 작업 공간에 있던 생성 기록(flow)은 새 계정에서 안 보일 수 있고, 소리 파일은 PC에 있다.
 - 음성은 앱에서 실시간으로 읽지 않고 미리 만든 파일을 재생한다.
 
 ## 2. 목소리
@@ -14,6 +15,7 @@
 | 역할 | 목소리 | 쓰는 곳 |
 |---|---|---|
 | 해설자 Mina | 한국 여성, `aiUUgjHa4mpHf6UenZuf` | 코스, Words |
+| 쉐도잉 해설자 JISOO | 한국 여성, 생기 있는 정보 전달형, `iWLjl1zCuqXRkW6494ve` (일레븐랩스 공유 목소리) | 쉐도잉 한국어 해설 (2026-11-11 성범이 JISOO, Kanna, Hana Lee를 같은 문장으로 들어 보고 고름. 2026-11-12 낮에 폰의 한국어 음성으로 시험했다가 같은 날 저녁 성범이 JISOO로 만들기로 정했다. Small Talk 10화가 앱에 들어갔고 하루 일과가 다음이다. [쉐도잉](side-a-shadowing.md) 2장) |
 | 남1 | Jack John | 코스 예문, Words 단어, 쉐도잉 나(A) |
 | 여1 | Hope (`OYTbf65OHHFELVut7v2H`) | 코스 예문, Words 예문, 쉐도잉 상대(B) |
 | 남2 | Will | 코스 예문, Words 예문 |
@@ -40,6 +42,7 @@
 
 | 소리 | 파일 (`spikes/episode-01/audio/raw/`) | 쓰는 곳 |
 |---|---|---|
+| Level 1 뼈대 시작음 | `sfx-start-basics.mp3`(원본 MUSCSynth-bright_social_connec, 3초, 성범이 고름 2026-11-13). 평균 음량 -17.3dB라 -11dB로 초급과 맞춘다 | Level 1 뼈대 |
 | 초급 시작음 | `sfx-start.mp3`(3초) | 초급 |
 | 심화 시작음 | `sfx-start-intermediate.mp3`(원본 TOONMisc-Professional_cartoon, 2초) | 심화 |
 | 고급 시작음 | `sfx-start-advanced.mp3`(원본 MUSCInst-Create_a_short_5-sec, 2초). 평균 음량이 약 5dB 커서 초급 시작음 크기로 맞춘다 | 고급 |

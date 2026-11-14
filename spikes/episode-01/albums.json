@@ -8,10 +8,40 @@
   "albums": [
     {
       "kind": "course",
+      "name": "뼈대",
+      "en": "Level 1",
+      "about": "The building blocks of English",
+      "color": "#03421d",
+      "cover": "b0",
+      "groups": [
+        {
+          "ko": "영어의 뼈대",
+          "en": "The building blocks",
+          "tracks": [
+            { "title": "Word order", "ko": "영어는 순서가 반대" },
+            { "title": "I'm / You're / It's", "ko": "상태를 말할 때는 be" },
+            { "title": "Do / Don't", "ko": "Do로 묻고 don't로 아니라고" },
+            { "title": "a / an", "ko": "하나를 말할 때 앞에 a" },
+            { "title": "cats / money", "ko": "여러 개면 s, 못 세면 그대로" },
+            { "title": "the", "ko": "서로 아는 걸 말할 때 the" },
+            { "title": "go home / my / your", "ko": "a, the를 안 붙이는 때" },
+            { "title": "She likes", "ko": "he, she 뒤엔 동사에 s" },
+            { "title": "to / -ing", "ko": "동사 두 개 잇기" },
+            { "title": "-ed / went / did", "ko": "과거형 만드는 법" },
+            { "title": "at / in / on (place)", "ko": "장소 앞에 붙는 at, in, on" },
+            { "title": "at / in / on (time)", "ko": "시간 앞에 붙는 at, in, on" },
+            { "title": "go / come", "ko": "상대에게 갈 때는 come" },
+            { "title": "have / get / make / do / take", "ko": "자주 쓰는 동사 다섯" }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "course",
       "name": "초급",
-      "en": "Beginner",
+      "en": "Level 2",
       "about": "Talk about yourself, ask about others",
-      "color": "#031253",
+      "color": "#0124d3",
       "cover": "b1",
       "groups": [
         {
@@ -62,9 +92,9 @@
     {
       "kind": "course",
       "name": "심화",
-      "en": "Intermediate",
+      "en": "Level 3",
       "about": "The past, plans, offers and requests",
-      "color": "#0224d1",
+      "color": "#001250",
       "cover": "b2",
       "groups": [
         {
@@ -115,9 +145,9 @@
     {
       "kind": "course",
       "name": "고급",
-      "en": "Advanced",
+      "en": "Level 4",
       "about": "Say what you think, at length and naturally",
-      "color": "#06411b",
+      "color": "#ee2678",
       "cover": "b3",
       "groups": [
         {

@@ -3,7 +3,7 @@
 build_pwa.py가 web/index.html을 만들면서 부르고, 결과를 data-pack/에 쓴다. publish_data.py가 그 폴더를 R2의 data/에 올린다.
   manifest.json            목록. 판 번호 v(올린 날짜와 시간, 예 202611131305)와 아래 파일들의 이름
   content-지문.json        { eps: 시간표, scripts: 대본, mb: 전체 소리 크기 }. 소리 주소는 R2 주소 + ?v=지문이라 소리와 시간표가 한 판으로 묶인다
-  game-지문.json           { ver, audio, bank }. app/game-data.js와 같은 내용
+  game-지문.json           { ver, audio, bank, tips, names }. app/game-data.js와 같은 내용
   albums-지문.json         앨범 목록(albums.json과 같은 내용, 해설 소리 이름만 R2 주소로 바뀐다). 2026-11-13에 코드에서 빼서 옮겼다
   cover-이름-지문.webp     app/cover-*.webp
 파일 이름에 내용 지문이 들어가서 이름이 같으면 내용도 같다. 앱은 목록의 이름이 달라진 파일만 받는다.
@@ -69,6 +69,12 @@ def pack(body, mb):
     js = (APP / "game-data.js").read_text(encoding="utf-8")
     names = (("ver", "GAME_VER"), ("audio", "GAME_AUDIO"), ("bank", "GAME_BANK"))
     g = {k: json.loads(re.search(rf"^window\.{n} = (.*);$", js, re.M).group(1)) for k, n in names}
+    t = re.search(r"^window\.GAME_TIPS = (.*);$", js, re.M)  # 게임 팁(2026-11-14). game_tips.py가 넣는다
+    if t:
+        g["tips"] = json.loads(t.group(1))
+    n = re.search(r"^window\.GAME_NAMES = (.*);$", js, re.M)  # 빈칸에서 뺄 고유명사(2026-11-14). game_names.py가 넣는다
+    if n:
+        g["names"] = json.loads(n.group(1))
     game = json.dumps(g, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     mf = {"fmt": FMT, "v": 0, "content": f"content-{sig(content)}.json", "game": f"game-{sig(game)}.json", "albums": f"albums-{sig(albums)}.json", "covers": {}}
     files = {mf["content"]: content, mf["game"]: game, mf["albums"]: albums}
@@ -79,7 +85,8 @@ def pack(body, mb):
         files[name] = b
     old = json.loads(PUBLISHED.read_text(encoding="utf-8")) if PUBLISHED.exists() else {}
     same = {k: v for k, v in old.items() if k != "v"} == {k: v for k, v in mf.items() if k != "v"}
-    mf["v"] = old["v"] if same else int(time.strftime("%Y%m%d%H%M"))
+    # 같은 분 안에 두 번 올리면 판 번호가 같아져 폰이 새 판으로 알아보지 못했다(2026-11-14 찾음). 올린 판보다 항상 크게 한다
+    mf["v"] = old["v"] if same else max(int(time.strftime("%Y%m%d%H%M")), old.get("v", 0) + 1)
     if PACK.exists():
         shutil.rmtree(PACK)
     PACK.mkdir()

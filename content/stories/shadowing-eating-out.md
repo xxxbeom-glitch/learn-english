@@ -26,6 +26,7 @@ B: Hi! What can I get started for you?
 
 A: Hi, can I get a grande iced Americano? ★
 뜻: 안녕하세요, 그란데 아이스 아메리카노 주세요.
+따라: Can I get a grande iced Americano? | 그란데 아이스 아메리카노 주세요. | 앞 0.49
 소리: 스타벅스 사이즈는 작은 것부터 tall, grande, venti예요.
 
 B: Sure. Anything else?
@@ -40,6 +41,7 @@ B: You got it. Can I get a name for the order?
 
 A: It's Beom. B-E-O-M. ★
 뜻: 범이에요. 비, 이, 오, 엠.
+따라: It's Beom. | 범이에요. | 뒤 0.95
 
 B: Thanks, Beom. It'll be ready at the end of the counter.
 뜻: 고마워요, 범. 카운터 끝에서 나와요.
@@ -50,6 +52,7 @@ B: Thanks, Beom. It'll be ready at the end of the counter.
 
 A: Hi, can I get a tall vanilla latte? ★
 뜻: 안녕하세요, 톨 바닐라 라테 주세요.
+따라: Can I get a tall vanilla latte? | 톨 바닐라 라테 주세요. | 앞 0.53
 
 B: Sure. Hot or iced?
 뜻: 네. 따뜻한 걸로요, 아이스로요?
@@ -145,6 +148,7 @@ B: Sure. Your order number is forty-two.
 
 A: Great. I'll wait over there. ★
 뜻: 좋아요. 저쪽에서 기다릴게요.
+따라: I'll wait over there. | 저쪽에서 기다릴게요. | 앞 0.56
 
 B: We'll call your number when it's ready.
 뜻: 준비되면 번호 불러 드릴게요.
@@ -155,6 +159,7 @@ B: We'll call your number when it's ready.
 
 A: Hi, can I get a footlong chicken teriyaki on wheat? ★
 뜻: 안녕하세요, 치킨 데리야끼 30센티 위트 빵으로 주세요.
+따라: Can I get a footlong chicken teriyaki on wheat? | 치킨 데리야끼 30센티 위트 빵으로 주세요. | 앞 0.53
 소리: footlong은 서브웨이의 '30센티' 샌드위치예요.
 
 B: Sure. Would you like it toasted?
@@ -162,6 +167,7 @@ B: Sure. Would you like it toasted?
 
 A: Yes, please. ★
 뜻: 네, 구워 주세요.
+따라: 뺌
 
 B: Which veggies would you like?
 뜻: 채소는 뭐 넣어 드릴까요?
@@ -185,12 +191,14 @@ B: Hi there! How many?
 
 A: Hi, a table for two, please. ★
 뜻: 안녕하세요, 두 명이요.
+따라: A table for two, please. | 두 명이요. | 앞 0.57
 
 B: Do you have a reservation?
 뜻: 예약하셨어요?
 
 A: No, we don't. Is there a wait? ★
 뜻: 아뇨, 안 했어요. 기다려야 하나요?
+따라: Is there a wait? | 기다려야 하나요? | 앞 1.57
 소리: Is there a wait?는 '기다려야 해요?'라는 뜻이에요.
 
 B: About fifteen minutes. Is that okay?
@@ -242,6 +250,7 @@ B: Sure. Was everything okay?
 
 A: Yes, everything was great. ★
 뜻: 네, 다 정말 맛있었어요.
+따라: Everything was great. | 다 정말 맛있었어요. | 앞 0.69
 
 B: Glad to hear it. Here's your check.
 뜻: 다행이네요. 계산서 여기 있어요.

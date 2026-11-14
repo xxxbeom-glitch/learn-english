@@ -22,6 +22,7 @@
 
 A: Hey! How's it going? ★
 뜻: 어, 안녕하세요! 잘 지내요?
+따라: How's it going? | 잘 지내요? | 앞 0.58
 
 B: Oh, hey! Not bad. You?
 뜻: 아, 안녕하세요! 괜찮아요. 그쪽은요?
@@ -53,6 +54,7 @@ A: See you!
 
 A: Whoa, long time no see! ★
 뜻: 와, 이게 얼마 만이에요!
+따라: Long time no see! | 이게 얼마 만이에요! | 앞 0.83
 
 B: Oh my gosh, hi! How have you been?
 뜻: 어머, 안녕하세요! 그동안 어떻게 지냈어요?
@@ -66,6 +68,7 @@ B: You look great! Are you still at the same company?
 
 A: Yeah, same old, same old. What about you? ★
 뜻: 네, 맨날 똑같죠. 그쪽은요?
+따라: Same old, same old. What about you? | 맨날 똑같죠. 그쪽은요? | 앞 0.62
 소리: same old는 '쎄임오울'처럼 이어져요.
 
 B: I just started a new job, actually.
@@ -140,6 +143,7 @@ B: You look tired. Are you okay?
 
 A: Yeah, it's just been a crazy week. ★
 뜻: 네, 그냥 이번 주가 정신없었어요.
+따라: It's just been a crazy week. | 그냥 이번 주가 정신없었어요. | 앞 0.65
 
 B: I hear you. Lots of meetings?
 뜻: 무슨 말인지 알아요. 회의 많았어요?
@@ -180,6 +184,7 @@ B: Nice! I'm more into K-dramas, honestly.
 
 A: Oh yeah? Any recommendations? ★
 뜻: 그래요? 추천해 줄 거 있어요?
+따라: Any recommendations? | 추천해 줄 거 있어요? | 앞 0.93
 
 B: Definitely. I'll send you a list.
 뜻: 그럼요. 목록 보내 줄게요.
@@ -200,6 +205,7 @@ B: Wow, even on the weekend?
 
 A: Yeah, it helps me clear my head. ★
 뜻: 네, 머리 비우는 데 좋아요.
+따라: It helps me clear my head. | 머리 비우는 데 좋아요. | 앞 0.61
 
 B: Respect. I'm just going to sleep in.
 뜻: 대단하네요. 저는 그냥 늦잠 잘 거예요.
@@ -217,6 +223,7 @@ B: You too!
 
 A: Wow, this line is so long. ★
 뜻: 와, 줄 진짜 기네요.
+따라: This line is so long. | 줄 진짜 기네요. | 앞 0.74
 
 B: I know, right? It's always like this at noon.
 뜻: 그러니까요. 점심때는 늘 이래요.
@@ -245,6 +252,7 @@ B: Excuse me, sorry. Do you know where this is?
 
 A: Let me see. Oh, it's not far from here. ★
 뜻: 어디 봐요. 아, 여기서 멀지 않아요.
+따라: It's not far from here. | 여기서 멀지 않아요. | 앞 1.85
 소리: Let me see는 '어디 봐요'처럼 잠깐 확인할 때 써요.
 
 B: Oh, great. Which way should I go?
@@ -272,6 +280,7 @@ A: No problem. Enjoy Seoul!
 
 A: Oh, look at the time. I should get going. ★
 뜻: 어, 시간 좀 봐요. 저 이제 가 봐야겠어요.
+따라: Look at the time. I should get going. | 시간 좀 봐요. 저 이제 가 봐야겠어요. | 앞 0.67
 
 B: Yeah, me too. This was fun.
 뜻: 네, 저도요. 재밌었어요.

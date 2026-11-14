@@ -4,6 +4,9 @@ python build_shadowing.py small-talk 1
 
 대본: content/stories/shadowing-<album>.md 의 '## N. 제목' 아래 'A: 영어 ★' / '뜻: 한국어' 줄.
 목소리: audio/shadowing/<album>/epNN/clips/d1..dN.mp3 (대본 줄 순서), g1(Now, repeat after me.), g2(One more time.).
+따라 하기 줄 정리(2026-11-11 성범 확인): 핵심 줄 뜻 아래 '따라: 영어 | 한국어 | 앞 0.62' 줄이 있으면 따라 하기에서는
+그 글과 뜻을 보이고, 같은 소리 d{k}를 앞(쉼 뒤부터) 또는 뒤(그 자리까지)를 잘라 쓴다. '따라: 뺌'이면 따라 하기에서 뺀다.
+정리안은 content/stories/shadowing-repeat-review.md.
 흐름(2026-11-10 성범 결정): 시작음 → 대화 → Now, repeat after me. → 핵심 줄(★)마다 듣기, 멈춤, 듣기, 멈춤, 클릭음
 (마지막 줄 뒤엔 클릭음 없음) → One more time. → 대화로 끝난다. 끝음은 없다.
 """
@@ -32,10 +35,19 @@ def script(album, n):
         m = re.match(r"([AB]): (.+)", raw.strip())
         if m:
             en = m.group(2).strip()
-            lines.append({"who": m.group(1), "text": en.replace("★", "").strip(), "key": "★" in en, "ko": None})
+            lines.append({"who": m.group(1), "text": en.replace("★", "").strip(), "key": "★" in en, "ko": None, "rep": None})
         m = re.match(r"뜻: (.+)", raw.strip())
         if m and lines:
             lines[-1]["ko"] = m.group(1).strip()
+        m = re.match(r"따라: (.+)", raw.strip())
+        if m and lines:
+            v = m.group(1).strip()
+            if v == "뺌":
+                lines[-1]["key"] = False
+            else:
+                en, ko, cut = [x.strip() for x in v.split("|")]
+                side, sec = cut.split()
+                lines[-1]["rep"] = {"text": en, "ko": ko, "side": side, "at": float(sec)}
     return title, lines
 
 
@@ -59,6 +71,12 @@ def build(album, n):
     wav(RAW / "sfx-next-soft.mp3", "atrim=0:1.0,afade=t=out:st=0.9:d=0.1,volume=-4dB", tmp / "click.wav")
     for k in range(1, len(lines) + 1):
         wav(d / "clips" / f"d{k}.mp3", "anull", tmp / f"d{k}.wav")
+    for k, l in enumerate(lines, 1):
+        r = l["rep"]
+        if r and r["side"] == "앞":  # 쉼 뒤부터, 틱 소리 막는 페이드인과 짧은 앞 여백
+            wav(d / "clips" / f"d{k}.mp3", f"atrim=start={r['at']},asetpts=PTS-STARTPTS,afade=t=in:d=0.015,adelay=100:all=1", tmp / f"r{k}.wav")
+        elif r:  # 그 자리까지, 짧은 페이드아웃
+            wav(d / "clips" / f"d{k}.mp3", f"atrim=end={r['at']},afade=t=out:st={r['at'] - 0.05:.3f}:d=0.05", tmp / f"r{k}.wav")
     for g in GUIDE:
         wav(d / "clips" / f"{g}.mp3", "anull", tmp / f"{g}.wav")
 
@@ -83,6 +101,9 @@ def build(album, n):
     def say(k, section, kind="line"):
         l = lines[k - 1]
         speaker = "Me" if l["who"] == "A" else "Partner"
+        r = l["rep"] if section == "repeat" else None
+        if r:
+            return put(tmp / f"r{k}.wav", {"speaker": speaker, "text": r["text"], "meaning": r["ko"], "section": section, "kind": kind})
         return put(tmp / f"d{k}.wav", {"speaker": speaker, "text": l["text"], "meaning": l["ko"], "section": section, "kind": kind})
 
     def dialogue(section):

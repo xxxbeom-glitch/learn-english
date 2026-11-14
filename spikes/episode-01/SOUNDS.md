@@ -22,6 +22,7 @@
 | `UIClick-Create_a_very_soft_U-Elevenlabs.mp3` | `sfx-next-soft.mp3` | 말해보기·따라 하기 다음 줄 클릭음 |
 | `UIClick-soft,_appealing,_cli-Elevenlabs.mp3` | `sfx-word-click.mp3` | 단어 시작 클릭음 |
 | `MUSCInst-Cinematic_documentar-Elevenlabs.mp3` | `sfx-start-words.mp3` | 단어 시작음 |
+| `MUSCSynth-bright_social_connec-Elevenlabs.mp3` | `sfx-start-basics.mp3` | Level 1 뼈대 시작음 (2026-11-13) |
 | `TOONMisc-Professional_cartoon-Elevenlabs.mp3` | `sfx-start-intermediate.mp3` | 심화 시작음 |
 | `MUSCInst-Create_a_short_5-sec-Elevenlabs.mp3` | `sfx-start-advanced.mp3` | 고급 시작음 |
 | `MUSCSmpl-playing_old_samples_-Elevenlabs.mp3` | (사본 없음, 바로 씀) | The Replay 인트로 비트(`merge_replay.py`) |
@@ -36,6 +37,7 @@
 | `unused/app-old/b1-NN-text.webm` | 음성 없을 때 대본만 보여 주던 소리 없는 파일 | 초급 25화 모두 새 음성(v2)이 생겼다. 다시 필요하면 `build_page.py`가 새로 만든다 |
 | `unused/app-old/b1-01-v2g.webm`, `b1-01-v2gk.webm` | 초급 1화 구글·Gemini 음성 비교판 | 구글·Gemini 음성은 취소, 한국어·영어 모두 일레븐랩스로 정했다 |
 | `unused/app-old/b1-01-voices.webm` | 해설자 목소리 오디션 트랙 | 목소리를 고른 뒤 끝난 시험 |
+| `unused/basics-ko-fix/ep02-clips-n02.mp3` 외 5개 | Level 1 2화, 5화의 옛 해설 조각 | 2026-11-13 같은 문장의 한국어 뜻을 Level 2에 맞춰 다시 만들었다 |
 | `unused/app-old/episode-01.mp3` | 첫 시험 에피소드(지하철 이야기) | 이야기·대화 짜임을 버리고 과정별 짜임으로 바꿨다 |
 | `unused/google-test/` | 구글 Cloud·Gemini TTS 시험 음성 | 구글 음성 취소(선불 결제 사건 뒤 일레븐랩스로 통일) |
 | `unused/beginner2-variants/ep01g`, `ep01gem`, `ep01gk`, `ep08gem` | 초급 새 짜임의 구글·Gemini 비교판 | 위와 같다 |

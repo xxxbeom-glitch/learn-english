@@ -36,6 +36,7 @@ B: Oh, nice! I work with her.
 
 A: Oh, so you're the coworker she always talks about. ★
 뜻: 아, 지수가 맨날 얘기하는 그 회사 동료군요.
+따라: So you're the coworker she always talks about. | 지수가 맨날 얘기하는 그 회사 동료군요. | 앞 0.60
 
 B: Ha, I hope she says good things!
 뜻: 하, 좋은 얘기였으면 좋겠네요!
@@ -55,6 +56,7 @@ B: Sorry, how do you spell that?
 
 A: S-E-O-N-G, B-E-O-M. ★
 뜻: 에스, 이, 오, 엔, 지, 비, 이, 오, 엠이에요.
+따라: 뺌
 소리: 철자는 한 글자씩 또박또박 끊어서 말해요.
 
 B: Got it. That's a cool name. Is it Korean?
@@ -62,6 +64,7 @@ B: Got it. That's a cool name. Is it Korean?
 
 A: Yeah. You can just call me Beom if that's easier. ★
 뜻: 네. 편하면 그냥 범이라고 불러도 돼요.
+따라: You can just call me Beom if that's easier. | 편하면 그냥 범이라고 불러도 돼요. | 앞 0.67
 
 B: Okay, Beom. Your order will be right up.
 뜻: 네, 범 님. 주문하신 거 금방 나와요.
@@ -81,6 +84,7 @@ B: Oh, cool! Were you born there?
 
 A: Yeah, born and raised. ★
 뜻: 네, 서울에서 나고 자랐어요.
+따라: Born and raised. | 서울에서 나고 자랐어요. | 앞 0.51
 소리: born and raised는 '거기서 나고 자랐다'는 뜻으로 한 덩어리처럼 말해요.
 
 B: I've always wanted to visit Seoul.
@@ -115,6 +119,7 @@ B: That sounds interesting.
 
 A: It is. It keeps me busy, though. ★
 뜻: 재밌어요. 그래도 꽤 바빠요.
+따라: It keeps me busy, though. | 그래도 꽤 바빠요. | 앞 0.94
 
 B: I bet.
 뜻: 그럴 것 같아요.
@@ -185,12 +190,14 @@ B: Nice. Have you been to any concerts?
 
 A: Yeah, I saw a few when they came to Seoul. ★
 뜻: 네, 서울에 왔을 때 몇 번 봤어요.
+따라: I saw a few when they came to Seoul. | 서울에 왔을 때 몇 번 봤어요. | 앞 0.76
 
 B: That must have been amazing.
 뜻: 진짜 좋았겠네요.
 
 A: It was! Here, let me play you one of my favorites. ★
 뜻: 좋았어요! 자, 제가 좋아하는 곡 하나 틀어 줄게요.
+따라: Let me play you one of my favorites. | 제가 좋아하는 곡 하나 틀어 줄게요. | 앞 1.34
 
 B: Sure, go ahead.
 뜻: 좋아요, 틀어 봐요.
@@ -230,6 +237,7 @@ B: Are you going home for the holidays?
 
 A: Yeah, I'm going to see my parents. ★
 뜻: 네, 부모님 뵈러 가요.
+따라: I'm going to see my parents. | 부모님 뵈러 가요. | 앞 0.62
 
 B: Nice. Do you have any brothers or sisters?
 뜻: 좋네요. 형제나 자매 있어요?
@@ -242,6 +250,7 @@ B: Aw, so you're an uncle!
 
 A: Yeah, and he's the cutest. ★
 뜻: 네, 근데 진짜 귀여워요.
+따라: He's the cutest. | 진짜 귀여워요. | 앞 1.18
 
 B: Ha, have a great time with them.
 뜻: 하, 가족이랑 좋은 시간 보내요.
@@ -255,6 +264,7 @@ B: Okay, can you tell us a little about yourself?
 
 A: Sure. Hi, everyone. I'm Seongbeom, and I'm from Seoul. ★
 뜻: 네. 안녕하세요, 여러분. 저는 성범이고, 서울에서 왔어요.
+따라: Hi, everyone. I'm Seongbeom, and I'm from Seoul. | 안녕하세요, 여러분. 저는 성범이고, 서울에서 왔어요. | 앞 0.69
 
 B: Welcome! What brings you here?
 뜻: 환영해요! 여기는 어떻게 오게 됐어요?

@@ -21,6 +21,7 @@
 
 A: Whoa, nice shoes! Are they new? ★
 뜻: 와, 신발 멋지네요! 새로 샀어요?
+따라: Nice shoes! Are they new? | 신발 멋지네요! 새로 샀어요? | 앞 0.71
 
 B: Thanks! I just got them last weekend.
 뜻: 고마워요! 지난 주말에 샀어요.
@@ -47,6 +48,7 @@ A: Perfect, thanks!
 
 A: Hey, you nailed that presentation. ★
 뜻: 발표 진짜 잘했어요.
+따라: You nailed that presentation. | 발표 진짜 잘했어요. | 앞 0.56
 소리: nail it은 '완벽하게 해내다'라는 뜻이에요.
 
 B: Really? I was so nervous.
@@ -103,6 +105,7 @@ B: Hey, are you free this Saturday? I'm moving.
 
 A: Oh, I wish I could help, but I already have plans. ★
 뜻: 아, 돕고 싶은데 이미 약속이 있어요.
+따라: I wish I could help, but I already have plans. | 돕고 싶은데 이미 약속이 있어요. | 앞 0.62
 소리: I wish I could는 '그러고 싶지만 못 한다'는 부드러운 거절이에요.
 
 B: Oh, that's okay. Don't worry about it.
@@ -116,6 +119,7 @@ B: Really? That would be amazing.
 
 A: Sure. I'll bring some food, too. ★
 뜻: 그럼요. 먹을 것도 좀 사 갈게요.
+따라: I'll bring some food, too. | 먹을 것도 좀 사 갈게요. | 앞 0.66
 
 B: You're the best!
 뜻: 최고예요!
@@ -159,6 +163,7 @@ B: Yeah, I'm fine. It's just a little coffee.
 
 A: Here, let me get you some napkins. ★
 뜻: 여기요, 냅킨 좀 가져다 드릴게요.
+따라: Let me get you some napkins. | 냅킨 좀 가져다 드릴게요. | 앞 0.70
 
 B: Thanks. It's not a big deal.
 뜻: 고마워요. 별일 아니에요.
@@ -221,6 +226,7 @@ B: Hmm, I thought it was perfect.
 
 A: Well, I guess we'll have to agree to disagree. ★
 뜻: 뭐, 서로 생각이 다른 걸로 하죠.
+따라: I guess we'll have to agree to disagree. | 서로 생각이 다른 걸로 하죠. | 앞 0.70
 소리: agree to disagree는 '서로 다르다는 걸 인정하자'는 뜻이에요.
 
 B: Ha, fair enough.
@@ -261,6 +267,7 @@ B: Well, I should get going. It was nice talking to you.
 
 A: You too. I had a really good time. ★
 뜻: 저도요. 정말 즐거웠어요.
+따라: I had a really good time. | 정말 즐거웠어요. | 앞 0.85
 
 B: Me too. Maybe I'll see you here again.
 뜻: 저도요. 여기서 또 볼 수도 있겠네요.
@@ -273,6 +280,7 @@ B: Sure! Here, put it in your phone.
 
 A: Great. I'll text you so you have mine. ★
 뜻: 좋아요. 제 번호도 저장하게 문자 보낼게요.
+따라: I'll text you so you have mine. | 제 번호도 저장하게 문자 보낼게요. | 앞 0.55
 
 B: Sounds good. Talk soon!
 뜻: 좋아요. 또 연락해요!

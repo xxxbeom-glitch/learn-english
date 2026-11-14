@@ -30,6 +30,7 @@ B: Six? That's so early!
 
 A: Yeah, I'm kind of a morning person. ★
 뜻: 네, 제가 좀 아침형 인간이에요.
+따라: I'm kind of a morning person. | 제가 좀 아침형 인간이에요. | 앞 0.72
 소리: morning person은 아침에 힘이 나는 사람이라는 뜻이에요.
 
 B: I could never do that. I hit snooze like five times.
@@ -37,6 +38,7 @@ B: I could never do that. I hit snooze like five times.
 
 A: Ha, it just takes some getting used to. ★
 뜻: 하, 그냥 익숙해지는 데 시간이 좀 걸려요.
+따라: It just takes some getting used to. | 그냥 익숙해지는 데 시간이 좀 걸려요. | 앞 0.58
 소리: take some getting used to는 '익숙해지는 데 시간이 걸린다'는 뜻이에요.
 
 B: Maybe I'll try it someday.
@@ -51,6 +53,7 @@ B: Hey, I see you here every morning.
 
 A: Yeah, I work out before work. ★
 뜻: 네, 저는 출근 전에 운동해요.
+따라: I work out before work. | 저는 출근 전에 운동해요. | 앞 0.63
 
 B: Nice. How long have you been doing that?
 뜻: 좋네요. 그렇게 한 지 얼마나 됐어요?
@@ -63,6 +66,7 @@ B: What are you working on today?
 
 A: Legs. I'm going to be sore tomorrow. ★
 뜻: 하체요. 내일 근육통 오겠네요.
+따라: I'm going to be sore tomorrow. | 내일 근육통 오겠네요. | 앞 0.97
 소리: sore는 운동하고 나서 근육이 쑤신다는 뜻이에요.
 
 B: Ha, good luck!
@@ -110,6 +114,7 @@ B: It's at ten. We need to go over the slides.
 
 A: Okay. Let me grab a coffee first. ★
 뜻: 알겠어요. 커피 먼저 한 잔 가져올게요.
+따라: Let me grab a coffee first. | 커피 먼저 한 잔 가져올게요. | 앞 0.68
 
 B: Sure. Can you get me one, too?
 뜻: 그래요. 제 것도 하나 사다 줄 수 있어요?
@@ -162,6 +167,7 @@ B: Oh, no problem. Is it the report?
 
 A: Yeah, it's due today. ★
 뜻: 네, 오늘까지예요.
+따라: It's due today. | 오늘까지예요. | 앞 0.62
 소리: due는 '마감이 언제까지'라는 뜻이에요.
 
 B: Got it. Good luck.
@@ -215,6 +221,7 @@ B: Same. Should we just order in?
 
 A: Yeah, let's order something. ★
 뜻: 네, 뭐 시켜 먹어요.
+따라: Let's order something. | 뭐 시켜 먹어요. | 앞 0.58
 
 B: Tonkatsu or budae-jjigae?
 뜻: 돈까스 먹을래요, 부대찌개 먹을래요?
@@ -241,6 +248,7 @@ B: Like what?
 
 A: Laundry, cleaning... my place is a mess. ★
 뜻: 빨래, 청소… 집이 엉망이에요.
+따라: My place is a mess. | 집이 엉망이에요. | 앞 2.26
 
 B: Ha, okay. How about later tonight?
 뜻: 하, 알겠어요. 그럼 오늘 밤은요?

@@ -208,6 +208,17 @@ def main():
         f = f"w1-{n:02d}.webm"
         tl.append(json.loads((d / "timeline.json").read_text(encoding="utf-8")) | {"file": f})
         shutil.copy(d / f, HERE / "app" / f)
+    # Level 1 영어의 뼈대(course_v2.py로 음성을 만든 화). 2026-11-13 1화를 처음 넣었다.
+    # 들은 기록 자리 번호가 밀리지 않게 쉐도잉, Words 뒤, 맨 뒤에 붙인다. 화면 순서는 albums.json이 정한다.
+    for d in sorted((HERE / "audio" / "basics").glob("ep[0-9][0-9]")):
+        if not (d / "timeline.json").exists():
+            continue
+        n = int(d.name[2:])
+        e = course_episode("basics", n)
+        e["kolines"], e["course"], e["text"] = [], "뼈대", False
+        eps.append(e)
+        tl.append(json.loads((d / "timeline.json").read_text(encoding="utf-8")))
+        shutil.copy(d / f"f-{n:02d}.webm", HERE / "app" / f"f-{n:02d}.webm")
     # 해설을 쓰기 전의 화는 대화만 대본에 넣는다.
     have = {e["n"] for e in eps if e["course"] == "초급"}
     for n, title, lines in parse_draft(DRAFT.read_text(encoding="utf-8")) if DRAFT.exists() else []:

@@ -619,3 +619,603 @@ Figma work in progress: file key 31ndvuyn7Zkf4sScTUgvjq. Pages split; home updat
 9. Optional Next Step:
    Continue the Figma cleanup per the user's request "디자인시스템, 화면 정리 다시 깔끔하게 해둬 보기좋게 페이지정리하고 필요없는거 지우고": arrange the "01 디자인 시스템" page (component sections + a color/type token sheet incl. Lyric EN) and build the "00 표지" cover/index frame, then tidy "04 에셋" layout; afterwards reset the browser viewport, call wrap_up asking for consent to delete the uiux-study/sounds originals, and give the final Korean report.
 </summary>
+
+## 2026-11-10 18:40 (자동 압축, 세션 d02707f6)
+
+<analysis>
+Here is the conversation in order. All work happened in the learn-english project, on branch feat/english-voca-pwa.
+
+1. The user asked whether the project was organized the way they wanted, and said they want to archive sessions they no longer need.
+   - I listed the sessions and read the last messages of the learn-english ones.
+   - Spec split, compact-log cleanup, sound merge (uiux-study originals went to the Recycle Bin) and the Figma sync were all done. Nothing was committed (56 changes).
+   - I recommended archiving six sessions.
+2. The user said "6개 보관해".
+   - The first archive calls failed because a hook changed the input. Retrying with the "session" field worked.
+   - The six sessions were archived. "초급 25화 다시 쓰기 전 기준 통합 논의" (local_550c27d0) was also archived automatically as a side session.
+3. The user asked what the "25화 논의" session was.
+   - Its title is misleading. It was the main app-QA session, and it spawned the course-design session.
+4. The user said the Advanced and Intermediate courses are both done and asked if I remembered the last development work.
+   - I confirmed: Beginner 61 min, Intermediate 90 min, Advanced 107 min, and listed the recent commits.
+5. The user said one Words chapter was done and they had stopped while discussing other ideas.
+   - I searched the specs. Mid-turn the user also asked for Figma design-system work.
+   - I offered a separate session for it; the user chose "Do it here".
+6. Figma work (file 31ndvuyn7Zkf4sScTUgvjq, session b8f29b43-803b-41fd-b21f-9b940ca61ea6):
+   - Variables: renamed the collection to "Side A · 색" and added code syntax.
+   - Added white/80, 70, 60, 35, 30, 25 and 20, bg/dim, and three album colors.
+   - Created the collection "Side A · 크기" (VariableCollectionId:304:12).
+   - Built 12 components in section "컴포넌트 · 조작" (306:7).
+   - Replaced 46 hand-drawn elements in the screens with instances.
+   - The play-button icon turned white. I fixed it by binding the icon to bg/base on the instances.
+   - Fixed the album/심화 and album/고급 values.
+   - Updated section 8 of side-a-app-screens.md.
+7. Mid-Figma, the user asked to add speaker names to podcast lyrics.
+   - Offered a session; the user chose "New session" (local_aa015977).
+   - That session added the names to The Replay lyrics, removed Words from the app, and made Wi-Fi only block downloads on mobile data (@capacitor/network). The user confirmed it works.
+8. The user asked how much Figma work was left. I gave a progress update and finished the work.
+9. The user said "아직, 여기서 보류 여기까지만! 더이상작업예정없음 커밋푸시해".
+   - Committed 124b95b (62 files) and pushed.
+10. The user reported that some Advanced tracklist tracks had no Korean subtitle.
+    - Fixed the TOC and KO_TITLE in template.html, rebuilt, and committed and pushed e171d29.
+    - The phone wasn't connected at first. After the user turned VPN off, I connected wirelessly to 192.168.35.135:42115, installed the app and verified it with a screenshot.
+11. The user asked how to continue with Fable. I explained the model picker and the settings.json "model" field.
+12. The user asked whether they can switch back to Opus later. Yes.
+13. Latest message: the user will use Fable in a new session and first wants the token price difference between the latest Opus and the latest Fable. Then the compaction request arrived.
+
+The latest question is about pricing. I don't have verified pricing, and the claude-api skill should be consulted, because its trigger covers LLM pricing ("never answer from memory"). So the next step is to load the claude-api skill and answer with Opus 5.5 vs Fable 5.2 per-token prices.
+</analysis>
+
+<summary>
+1. Primary Request and Intent:
+   - Check whether the learn-english project is organized as the user wanted, and archive sessions that are no longer needed. Done: six archived, and the 초급 25화 session was archived along with them.
+   - Explain the "25화 논의" session; recall the last development work and the pending ideas.
+   - Define the Figma design system (components, variables, etc.) in Figma. Done.
+   - Add speaker names to podcast lyrics the same way as shadowing. Done in a separate session, local_aa015977, which also removed Words from the app and made Wi-Fi only block downloads on mobile data. The user confirmed it works.
+   - The user put everything on hold ("아직, 여기서 보류 여기까지만! 더이상작업예정없음 커밋푸시해"). Committed and pushed.
+   - Fix Advanced tracks that had no Korean subtitle. Fixed, pushed, installed on the phone and verified.
+   - How to continue the project with Fable, and whether switching back to Opus is possible. Both answered.
+   - **Latest request:** "응 새 세션에서 페이블로 할건데, 지금 오푸스와 페이블 최신버전 토큰 가격차이부터 알려줘" (compare token prices of the latest Opus, Opus 5.5 / claude-opus-5-5, and the latest Fable, Fable 5.2 / claude-fable-5-2).
+
+2. Key Technical Concepts:
+   - App and build: Side A Android app (Capacitor wrapping web code). Sound files are on Cloudflare R2.
+   - Build chain: `spikes/episode-01/build_page.py` → `build_pwa.py` (output in `spikes/episode-01/web`), then `side-a/scripts/copy-web.mjs` → `npx cap sync android` → `JAVA_HOME="C:/Program Files/Android/Android Studio/jbr" ./gradlew.bat assembleRelease -q`.
+   - Install: `adb install --user 0 -r` (avoids installing into the Galaxy Secure Folder). Wireless ADB is found with `adb mdns services`; this time it was 192.168.35.135:42115. The user had to turn off VPN first.
+   - Figma Plugin API through use_figma:
+     - Variables use scopes and code syntax; alpha lives in the variable value.
+     - Components are made with createComponentFromNode and grouped with combineAsVariants.
+     - Text, boolean and instance-swap properties are set with componentPropertyReferences.
+   - Session management tools: archive_session (needed the extra "session" field after a hook changed the input) and start_session with offer/proposal_id.
+   - Memory rules:
+     - Record changes in the design docs.
+     - Answer in Korean 해요체.
+     - Confirm costs before paid APIs.
+     - Never commit or push unless asked.
+
+3. Files and Code Sections:
+   - `spikes/episode-01/app/template.html`: app UI.
+     - The Advanced TOC now matches the scripts:
+       - 생각, 감정, 조언: [I think / don't think ~, Do you think ~?, I feel / feel like ~, Are you into ~?, I'm trying to ~, I have to / don't have to ~, You should / shouldn't ~, It looks / sounds ~, I hope ~, I'm sure / not sure ~, I'm worried about ~, Sorry about / for ~]
+       - 문장 잇기: [because, so, when, if, before / after, until]
+       - 자연스러운 말: [I used to ~, I'm about to ~, It depends on ~, I don't know what ~, I wish ~, I'd rather ~, I was going to ~]
+       - The '아직 정하지 않음' group was removed.
+     - Added to KO_TITLE: "I'm trying to ~": "하려고 애쓰는 일", "Sorry about / for ~": "미안하다고 하기", "until": "~할 때까지", "I wish ~": "이랬으면 하는 것", "I'd rather ~": "더 좋은 쪽 말하기", "I was going to ~": "하려다 못 한 일".
+   - `docs/superpowers/specs/side-a-courses.md`: "앱에서 바꿀 것(아직 안 바꿈)" became "앱에서 바꾼 것". Added a note: "2026-11-10 반영 완료 … I wish는 I hope의 '바라는 것 말하기'와 겹치지 않게 바꿨다."
+   - `docs/superpowers/specs/side-a-app-screens.md`, section 8: added the Figma variables (white/xx, bg/dim, album colors, 'Side A · 크기' with space, radius and size) and the component list.
+   - Specs read for ideas:
+     - side-a-words.md: Words 1화 only. The plan is 4 albums × 25 episodes, about 200k credits.
+     - side-a-podcasts.md: Behind the Brand is on hold. The Apple 1화 draft is in `content/podcasts/brand-01-apple.md`. Later ideas: book highlight transcriptions, monologues about past events, a K-culture episode of The Replay.
+     - side-a-shadowing.md: next album candidates are gym, office, travel, phone and reservations, shopping and refunds, hospital and pharmacy.
+     - side-a-courses.md: basic-verb bundle episodes, review sections, per-course end sounds.
+
+4. Errors and fixes:
+   - **archive_session rejected:** a hook modified the input. Fixed by resending with the exact `session` field.
+   - **Extra archive:** archiving 영어 학습 웹앱 기획 also archived the 초급 25화 session. I told the user; it was fine to leave it archived.
+   - **Figma play-button icon white on white:** setting the instance-swap property reset the icon color. Fixed by binding the variant icon vectors and the vectors on the 7 screen instances to bg/base (VariableID:115:3).
+   - **Stale Figma album colors:** album/심화 and album/고급 had old values. Set them to #0224d1 and #06411b.
+   - **Phone not found by adb:** VPN was on. After the user turned it off, `adb connect 192.168.35.135:42115` worked.
+   - **monkey launch:** printed a SecurityException for user 150 but the app still launched.
+
+5. Problem Solving:
+   - Figma design system:
+     - Collection "Side A · 색" (VariableCollectionId:115:2): code syntax var(--bg) and others, plus white/80, 70, 60, 35, 30, 25, 20 and bg/dim.
+     - Collection "Side A · 크기" (304:12).
+     - Components: 섹션 머리 306:13, 아이콘 버튼 306:16, 재생 버튼 set 306:420, 시트 손잡이 306:200, 스위치 set 306:415, 시트 옵션 줄 306:421, 선택 줄 306:422, 설정 줄 306:423, 상단 바 306:382, 재생 위치 306:387, 묶음 제목 306:391, 설정 섹션 머리 306:394.
+     - 46 screen elements now use these components.
+     - Not done: the token sheet 300:6 doesn't show the new variables, and the background home screens behind the player sheets still have old shelf names.
+   - Commits on feat/english-voca-pwa, both pushed: 124b95b (big batch) and e171d29 (Advanced TOC and Korean titles).
+
+6. All user messages:
+   - "지금 이 프로젝트내용 내가 원한대로 다 정리가 된건가? 세션 너무 많이 열려서 이제 볼필요없는건 보관처리하려고해"
+   - "6개 보관해"
+   - "25화 논의세션이 뭐야"
+   - "고급과 심화도 다 끝났잖아. 우리 개발 마지막 기억안나?"
+   - "words 한 챕터 했고, 이외 다른 아이디어 얘기하다 멈췄잖아"
+   - (mid-turn) "피그마에서 디자인시스템 컴퍼넌트 및 변수 등 다 정의해" — chose "Do it here"
+   - (mid-turn) "그리고 팟캐스트도 대화문에서 앞에 이름 달아줘 쉐도윙과 같은 방식으로" — chose "New session"
+   - "피그마 작업 얼마나남음?"
+   - "아직, 여기서 보류 여기까지만! 더이상작업예정없음 커밋푸시해"
+   - "아 잠시만, 고급과정에 트랙리스트에 서브 한국어 캡션없는 트랙이 있어"
+   - "다시 연결해. vpn껐어"
+   - "이 프로젝트 페이블로 진행하려면 어떻게 해"
+   - "페이블했다가 후에 다시 오푸스로 돌아오는것도 가능해?"
+   - "응 새 세션에서 페이블로 할건데, 지금 오푸스와 페이블 최신버전 토큰 가격차이부터 알려줘"
+
+7. Pending Tasks:
+   - Answer the token price difference between Opus 5.5 and Fable 5.2, per input and output token.
+   - No other work is pending; the user put the project on hold. The working tree is clean and pushed.
+
+8. Current Work:
+   The last task (Advanced Korean subtitles) is finished and verified on the phone. The user then asked about switching to Fable (answered) and now asks: "지금 오푸스와 페이블 최신버전 토큰 가격차이부터 알려줘". This has not been answered yet.
+
+9. Optional Next Step:
+   Load the claude-api skill. Its trigger says to read it first for any LLM pricing question and never answer from memory. Then answer in Korean 해요체 with the per-token input and output prices of Opus 5.5 (claude-opus-5-5) and Fable 5.2 (claude-fable-5-2) and the difference between them. No other work.
+</summary>
+
+## 2026-11-11 18:31 (자동 압축, 세션 798ac9d3)
+
+<analysis>
+This session was started by another session (local_574c16bf-bec5-4daf-89a0-78a66072c6b6) to work on the Side A English learning app (learn-english repo, Capacitor-wrapped web app, sounds on Cloudflare R2). Replies to the user must be in Korean, 해요체. Do not commit. There are 56 uncommitted changes in the working tree from other work; do not touch them.
+
+The work went in this order:
+
+1. **Podcast speaker names.**
+   - The podcast timelines (`audio/podcast/r*-*.json`) already had a `speaker` field.
+   - Edited `template.html` `lineHtml` to show the name.
+   - The user then said only The Replay needs names (it has 2 people). Changed the condition to `(E.cast || []).length > 1`.
+   - Built the app and installed it on the phone. The phone was connected through a wireless adb pairing QR code, which the user asked for.
+   - Recorded the decision in `side-a-podcasts.md`.
+
+2. **Removed Words from the app.**
+   - `build_page.py`: `WORDS_IN_APP = False`.
+   - `template.html`: commented out the Words 1 entry in `WORDS`; `renderHome` now filters out empty shelves.
+   - Installed on the phone; updated the docs.
+
+3. **Wi-Fi only bug.**
+   - Downloads still worked on mobile data because Android WebView does not provide `navigator.connection.type`.
+   - Added the `@capacitor/network` plugin and an `onCellular()` function; the check also runs during the download loop.
+   - The user confirmed it works ("ㅇㅇ 확인완료, 성공이야").
+
+4. **Figma work** (file EN-AudioBook, key 31ndvuyn7Zkf4sScTUgvjq).
+   - Merged page 03 into 02 and deleted page 03.
+   - Removed the Words shelf from home; moved Words screen 13 to the 99 보관 page.
+   - Created screens 14–19.
+   - Fixed the album play button triangle: its stroke (#0b0b0b) differed from its fill, so it looked like a border.
+   - Updated the cover page index and `side-a-app-screens.md`.
+   - The user then asked me to answer in Korean ("한글롬\대답해"); I re-answered in Korean.
+
+5. **Six feedback questions.** Answered in Korean (example fillers, on-demand TTS with caching, game audio, shadowing commentary, 3-mode lyrics, earphone unplug).
+
+6. **"지금 고쳐 줘"** — fix the earphone-unplug behavior.
+   - Edited `MainActivity.java` with a BECOMING_NOISY receiver.
+   - Added a `sidea-noisy` listener in `template.html`.
+   - Rebuilt `build_page` / `build_pwa`.
+   - Was in the middle of browser verification: the server had died and was restarted; script clicks don't start playback, so I set up a patched play hook and was about to do a real click at (512, 384).
+   - Still to do: Android APK build and install, and the doc update.
+
+Build commands:
+- `python build_page.py`
+- `python build_pwa.py`
+- `node scripts/copy-web.mjs`
+- `npx cap sync android`
+- In `side-a/android`, with `JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"`: `.\gradlew.bat assembleRelease -q`
+- `adb -s 192.168.35.135:46515 install -r --user 0 app\build\outputs\apk\release\app-release.apk`
+</analysis>
+
+<summary>
+1. Primary Request and Intent:
+   - The original task came from the parent session: add speaker names to podcast lyric lines, the same way shadowing does it.
+     - Verify in the browser, rebuild the app and install with `adb install --user 0`, and record decisions in `docs/superpowers/specs/side-a-podcasts.md`.
+     - Don't commit. Don't touch the 56 unrelated uncommitted changes.
+     - Ask before any paid ElevenLabs work.
+     - Reply in Korean 해요체.
+   - The user refined this: only The Replay needs speaker names (2 hosts); Seoul, Actually (Maddie alone) gets none.
+   - The user asked for a QR code to connect the phone (done via wireless adb pairing).
+   - "words는 일단 앱에서 제거해줘" — done.
+   - Wi-Fi only setting still allowed downloads on mobile data — fixed. The user confirmed success.
+   - Figma work in the EN-AudioBook file:
+     - More screens: album/tracklist and player screens for podcast and shadowing, plus one more shadowing lyric screen.
+     - Remove WORDS.
+     - Merge page "02 화면 · 앱 개발 버전" with "03 세부 화면 · 상태".
+     - Fix the white border on the album's big play-button triangle.
+     - All done.
+   - "한글롬\대답해" — answer in Korean.
+   - Six feedback questions were answered in Korean (example fillers, ElevenLabs on-demand caching, game audio, shadowing commentary, 3-mode lyric display, earphone unplug).
+   - Latest request: **"지금 고쳐 줘"** — make playback pause when earphones are unplugged or Bluetooth disconnects, like Spotify.
+
+2. Key Technical Concepts:
+   - Capacitor 8 Android app wrapping a web page. The pipeline is `template.html` → `build_page.py` → `app/episode-01.html` → `build_pwa.py` → `web/index.html` (adds the charset meta) → `side-a/scripts/copy-web.mjs` → `www/` → cap sync → gradle.
+   - Gradle needs JDK 21: `JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"`. `npm run apk` fails at the `gradlew.bat` step, so run gradle directly.
+   - The phone is on wireless adb at `192.168.35.135:46515`; install with `--user 0`.
+   - The service worker caches the PWA test server. Unregister it and clear caches before reloading.
+   - Capacitor plugins are called with `Capacitor.nativePromise('Plugin','method',{})`.
+   - Android `AudioManager.ACTION_AUDIO_BECOMING_NOISY` broadcast → `evaluateJavascript` dispatches the window event `sidea-noisy`.
+   - Figma Plugin API through `use_figma`; `skillNames` must include "figma-use,figma-generate-design".
+   - Play-button triangle fix: the stroke color matches the fill (#121212).
+   - Test servers come from `.claude/launch.json`: `story-pwa` (port 8765, `spikes/episode-01/web`) and `story-app` (8781). `app/episode-01.html` has no charset meta, so test via `story-pwa`.
+
+3. Files and Code Sections:
+   - **`spikes/episode-01/app/template.html`**
+     - In `lineHtml`, after the shadowing speaker line:
+       ```js
+       /* 팟캐스트도 둘 이상이 대화하는 화(The Replay)는 쉐도잉과 같은 모양으로 화자 이름을 단다. ... 매디 혼자 말하는 Seoul, Actually에는 달지 않는다. 2026-11-10 성범 요청 */
+       else if (albumOf(E.course).pod && (E.cast || []).length > 1 && l.speaker) t = `<span class="who">${esc(l.speaker)}:</span> ${t}`;
+       ```
+     - The Words 1 entry in `WORDS` is commented out (`// { name: '단어 1', ...`) with a comment explaining it was removed.
+     - `renderHome`: `SHELVES.filter(([, list]) => list.length).map(...)`.
+     - Added before `albumDownload`:
+       ```js
+       async function onCellular() { const C = window.Capacitor;
+         if (C && C.isNativePlatform && C.isNativePlatform() && C.isPluginAvailable('Network')) {
+           try { const s = await C.nativePromise('Network', 'getStatus', {}); return s.connectionType !== 'wifi' } catch { return true } }
+         return !!(navigator.connection && navigator.connection.type === 'cellular'); }
+       ```
+     - In `albumDownload`: `const WIFI_MSG = 'Wi-Fi only is on. Connect to Wi-Fi to download.'; if (S.wifi && await onCellular()) return toast(WIFI_MSG);`
+     - In the worker loop: `if (S.wifi && await onCellular()) throw Object.assign(new Error('cellular'), { name: 'WifiOnly' });`
+     - In the catch: `if (e.name === 'WifiOnly') { ac.abort(); toast(WIFI_MSG) } else if (e.name !== 'AbortError') toast(...)`
+     - Latest change, after `const togglePlay = () => a.paused ? play() : a.pause();`:
+       ```js
+       /* 이어폰을 빼거나 블루투스 이어폰이 끊기면 멈춘다. 안드로이드 앱(MainActivity)이 sidea-noisy를 보낸다. 2026-11-11 성범 제보 */
+       window.addEventListener('sidea-noisy', () => { if (!a.paused) a.pause() });
+       ```
+   - **`spikes/episode-01/build_page.py`**
+     - Words loop gated:
+       ```python
+       # 2026-11-10 성범 요청으로 Words는 일단 앱에서 뺐다. ...
+       WORDS_IN_APP = False
+       for d in sorted((HERE / "audio" / "words").glob("ep[0-9][0-9]")) if WORDS_IN_APP else []:
+       ```
+   - **`side-a/android/app/src/main/java/com/seongbeom/sidea/MainActivity.java`** (latest change)
+     - Added imports: `BroadcastReceiver`, `Context`, `Intent`, `IntentFilter`, `AudioManager`.
+     - Receiver field:
+       ```java
+       private final BroadcastReceiver noisy = new BroadcastReceiver() {
+           @Override public void onReceive(Context context, Intent intent) {
+               if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction()) && getBridge() != null) {
+                   getBridge().getWebView().evaluateJavascript("window.dispatchEvent(new Event('sidea-noisy'))", null); } } };
+       ```
+     - In `onCreate` after `super.onCreate`:
+       `ContextCompat.registerReceiver(this, noisy, new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY), ContextCompat.RECEIVER_NOT_EXPORTED);`
+     - Added `onDestroy`: `try { unregisterReceiver(noisy); } catch (IllegalArgumentException ignored) { } super.onDestroy();`
+   - **`side-a/package.json`**: added `"@capacitor/network": "^8.0.1"`.
+   - **Docs updated:**
+     - `docs/superpowers/specs/side-a-podcasts.md`: 화자 표시 paragraph.
+     - `side-a-words.md`: "지금 상태: 앱에서 뺐다" note.
+     - `2026-11-07-story-audio-english-design.md`: Words table row now reads "1화만 완료, 2026-11-10 앱에서 일단 뺌".
+     - `side-a-app-delivery.md`: Wi-Fi only explanation with `@capacitor/network`.
+     - `side-a-app-screens.md`: "Figma 화면 정리 (2026-11-11)" bullet.
+   - **Figma EN-AudioBook changes:**
+     - Page 03 section 247:775 moved into page 02 at y=1460; page 03 deleted.
+     - Home 117:55: Words shelf removed.
+     - Frame 299:2036 moved to page 99 보관.
+     - New frames in section 121:528:
+       - 14 앨범 · 팟캐스트 — 329:1956
+       - 15 재생 · 팟캐스트 — 329:2046
+       - 16 재생 · 쉐도잉 — 329:2237
+       - 17 쉐도잉 따라 하기 — 329:2431
+       - 18 트랙리스트 시트 · 팟캐스트 — 329:2625
+       - 19 트랙리스트 시트 · 쉐도잉 — 329:2920
+     - Play button component 306:23: vector stroke fixed.
+     - Cover page index updated.
+
+4. Errors and fixes:
+   - **Browser syntax error on `app/episode-01.html`:** the file has no charset meta. Fixed by using `build_pwa.py` output on `story-pwa`.
+   - **Service worker served stale code:** unregister it and delete caches, then reload.
+   - **`npm run apk` gradlew.bat not found, then "invalid source release: 21":** run `.\gradlew.bat` directly with `JAVA_HOME` set to Android Studio jbr.
+   - **Phone not connected:** generated an adb wireless pairing QR (`WIFI:T:ADB;S:name;P:pw;;`) with a background script that polled `adb mdns services`, paired, and connected. The QR file was deleted afterwards.
+   - **User feedback:**
+     - Seoul, Actually should not get speaker names.
+     - Respond in Korean, not English.
+   - **Current verification issues:**
+     - The test server died ("navigation denied"); restarted `story-pwa`.
+     - The audio element isn't in the DOM and `a` isn't globally accessible. Script clicks don't start playback, so I hook `HTMLMediaElement.prototype.play` (stored at `window.__op`, element in `window.__el`, muted) and need a real click.
+
+5. Problem Solving:
+   - Speaker labels, Words removal, Wi-Fi only, and the Figma screens are all solved and verified. Speaker labels, Words removal, and Wi-Fi only are installed on the phone.
+   - The earphone-unplug fix code is written. Browser verification is in progress; the APK build, phone install, and doc update are pending.
+
+6. All user messages:
+   - Initial task (from the parent session): add podcast lyric speaker names like shadowing; verify; build and install with `adb install --user 0`; record in `side-a-podcasts.md`; don't commit; don't touch the other 56 changes; ask before paid ElevenLabs; answer in Korean 해요체.
+   - "더 리플레이 팟캐스트 채널이 지금 2명이라 화자가 필요해"
+   - "접속할수있는 qr코드를 줘봐"
+   - "연결했는데"
+   - "words는 일단 앱에서 제거해줘,"
+   - "그리고 지금 설정에서 와이파이 온리 켜놔도 데이터상태일때 사운드파일 다운로드가능한상태임"
+   - "ㅇㅇ 확인완료, 성공이야"
+   - "지금 피그마에 화면을 더 만들어줘, 쉐도잉, 팟캐스트의 트랙리스트도 나오는 화면이랑, 재생화면도 팟캐스트, 쉐도잉, 그리고 WORDS는 빼줘 가사나오는건 쉐도잉 부분으로 하나 더 피그마에 그려줘"
+   - "그리고 지금 앨범 트랙리스트 위에 큰 재생버튼 삼각형에 흰색 보더ㅏ라인들어가있어"
+   - "02 화면 · 앱 개발 버전 03 세부 화면 · 상태 합쳐"
+   - "한글롬\대답해"
+   - The six-question feedback message (1: example fillers like sorry/wait/hi — intended or mistake; 2: ElevenLabs on-demand generation plus local cache; 3: game listening audio efficiency; 4: shadowing needs some Korean commentary but limited scope; 5: lyrics all / English only / Korean only modes; 6: earphone unplug keeps playing on the speaker; 7: give feedback so far).
+   - "지금 고쳐 줘"
+
+7. Pending Tasks:
+   - Finish the earphone-unplug fix:
+     - Browser check that the `sidea-noisy` event pauses playback.
+     - Build the APK (copy-web, cap sync, gradle with JDK 21) and install on the phone with `--user 0`.
+     - Record it in a design doc (likely `side-a-app-delivery.md` or `side-a-app-screens.md`).
+     - Call `wrap_up`, then report in Korean. No commit.
+
+8. Current Work:
+   - Verifying the earphone-unplug fix in the browser (tab "seed", http://localhost:8765/, `story-pwa` restarted).
+   - The last script hooked `HTMLMediaElement.prototype.play` (saved in `window.__op`, element in `window.__el`, muted) and scrolled the first track button `[data-play]` into view at about (512, 384) in a 1024×768 viewport.
+   - The Small Talk album (`data-album="5"`) had been opened by the earlier script.
+   - Next: real-click that track, confirm it's playing (`window.__el.paused === false` / `body.playing`), dispatch `window.dispatchEvent(new Event('sidea-noisy'))`, and confirm it paused.
+
+9. Optional Next Step:
+   - The user's latest request was "지금 고쳐 줘" (fix earphone-unplug pause).
+   - Next actions:
+     - Real-click the track at (512, 384) with `mcp__Claude_Browser__computer` `left_click`, then run JS to check `window.__el.paused` before and after dispatching `sidea-noisy`, and restore `HTMLMediaElement.prototype.play = window.__op`.
+     - Build and install:
+       - In `side-a`: `node scripts/copy-web.mjs; npx cap sync android`
+       - In `side-a/android`: `$env:JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"; .\gradlew.bat assembleRelease -q`
+       - Install: `adb -s 192.168.35.135:46515 install -r --user 0 app\build\outputs\apk\release\app-release.apk`
+     - Add a doc note, call `wrap_up`.
+     - Report in Korean, and ask the user to test by unplugging earphones or disconnecting Bluetooth while playing.
+</summary>
+
+## 2026-11-11 19:13 (자동 압축, 세션 798ac9d3)
+
+<analysis>
+Chronological recap since the previous summary:
+
+1. Earphone-unplug fix:
+   - Browser check passed: playing, then the `sidea-noisy` event fired, then paused.
+   - Built the APK and installed it. The phone's adb address had changed to the mdns name `adb-R3CX108LP4R-1HcszY._adb-tls-connect._tcp` (192.168.35.135:45003).
+   - Doc note added to side-a-app-delivery.md §6. The user confirmed it works.
+
+2. Podcast lyrics 3 modes:
+   - The user asked for item 5 (lyric display all / English / Korean), podcast only, since shadowing awaits the Korean commentary decision.
+   - Implemented in template.html: S.lyr, LYR, the shLyr sheet, CSS classes lyr-en / lyr-ko, who label inside .ko, and the isPod fix to exclude shadow/words.
+   - Built and installed. Docs updated: side-a-podcasts.md, side-a-shadowing.md, side-a-app-screens.md.
+
+3. Shadowing repeat-line cleanup:
+   - The user asked to remove filler interjections from the repeat lines.
+   - Analyzed 210 ★ lines and created content/stories/shadowing-repeat-review.md: 53 cuts, 2 removals, 155 unchanged.
+   - The user worried about ffmpeg cut naturalness. Answered: front/back cuts only; the middle cut was changed to a front cut.
+
+4. Trim samples:
+   - Cut 6 samples and built an artifact comparison page.
+   - Mistake: #3 used the wrong clip (d5 instead of d6). Fixed after the user pointed it out, and from then on clips are mapped via timeline.json.
+   - Sound didn't play with data: URIs. Switched to published files with Web Audio play buttons.
+   - The user said play/stop was erratic, so switched to native `<audio controls>` with relative files.
+   - Added 10 more samples (7–16). The user said "오 좋다".
+
+5. Korean commentary:
+   - Gave ideas, then a full script for Small Talk ep1 in content/stories/shadowing-commentary-sample.md.
+   - The user said "1화 만들어 봐". Generated 4 Mina clips with eleven_v4 for 230 credits and built sample-ep01.mp3 (1:39 vs 1:12).
+   - Added the sample to the top of the artifact.
+
+6. Later questions:
+   - The user asked for the script again; shown.
+   - Asked how many expressions per track: 3.
+   - Confirmed the plan (cut + generate Korean + update script).
+
+7. Latest:
+   - The user wants a different Korean female voice for the shadowing commentary.
+   - Listed voices and downloaded 10 free previews into trim-test/voices/. Next: put them on the artifact page for comparison.
+
+Artifact URL: https://claude.ai/artifact/Gfd2ry7njMcpc2Q526fHCN
+- File path: D:\project\learn-english\spikes\episode-01\audio\shadowing\trim-test\artifact.html
+- Publish with root D:\project\learn-english and files mapping.
+
+Voice IDs:
+- jennie z6Kj0hecH20CdetSElRT
+- jiyoung AW5wrnG1jVizOYY7R1Oo
+- hanaim 8jHHF8rMqMlg8if2mOUe
+- jisoo iWLjl1zCuqXRkW6494ve
+- kanna 5I7B1di44aCL15NkP0jn
+- yooni n2fbxG88jqAoaVPUy3IG
+- hanna zgDzx5jLLCqEp6Fl7Kl7
+- rumi sf8Bpb1IU97NI9BHSMRf
+- hanalee QPFsEL6IBxlT15xfiD6C
+- annie Lb7qkOn5hF8p7qfCDH8q
+- Others in the list: Seulki ksaI0TCD9BstzEzlxj4q, Selly Han ETPP7D0aZVdEj12Aa7ho, Sunny 4p0HBzAAGyju0nYfNntV, Sian 5n5gqmaQi9Ewevrz7bOS, Jini 0oqpliV6dVSr9XomngOW, BOMISORI 7oLyBHyhxAjrctX6ZQlw, salang mYk0rAapHek2oTw18z8x, Sola KlstlYt9VVf3zgie2Oht.
+
+Constraints:
+- Don't commit.
+- Don't touch the unrelated uncommitted changes.
+- Ask before paid ElevenLabs. Generating samples in a new voice costs credits.
+- Answer in Korean 해요체.
+- Session started from parent session local_574c16bf-bec5-4daf-89a0-78a66072c6b6.
+</analysis>
+
+<summary>
+1. Primary Request and Intent:
+   - **Original task** (from the parent session `local_574c16bf-bec5-4daf-89a0-78a66072c6b6`): add podcast lyric speaker names like shadowing.
+     - Verify, build, and install with `adb install --user 0`.
+     - Record in `side-a-podcasts.md`.
+     - **Don't commit. Don't touch the 56 unrelated uncommitted changes. Ask before any paid ElevenLabs work.**
+     - Reply in Korean 해요체.
+   - **Earlier work, all done and confirmed by the user:**
+     - Speaker names only on The Replay.
+     - QR pairing.
+     - Words removed from the app.
+     - Wi-Fi-only fix.
+     - Figma screens.
+   - **This segment:**
+     - Earphone-unplug pause: done, user confirmed.
+     - Podcast lyrics 3 modes (podcast only; shadowing waits on the commentary decision): done.
+     - Shadowing repeat-line cleanup: a review table was made; the user liked the trim samples ("오 좋다").
+     - Korean commentary for shadowing: ideas, an ep1 script, and a generated ep1 sample (230 credits, approved by "1화 만들어 봐").
+   - **Plan the user agreed to** ("한국어만 생성하고 대본만 업데이트 하면되겠네, 음성자르고"):
+     - Cut audio per the table.
+     - Write Korean commentary scripts, reviewed per album before any voice generation.
+     - Generate the Korean voice (paid, about 16k credits total, done album by album).
+     - Rebuild, upload to R2, and install the app.
+   - **Latest request:** "여기선 음성모델 다른걸로 쓰고싶어 한국어말야. 다른 여성의 목소리로" — use a different Korean female voice (not Mina) for the shadowing commentary.
+
+2. Key Technical Concepts:
+   - **Pipeline:**
+     - `template.html` → `build_page.py` → `build_pwa.py` → `web/`
+     - `side-a/scripts/copy-web.mjs` → `npx cap sync android` → gradle
+     - Gradle needs `$env:JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"` and `.\gradlew.bat assembleRelease -q`.
+     - Install: `adb -s adb-R3CX108LP4R-1HcszY._adb-tls-connect._tcp install -r --user 0 app\build\outputs\apk\release\app-release.apk`. The old IP:port changed; use `adb mdns services` to find the device.
+   - **Browser test** uses the `story-pwa` server (port 8765). Unregister the service worker and clear caches before reloading.
+   - **Shadowing build** is `spikes/episode-01/build_shadowing.py`:
+     - Clips d1..dN follow script line order (A and B lines); g1/g2 are the guides.
+     - Timeline sections are talk / repeat / replay.
+     - Map lines through `timeline.json` talk lines, not by hand-counting.
+   - **ffmpeg trimming:**
+     - Find the cut with per-10ms RMS: `asetnsamples=480,astats=metadata=1:reset=1,ametadata=print:key=lavfi.astats.Overall.RMS_level`.
+     - Front cut: `atrim=start=T,asetpts=PTS-STARTPTS,afade=t=in:d=0.015,adelay=100:all=1`.
+     - Back cut: `atrim` plus a 0.05s fade-out.
+     - Never cut out the middle of a line.
+   - **ElevenLabs MCP (`67a9ac48`, paid account):**
+     - `creative_generate_speech` with model `eleven_v4`, `generations_count` 1, prompt prefixed `[casual]`. Never retry by calling it twice.
+     - `creative_get_generations` returns `full_res_url`; download it with curl.
+     - `creative_list_voices` preview_urls are free.
+   - **Artifact limits:**
+     - data: URI audio does not play; publish the mp3s as `files` and use relative paths.
+     - Native `<audio controls>` is used now.
+
+3. Files and Code Sections:
+   - **`spikes/episode-01/app/template.html`** (podcast lyric modes):
+     - CSS:
+       ```css
+       .ln[data-s="dialogue"] .ko, body.lyr-en .ln .ko { display: none }
+       .ln .ko .who { display: none }
+       body.lyr-ko .ln:has(.ko) .en { display: none }
+       body.lyr-ko .ln .ko { margin-top: 0; font: 700 var(--lyr)/1.5 var(--sans) }
+       body.lyr-ko .ln .ko .who { display: inline }
+       ```
+     - The settings row became `<button class="row" data-sheet="lyr"><b>Podcast lyrics</b>…<em class="lyrVal">`.
+     - The More sheet `#optKo` became a `data-sheet="lyr"` button labeled "Lyrics".
+     - New sheet `#shLyr` with `#lyrList`. `SHEETS` gained `lyr: 'shLyr'`, and the render code got `if (t === 'lyr') renderLyr();`.
+     - JS:
+       ```js
+       const LYR = { all: 'English + Korean', en: 'English only', ko: 'Korean only' };
+       const isPod = e => { const al = albumOf(e.course); return !!al.pod && !al.shadow && !al.words };
+       function syncKo() { document.querySelectorAll('.lyrVal').forEach(b => b.textContent = LYR[S.lyr]);
+         document.body.classList.toggle('lyr-en', isPod(E) && S.lyr === 'en'); document.body.classList.toggle('lyr-ko', isPod(E) && S.lyr === 'ko'); }
+       ```
+     - `renderLyr()` builds the opt buttons with `data-lyr`. The click handler for `data-lyr` sets `S.lyr`, saves, calls syncKo, retiks the lyrics, and closes the sheets.
+     - Migration: `if (!LYR[S.lyr]) S.lyr = S.ko === false ? 'en' : 'all';`. `save()` stores `lyr`.
+     - The `data-ko` toggle handler was removed.
+     - In `lineHtml`, the speaker label is duplicated into `.ko`:
+       ```js
+       const who = (t.match(/^<span class="who">[^<]*<\/span> /) || [''])[0];
+       ```
+     - Earlier in the session: the `sidea-noisy` listener pauses playback.
+   - **`side-a/android/.../MainActivity.java`**: BECOMING_NOISY receiver (done earlier; shown in the file read).
+   - **Docs updated:**
+     - `docs/superpowers/specs/side-a-app-delivery.md` §6: earphone-unplug note.
+     - `side-a-podcasts.md`: the 3-mode paragraph.
+     - `side-a-shadowing.md`: Korean meaning always shown for now.
+     - `side-a-app-screens.md`: More sheet Lyrics and Playback Podcast lyrics.
+   - **`content/stories/shadowing-repeat-review.md`** (new):
+     - Per-album table of repeat-line trims: 53 cuts and 2 removals (About Me 2화 spelling, Eating Out 6화 "Yes, please").
+     - Criteria, method (ffmpeg, fade-in, no middle cuts), and cost.
+     - Small Talk 9화 changed to "It's not far from here." (front cut).
+   - **`content/stories/shadowing-commentary-sample.md`** (new):
+     - Small Talk ep1 commentary script: a scene intro plus 3 key-line commentaries.
+     - Guides stay in English, the narrator doesn't read English, and pronunciation tips are written in Hangul.
+     - Records the sample generation: Mina, eleven_v4, 230 credits (56+52+72+50). Clips are in `audio/shadowing/small-talk/ep01/commentary/n1~n4.mp3`; the joined sample is `trim-test/sample-ep01.mp3`.
+     - The four narrator texts:
+       - n1 "아침에 회사 1층 카페에서 아는 동료를 만났어요. 가볍게 인사하고 헤어지는 대화예요."
+       - n2 "'잘 지내요?'라는 뜻이에요. 아는 사람을 만났을 때 가볍게 건네는 인사예요."
+       - n3 "'꽤 좋아요. 커피 좀 사러 왔어요.'라는 말이에요. 커피 사는 부분은 '그래빙썸 커피'처럼 붙여서 말해 보세요."
+       - n4 "'무슨 말인지 알아요'라는 뜻이에요. 상대 말에 맞장구칠 때 편하게 써요."
+   - **`spikes/episode-01/audio/shadowing/trim-test/`**:
+     - `1..16-before.mp3` / `-after.mp3` (trim samples).
+     - `sample-ep01.mp3` and `sample-ep01-old.mp3`.
+     - `artifact.html`, the comparison page:
+       - Sections: a commentary sample at the top, "앞부분 자르기 (1~6)", and "두 번째 묶음 (7~16)".
+       - Native `<audio controls preload="metadata" src="X.mp3">`.
+       - A script pauses the other players when one plays and shows #err on error.
+     - `voices/` holds the 10 downloaded voice previews: jennie, jiyoung, hanaim, jisoo, kanna, yooni, hanna, rumi, hanalee, annie.
+   - **Scratch scripts:**
+     - `E:\Temp\claude\12f846cde673f19c\798ac9d3-0f6e-4681-8379-37e6a3a97a1b\scratchpad\sample.py` builds the commentary sample. It imports build_shadowing as B, trims the narrator clips with silenceremove, and front-cuts d1 at 0.58.
+     - `find.py` maps lines through timeline.json and lists RMS dips.
+   - **Trim cut points used:**
+     | # | Clip | Cut |
+     |---|---|---|
+     | 1 | small-talk ep02 d5 | 0.62 |
+     | 2 | daily ep06 d4 | 0.62 |
+     | 3 | about-me ep09 d6 | 1.18 |
+     | 4 | social ep06 d3 | 0.70 |
+     | 5 | speak-up ep05 d2 | 0.92 |
+     | 6 | eating ep01 d6 | keeps 0–0.95 (back cut) |
+     | 7 | small-talk ep06 d6 | 0.93 |
+     | 8 | small-talk ep10 d1 | 0.67 |
+     | 9 | daily ep01 d6 | 0.58 |
+     | 10 | daily ep09 d4 | 2.26 |
+     | 11 | about-me ep07 d6 | 1.34 |
+     | 12 | eating ep07 d4 | 1.57 |
+     | 13 | social ep02 d1 | 0.56 |
+     | 14 | social ep08 d6 | 0.70 |
+     | 15 | speak-up ep10 d4 | 1.78 |
+     | 16 | swearing ep08 d2 | 1.02 |
+
+4. Errors and fixes:
+   - **adb device not found:** the wireless port changed. Used `adb mdns services` and the mdns device name.
+   - **Korean-only mode also applied to shadowing:** shadow albums carry `pod: true`. Fixed isPod to exclude `shadow` and `words`.
+   - **Wrong clip for sample #3:** user said "About Me 9화 음성이랑 예문이 아에 다른데". I had counted d5 instead of d6, because the episode starts with B. Recut from d6, and from then on use timeline.json matching.
+   - **Artifact had no sound** (user: "소리가 다 안나와"): data: URIs were blocked. Switched to published files.
+   - **Play/stop erratic** (user: "재생정지가 지멋대로야"): the Web Audio buttons were the cause. Replaced them with native audio players.
+   - **Script syntax error** in javascript_tool (an unbalanced paren): simplified the script.
+
+5. Problem Solving:
+   - **Earphone-unplug pause:** verified and installed.
+   - **Podcast lyric modes:** verified in the browser and installed; the phone hasn't been checked directly.
+   - **Trim approach:** validated by the user.
+   - **Commentary sample:** generated. Its narrator lines are 5.5–8.7s, which may feel long.
+   - **Voice selection for commentary:** in progress.
+
+6. All user messages:
+   - "ㅇㅇ 재생멈추는거확인했어. 그다음, 지금 바로할수있는건 5번 가사보기를 3개로 쪼개는건 음성을 지금 할수있는거지? 다만, 지금 쉐도잉은 한국어해설을 추가하냐 마냐 결정해야하니까, 팟캐스트만 해줘"
+   - "쉐도잉도 지금 따라해보세요 하는 그 학습 어휘가 너무 필요없는 감탄사나 덧붙힌 말들은 빼고 알짜배기만 남길수있어? 아니면 지금 쉐도잉 상태가 맞는거야 ?"
+   - "표 만들어 줘"
+   - (mid-turn) "근데 잘라내면 ffmpeg 로 오디오파일을 잘라내는 방식이야? 삑 하는 소리 혹은 부자연스럽거나 하지; 않을까 만약 앞이나 뒤를 자르면 괜찮을수도있는데 중간을 덜어낸다면 자연스러움이 유지될지 좀 걱정이라"
+   - "응 잘라줘봐 몇개만, 원본이랑 수정본이랑 각각 보여줘"
+   - "html 오디오플레이어형식으로 바로들어볼수있게해줘"
+   - "About Me 9화 음성이랑 예문이 아에 다른데? 다른걸 했음?"
+   - "소리가 다 안나와"
+   - "이제 나와"
+   - "10개만 더 새로운걸로 해볼래?"
+   - "오 좋다. 이렇게 하면 쉐도잉은 추가로 한국어에 대한 해설만 생성해서 보강 수정하면되는거네 ?"
+   - "그럼 한국어 해설을 어떤식으로 넣으면 좋을지 아이디어줘봐"
+   - "예를들어 어떻게 하면좋을지 풀 스크립트 1화만 만들어봐"
+   - "1화 만들어 봐"
+   - "아티팩트 만든거 재생정지가 지멋대로야 내가컨트롤하기가어려워"
+   - "다시 대본보여줘봐"
+   - "한 트랙당 배울 어휘가 몇개야 세도잉"
+   - "무튼 그럼 이 기준으로 작업한다하면 한국어만 생성하고 대본만 업데이트 하면되겠네, 음성자르고,"
+   - "여기선 음성모델 다른걸로 쓰고싶어 한국어말야. 다른 여성의 목소리로"
+
+7. Pending Tasks:
+   - Choose a new Korean female voice for the shadowing commentary. Present the free previews and let the user pick. Any paid generation of the sample lines in a new voice needs user consent first.
+   - Then the agreed plan:
+     - Trim 53 lines and remove 2, matching each line through timeline.json.
+     - Write commentary scripts for 70 episodes, reviewed per album.
+     - Generate the commentary voice (paid, ask first, album by album, about 16k credits).
+     - Move the commentary flow into `build_shadowing.py` and update the timeline/lyrics.
+     - Upload to R2, build, and install the app.
+     - Update the docs.
+     - Later: shadowing lyric 3 modes.
+   - Record the voice choice in `docs/superpowers/specs/side-a-voice.md` (voice table) once decided.
+   - No commits.
+
+8. Current Work:
+   - The user asked: "여기선 음성모델 다른걸로 쓰고싶어 한국어말야. 다른 여성의 목소리로".
+   - I called `creative_list_voices` (ko, female) and downloaded 10 free preview mp3s into `D:\project\learn-english\spikes\episode-01\audio\shadowing\trim-test\voices\`.
+   - Each file's voice ID and description:
+
+     | File | Voice | ID | Description |
+     |---|---|---|---|
+     | jennie | Jennie | z6Kj0hecH20CdetSElRT | youthful, informative |
+     | jiyoung | JiYoung | AW5wrnG1jVizOYY7R1Oo | warm, clear Seoul narration |
+     | hanaim | Han Aim | 8jHHF8rMqMlg8if2mOUe | casual podcast talk |
+     | jisoo | JISOO | iWLjl1zCuqXRkW6494ve | lively news-style |
+     | kanna | Kanna | 5I7B1di44aCL15NkP0jn | friendly, like a friend |
+     | yooni | Yooni | n2fbxG88jqAoaVPUy3IG | bright, crisp |
+     | hanna | Hanna | zgDzx5jLLCqEp6Fl7Kl7 | bright, warm |
+     | rumi | Rumi Oh | sf8Bpb1IU97NI9BHSMRf | warm, clear |
+     | hanalee | Hana Lee | QPFsEL6IBxlT15xfiD6C | cheerful, quick |
+     | annie | Annie | Lb7qkOn5hF8p7qfCDH8q | soft narration |
+
+   - Durations range from 3.2s to 20.2s. Each preview speaks different text.
+
+9. Optional Next Step:
+   - Add a "해설 목소리 후보" section to the top of `artifact.html` with a native `<audio controls>` for each of the 10 previews (name and short description).
+   - Publish to the same artifact with `root` D:\project\learn-english and a files mapping `voices/<name>.mp3` → `spikes/episode-01/audio/shadowing/trim-test/voices/<name>.mp3`.
+   - Then ask the user (in Korean 해요체) to pick one or two. Offer to generate the same ep1 commentary lines in the chosen voice for a fair comparison, stating the cost first (about 230 credits per voice, paid) and generating only after the user agrees.
+</summary>

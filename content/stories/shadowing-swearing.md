@@ -57,6 +57,7 @@ B: Oh no. Is there a phone number on the car?
 
 A: No, nothing. How the hell am I supposed to get out? ★
 뜻: 아니, 없어. 나 대체 어떻게 나가라는 거야?
+따라: How the hell am I supposed to get out? | 나 대체 어떻게 나가라는 거야? | 앞 1.37
 소리: 질문 가운데 the hell을 넣으면 '대체'라는 느낌이 돼요.
 
 B: Maybe call the building office?
@@ -64,6 +65,7 @@ B: Maybe call the building office?
 
 A: Good idea. I'm gonna be late as hell. ★
 뜻: 좋은 생각이야. 나 진짜 엄청 늦겠다.
+따라: I'm gonna be late as hell. | 나 진짜 엄청 늦겠다. | 앞 1.16
 소리: as hell은 '엄청, 진짜'라는 뜻이에요.
 
 B: Just tell your boss what happened.
@@ -138,6 +140,7 @@ B: What? They told you on Friday afternoon?
 
 A: Yeah. And they're not even paying extra. ★
 뜻: 응. 게다가 추가 수당도 안 준대.
+따라: And they're not even paying extra. | 게다가 추가 수당도 안 준대. | 앞 0.86
 
 B: That's messed up.
 뜻: 그건 진짜 아니다.
@@ -215,6 +218,7 @@ B: Hey, you just got off work?
 
 A: Yeah. I'm so fucking tired. ★
 뜻: 응. 피곤해 죽겠어.
+따라: I'm so fucking tired. | 피곤해 죽겠어. | 앞 1.02
 소리: so fucking은 so보다 훨씬 세게 강조하는 말이에요.
 
 B: Long day?
@@ -254,6 +258,7 @@ B: Are you serious? That's a shitty thing to do.
 
 A: Right? It pissed me off so much. ★
 뜻: 그치? 진짜 너무 열받았어.
+따라: It pissed me off so much. | 진짜 너무 열받았어. | 앞 0.73
 소리: piss someone off는 '누구를 열받게 하다'라는 뜻이에요.
 
 B: You should talk to your manager.

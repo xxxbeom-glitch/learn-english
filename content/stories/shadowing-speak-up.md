@@ -49,6 +49,7 @@ B: Fine, whatever.
 
 A: Hey, sorry to bother you, but can you keep it down? ★
 뜻: 저기, 귀찮게 해서 미안한데 좀 조용히 해 줄 수 있어요?
+따라: Sorry to bother you, but can you keep it down? | 귀찮게 해서 미안한데 좀 조용히 해 줄 수 있어요? | 앞 0.56
 소리: keep it down은 '소리를 줄이다'라는 뜻이에요.
 
 B: What? We're not that loud.
@@ -129,6 +130,7 @@ B: Are you serious? Even a kid could do this right.
 
 A: Whoa. Don't talk to me like that. ★
 뜻: 와. 저한테 그렇게 말하지 마세요.
+따라: Don't talk to me like that. | 저한테 그렇게 말하지 마세요. | 앞 0.92
 
 B: I'm just being honest.
 뜻: 그냥 솔직하게 말한 건데요.
@@ -204,6 +206,7 @@ B: Okay. I get why you're upset.
 
 A: Hey, hold on. Let's not fight about this. ★
 뜻: 야, 잠깐만. 이걸로 싸우지 말자.
+따라: Hold on. Let's not fight about this. | 잠깐만. 이걸로 싸우지 말자. | 앞 0.44
 
 B: You started it!
 뜻: 네가 먼저 시작했잖아!
@@ -264,6 +267,7 @@ B: Let's just forget about it.
 
 A: Sounds good. So, are we good? ★
 뜻: 좋아. 그럼 우리 괜찮은 거지?
+따라: Are we good? | 우리 괜찮은 거지? | 앞 1.78
 소리: Are we good?은 다툰 뒤 '우리 이제 괜찮은 거지?' 하고 묻는 말이에요.
 
 B: Yeah, we're good.
@@ -271,6 +275,7 @@ B: Yeah, we're good.
 
 A: Great. Let me buy you a drink. ★
 뜻: 좋아. 내가 한잔 살게.
+따라: Let me buy you a drink. | 내가 한잔 살게. | 앞 0.59
 
 B: Ha, now we're talking.
 뜻: 하, 이제야 말이 통하네.

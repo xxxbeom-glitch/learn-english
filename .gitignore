@@ -13,5 +13,6 @@ spikes/episode-01/web/
 spikes/episode-01/app/*.webm
 spikes/episode-01/app/*.mp3
 spikes/episode-01/app/*.len
+spikes/episode-01/app/game/
 spikes/episode-01/app/episode-01.html
 spikes/episode-01/data-pack/

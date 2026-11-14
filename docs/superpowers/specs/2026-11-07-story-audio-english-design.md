@@ -10,7 +10,7 @@
 |---|---|
 | [side-a-rules.md](side-a-rules.md) | 의도와 실패 기준, 현실감, 대화 자연스러움, 이태원식·요즘말, 슬랭과 욕, 예문과 단어 고르기, 관심사와 유명인, 상황 소재, 해설자 말투, 대본 검수 |
 | [side-a-voice.md](side-a-voice.md) | 음성 엔진(일레븐랩스), 목소리 표, 만드는 규칙과 발음 처리, 효과음 표, 비용, 압축 |
-| [side-a-courses.md](side-a-courses.md) | 초급·심화·고급 75화 목차, 기본동사 묶음 화, 한 화의 짜임, 과정별 차이 표, 만드는 법, 진행 상황 |
+| [side-a-courses.md](side-a-courses.md) | 과정 이름 Level 1~4, Level 1 영어의 뼈대 14화, 초급·심화·고급(Level 2~4) 75화 목차, 기본동사 묶음 화, 한 화의 짜임, 과정별 차이 표, 만드는 법, 진행 상황 |
 | [side-a-shadowing.md](side-a-shadowing.md) | 쉐도잉 트랙 짜임, 앨범 7개, 가사 이름 표시, 정할 것 |
 | [side-a-words.md](side-a-words.md) | 단어 오디오북 Words의 짜임, 한 화 흐름, 1화 기록 |
 | [side-a-podcasts.md](side-a-podcasts.md) | The Replay, Seoul, Actually, Behind the Brand(보류) |
@@ -28,7 +28,7 @@
 
 | 섹션 | 앨범 | 상태 |
 |---|---|---|
-| Basic Expressions | 초급(Beginner), 심화(Intermediate), 고급(Advanced) 각 25화 | 음성 75화 모두 완료 |
+| Basic Expressions | Level 1 영어의 뼈대 14화(새로 만듦), Level 2 초급, Level 3 심화, Level 4 고급 각 25화(2026-11-13 이름 바꿈) | Level 2~4 음성 75화 완료. Level 1은 1화 대본 초안, 과정 이름을 말한 해설 26줄은 '전에 배운'으로 고칠 예정 |
 | Podcasts | The Replay(EP1, EP2), Seoul, Actually(5부) | 완료. Behind the Brand는 대본 초안만, 보류 |
 | Shadowing | Small Talk, 하루 일과, 나를 소개하기, 사람 사이 기술, 식당과 카페, Speak Up, Swear Like a Local 각 10화 | 완료 |
 | Words | Words 1 | 1화만 완료, 2026-11-10 앱에서 일단 뺌 |

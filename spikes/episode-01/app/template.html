@@ -30,6 +30,9 @@
 /* 당겨도 화면 전체가 늘어나거나 움직이지 않게: 안드로이드 늘어남 효과와 당겨서 새로고침을 끈다 */
 html, body { height: 100%; overscroll-behavior: none }
 body { margin: 0; background: var(--bg); color: var(--ink); font: var(--t-body); letter-spacing: -.01em; word-break: keep-all; overflow: hidden }
+/* 길게 눌러도 글자가 선택되거나 복사 메뉴가 뜨지 않게 한다(2026-11-13 성범 요청). 글을 쓰는 칸만 예외 */
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none }
+input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left }
 button:focus-visible { outline: 2px solid var(--hi); outline-offset: 2px; border-radius: 8px }
 h1, h2, h3, p { margin: 0 }
@@ -118,6 +121,23 @@ body:not(.playing) .ic-pause, body.playing .ic-play { display: none }
 .sheet .trk + .trk { border-top: 1px solid rgb(255 255 255 / .08) }
 
 /* 설정: iOS 설정처럼 섹션별 묶음 목록 */
+/* 임시 화면 'Game sounds'(2026-11-13 성범 요청): 게임 문장 소리를 번호 순서대로 하나씩 들어 보며 잘못 잘린 것을 찾는다. 번호는 소리 파일 번호(game/NNNN.webm)와 같다 */
+#sndTabs { position: sticky; top: 0; z-index: 2; display: flex; background: var(--bg); border-bottom: 1px solid rgb(255 255 255 / .08) }
+#sndTabs button { flex: 1; min-height: 48px; font: var(--t-body); color: var(--muted); box-shadow: inset 0 -2px 0 transparent }
+#sndTabs button[aria-selected="true"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink) }
+#sndTabs em { font-style: normal; margin-left: 6px; font-variant-numeric: tabular-nums }
+#sndEmpty { padding: 48px 0; text-align: center; font: var(--t-sub); color: var(--muted) }
+#sndList { list-style: none; margin: 0; padding: 0 0 24px }
+.snd { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 0; border-bottom: 1px solid rgb(255 255 255 / .08); content-visibility: auto; contain-intrinsic-size: auto 60px }
+.snd > em { flex: none; width: 40px; font: var(--t-cap); font-style: normal; color: var(--muted); font-variant-numeric: tabular-nums }
+.snd > span { flex: 1; min-width: 0 }
+.snd b { display: block; font: var(--t-body); color: var(--ink) }
+.snd small { display: block; margin-top: 2px; font: var(--t-sub); color: var(--muted) }
+.snd > button { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--sheet); color: var(--ink); display: grid; place-items: center }
+.snd > button svg { width: 18px; height: 18px }
+.snd > button .p2, .snd > button.on .p1 { display: none }
+.snd > button.on { background: var(--hi); color: #121212 }
+.snd > button.on .p2 { display: block }
 .head { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; padding-top: calc(var(--top) + 2px); padding-bottom: 2px; flex: none; min-height: calc(var(--top) + 48px) }
 .head h1 { font: var(--t-title); text-align: center; letter-spacing: -.02em }
 .grp-t { font: var(--t-cap); color: var(--muted); text-transform: uppercase; letter-spacing: .02em; padding: 24px 16px 8px }
@@ -128,7 +148,6 @@ body:not(.playing) .ic-pause, body.playing .ic-play { display: none }
 .row > span { font: var(--t-body); color: var(--muted); display: flex; align-items: center; gap: 4px; white-space: nowrap }
 .row > span svg { width: 20px; height: 20px; color: var(--muted) }
 .row > span .ck { color: var(--hi) }
-#dlAllV { font-variant-numeric: tabular-nums }
 .grp-d { font: var(--t-sub); color: var(--muted); padding: 8px 16px 0 }
 .row.two { min-height: 60px; padding-block: 10px }
 .row > .row-t { display: block; flex: 1; min-width: 0; text-align: left; white-space: normal; color: var(--ink) }
@@ -156,6 +175,7 @@ body:not(.playing) .ic-pause, body.playing .ic-play { display: none }
 .g-c.ok { box-shadow: inset 0 0 0 1.5px var(--hi) }
 .g-c.bad { color: var(--danger); box-shadow: inset 0 0 0 1.5px var(--danger) }
 .g-c.pop { animation: gpop .16s ease-out }
+.g-lead { background: none; color: var(--muted); pointer-events: none }
 @keyframes gpop { from { transform: scale(1.14) } }
 .g-gap { flex: none; border-radius: 6px; background: rgb(255 255 255 / .08) }
 .g-ghost { position: fixed; left: 0; top: 0; z-index: 60; margin: 0; pointer-events: none; scale: 1.06; box-shadow: 0 8px 24px rgb(0 0 0 / .5); transition: none }
@@ -165,15 +185,51 @@ body:not(.playing) .ic-pause, body.playing .ic-play { display: none }
 /* 답 자리에 올린 카드는 단어 모음에서 보이지 않는다(2026-11-13 성범 요청. 옛: 흐리게 남김). 자리는 비워 둬서 다른 카드가 움직이지 않는다 */
 .g-w.used { visibility: hidden; pointer-events: none }
 .g-foot { flex: none; padding-bottom: 16px }
+/* 진입 화면(2026-11-14 성범 "게임 탭 첫화면을 카드식으로 게임을 고르는 버튼"): 게임마다 카드 한 장. 누르면 그 게임으로 들어간다 */
+#vGame.pick #gHead > .icon { visibility: hidden }
+.g-list { flex: 1; min-height: 0; display: grid; align-content: start; gap: 16px; padding: 16px 0; overflow-y: auto; scrollbar-width: none }
+.g-list::-webkit-scrollbar { display: none }
+/* 큰 카드, 가운데 정렬(2026-11-14 성범 "확실히 큰 카드로", "타이포도 지금보다 큰 레벨로 딱 눈이 가게", "중앙정렬로") */
+.g-card { display: flex; flex-direction: column; align-items: center; width: 100%; padding: 28px 24px 20px; border-radius: 16px; background: var(--raise); text-align: center; transition: transform .1s }
+.g-card .g-ic { width: 64px; height: 64px; flex: none; border-radius: 50%; background: var(--sheet); display: grid; place-items: center }
+.g-card .g-ic svg { width: 30px; height: 30px }
+.g-card .g-ct { display: block; margin-top: 16px; min-width: 0 }
+.g-card b { display: block; font: 700 26px/1.2 var(--sans); letter-spacing: -.025em }
+.g-card .g-ct span { display: block; margin-top: 8px; font: var(--t-body); color: var(--muted) }
+.g-card .g-go { margin-top: 24px }
+/* 빈칸 고르기(2026-11-14 성범 "그걸로 일단 두문제정도만 해서 앱에 개발진행해줘봐"): 문장 한 줄에 빈칸 하나, 아래 보기 네 장(2×2) */
+.g-bl { font: 700 20px/1.8 "Outfit", var(--sans); letter-spacing: -.01em; text-align: center }
+/* 빈칸은 밑줄이 아니라 사각 박스(2026-11-14 성범 "예문의 블랭크가 언더라인이 아니라 사각 박스로") */
+.g-blank { display: inline-block; min-width: 56px; padding: 4px 16px; margin: 2px 0; border-radius: 8px; background: rgb(255 255 255 / .12); color: var(--hi); text-align: center; line-height: 1.3; vertical-align: baseline }
+/* 빈칸 너비는 정답 단어 너비 + 좌우 16(2026-11-14 성범 "빈칸의 너비가 실제 정답과 유사한 너비값으로"). 풀기 전에는 정답 글자를 숨겨서 자리만 잡는다 */
+.g-blank i { font-style: normal; visibility: hidden }
+.g-chs { flex: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+.g-ch { height: 52px; border-radius: 8px; background: var(--sheet); font: var(--t-title); text-align: center; display: grid; place-items: center; transition: transform .1s }
+.g-ch:active { transform: scale(.97) }
+.g-ch.bad { color: var(--danger); background: var(--raise); pointer-events: none }
+.g-ch.ok { background: var(--hi); color: #121212 }
 .g-go { display: block; width: 100%; height: 52px; border-radius: 999px; background: var(--hi); color: #121212; font: var(--t-head); text-align: center; transition: transform .1s }
 .g-go:active { transform: scale(.98) }
 .g-go:disabled { background: var(--raise); color: var(--faint) }
+/* 결과 화면 글자 버튼(2026-11-14 성범 "위아래 2cta인데 쉐이프는 하나만"): 초록 Play again 위에 배경 없는 버튼, 누르면 게임 진입 화면으로 */
+.g-txt { display: block; width: 100%; height: 52px; margin-bottom: 8px; color: var(--ink); font: var(--t-head); text-align: center }
+.g-txt:active { opacity: .6 }
+.g-n { color: var(--muted); font-weight: 600 }
 /* 맞음 판: 뒤는 딤(검정 60%)으로 하단 탭까지 덮고, 딤을 눌러도 닫히지 않는다. Next로만 넘어간다 */
-.g-dim { position: fixed; z-index: 30; inset: 0; background: rgb(0 0 0 / .6); opacity: 0; pointer-events: none; transition: opacity .25s }
+/* 맞음 판의 딤은 헤더 아래부터 깐다. 상태 표시줄과 헤더(하트)는 밝게 남아 판이 떠 있어도 하트를 누를 수 있다 (2026-11-14) */
+.g-dim { position: fixed; z-index: 30; inset: calc(var(--top) + 48px) 0 0; background: rgb(0 0 0 / .6); opacity: 0; pointer-events: none; transition: opacity .25s }
 .g-dim.on { opacity: 1; pointer-events: auto }
 .sheet.g-sheet { padding-top: 28px; text-align: center }
-.g-sheet .en { font: 700 18px/1.5 "Outfit", var(--sans); letter-spacing: -.01em }
-.g-sheet .ko { margin: 6px 0 22px; font: var(--t-body); color: var(--muted) }
+.g-sheet .en { font: 700 18px/1.5 "Outfit", var(--sans); letter-spacing: -.01em; text-align: center }
+.g-sheet .ko { margin: 6px 0 22px; font: var(--t-body); color: var(--muted); text-align: center }
+.g-sheet .ko:has(+ .g-tip:not([hidden])) { margin-bottom: 16px }
+/* 팁 박스(시안 24e): 뜻 아래 16, bg/raise, 모서리 8, 안쪽 12, 첫 줄 작은 회색 Tip, 그 아래 팁 글. 왼쪽 정렬 */
+.g-tip { margin-bottom: 22px; padding: 12px; border-radius: 8px; background: var(--raise); text-align: left }
+.g-tip small { display: block; margin-bottom: 4px; font: var(--t-cap); color: var(--muted) }
+.g-tip p { font: var(--t-body); color: var(--ink) }
+/* 하트(다시 연습할 문장): 끄면 빈 하트(헤더 아이콘과 같은 흰색), 켜면 초록으로 채운다 */
+.g-heart.on { color: var(--hi) }
+.g-heart.on svg { fill: currentColor }
 /* 속도 시트의 슬라이더: 재생 위치 막대와 같은 모양에 손잡이만 키우고(20) 지난 쪽은 초록 */
 .g-spd-t { display: flex; align-items: baseline; justify-content: space-between; gap: 12px }
 .g-spd-t output { font: var(--t-head); color: var(--hi); font-variant-numeric: tabular-nums }
@@ -217,6 +273,11 @@ body:not(.playing) .ic-pause, body.playing .ic-play { display: none }
 .toast { position: fixed; z-index: 60; left: 50%; bottom: calc(var(--tabH) + var(--miniH, 0px) + 16px); transform: translate(-50%, 16px); max-width: calc(100% - 32px); width: max-content;
   padding: 12px 20px; border-radius: 999px; background: #2a2a2a; color: #fff; font: var(--t-body); text-align: center; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s cubic-bezier(.2,.8,.2,1) }
 .toast.on { opacity: 1; transform: translate(-50%, 0) }
+/* 홈에서 맨 위일 때 아래로 당겼다 놓으면 새 판을 확인한다(2026-11-14 성범 요청). 표시 없이 홈 화면이 손가락을 따라 내려왔다가 놓으면 제자리로 돌아간다 */
+#vHome.ptr-back { transition: transform .3s cubic-bezier(.2,.8,.2,1) }
+/* 놓은 뒤 확인하는 동안 화면이 64px 내려온 채 멈추고, 빈 곳에 회색 작은 글자로 Checking…을 보인다(아이콘 없음) */
+.ptr-t { position: fixed; z-index: 1; top: calc(var(--top) + 22px); left: 0; right: 0; text-align: center; font: var(--t-sub); color: var(--muted); opacity: 0; transition: opacity .2s; pointer-events: none }
+.ptr-t.on { opacity: 1 }
 /* 하단 탭(2026-11-13 Figma '하단 탭'): Library(옛 홈), Game, Settings. 불투명한 단색(--bar)이 탭 60과 시스템 버튼 줄을 한 덩어리로 덮는다. 경계선 없음 */
 .tabs { position: fixed; z-index: 10; left: 50%; bottom: 0; transform: translateX(-50%); width: min(100%, 520px); height: var(--tabH); display: flex; padding: 0 8px var(--bot); background: var(--bar) }
 .tabs button { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: var(--t-cap); color: var(--muted); transition: transform .1s }
@@ -314,7 +375,11 @@ body.lyr-ko .ln .ko .who { display: inline }
 .cm:first-child { margin-top: 0 }
 .cm.now { opacity: 1 }
 .cm + .ln, .cm + .ln.gap { margin-top: 0 }
-.pip .cm { font: 400 4.2vw/1.4 var(--sans); margin: 5vw 0 2vw }
+/* 작은 창은 낮아서, 해설은 읽는 동안만 보인다. 늘 보이게 두면 첫 줄 바로 위 해설 끝줄이 창 맨 위에 반쯤 걸려 잘려 보였다(2026-11-13 성범 지적) */
+.pip .cm { display: none; font: 400 4.2vw/1.4 var(--sans); margin: 5vw 0 3vw }
+.pip .cm.now { display: block }
+/* 숨은 해설 뒤 줄은 다른 줄과 같은 간격을 둔다. 0으로 두면 앞 줄 끝이 창 맨 위에 걸려 보였다 */
+.pip .cm:not(.now) + .ln { margin-top: 5vw }
 /* 단어 오디오북: 단어 하나(단어, 뜻, 예문, 반복)가 한 묶음으로 보이게 묶음 사이만 넓힌다(2026-11-10 성범 요청 "딱 구분이 되면 좋겠어". 선은 넣지 않는다) */
 .ln.word:not(.gap) { margin-top: 56px }
 
@@ -407,27 +472,49 @@ body.lyr-ko .pip .ln .ko { font: 700 var(--lyr)/1.3 var(--sans); margin-top: 0 }
       <button class="row" data-sheet="lyr"><b>Podcast lyrics</b><span><em class="lyrVal" style="font-style:normal">English + Korean</em><i data-lucide="chevron-right"></i></span></button>
     </div>
     <p class="grp-d">Podcast lyrics can show English with Korean, English only, or Korean only. You can also change the text size with the zoom button on the player.</p>
+    <h2 class="grp-t">Game</h2>
+    <div class="grp">
+      <button class="row" data-sheet="gn"><b>Sentence game</b><span><em id="gnVal" style="font-style:normal">10 questions</em><i data-lucide="chevron-right"></i></span></button>
+      <button class="row" data-sheet="gnb"><b>Fill the blank</b><span><em id="gnbVal" style="font-style:normal">10 questions</em><i data-lucide="chevron-right"></i></span></button>
+    </div>
+    <p class="grp-d">How many questions each round has, for each game. The change starts from your next round.</p>
+    <h2 class="grp-t">Voice speed</h2>
+    <div class="grp">
+      <button class="row" data-sheet="aspd"><b>Audiobook</b><span><em id="aspdVal" style="font-style:normal">1.0</em><i data-lucide="chevron-right"></i></span></button>
+      <button class="row" data-sheet="gspd"><b>Game</b><span><em id="gspdVal" style="font-style:normal">1.0</em><i data-lucide="chevron-right"></i></span></button>
+    </div>
+    <p class="grp-d">Audiobooks and games each keep their own speed.</p>
     <h2 class="grp-t">Downloads</h2>
     <div class="grp">
-      <div class="row"><b>Wi-Fi only</b><button class="sw" role="switch" data-wifi aria-checked="false" aria-label="Wi-Fi only"></button></div>
-      <button class="row" id="dlAll" data-dlall><b id="dlAllT">Download all audio</b><span id="dlAllV"></span></button>
       <div class="row"><b>Storage used</b><span id="storeVal">0 MB</span></div>
       <button class="row" data-deldl><b class="danger-t">Delete downloads</b></button>
     </div>
-    <p class="grp-d">Download every episode and game sentence to this phone to play without internet. Playing an episode doesn't download it.</p>
+    <p class="grp-d">Episodes you play stay on this phone, so they start right away and play again without internet.</p>
+    <h2 class="grp-t">Test</h2>
+    <div class="grp">
+      <button class="row" data-go="sounds"><b>Game sounds</b><span><em id="sndN" style="font-style:normal"></em><i data-lucide="chevron-right"></i></span></button>
+    </div>
+    <p class="grp-d">Temporary. Listen to every game sentence one by one to find bad audio.</p>
     <h2 class="grp-t">About</h2>
     <div class="grp">
       <div class="row"><b>Version</b><span>1.0.0</span></div>
     </div>
   </main>
 
+  <main class="view gut" id="vSounds" hidden>
+    <header class="head"><button class="icon" data-back aria-label="Back"><i data-lucide="chevron-left"></i></button><h1>Game sounds</h1><span></span></header>
+    <div id="sndTabs" role="tablist"><button role="tab" data-sndtab="todo">To check<em id="sndT0"></em></button><button role="tab" data-sndtab="done">Checked<em id="sndT1"></em></button></div>
+    <ol id="sndList"></ol><p id="sndEmpty" hidden></p>
+  </main>
+
   <main class="view gut" id="vGame" hidden>
-    <header class="head" id="gHead"><button class="icon" data-sheet="gspd" aria-label="Voice speed"><i data-lucide="gauge"></i></button><h1>Game</h1><button class="icon" data-gskip aria-label="Skip this sentence"><i data-lucide="skip-forward"></i></button></header>
+    <header class="head" id="gHead"><button class="icon" data-gquit aria-label="Leave game"><i data-lucide="chevron-left"></i></button><h1 id="gTitle">Game</h1><button class="icon g-heart" id="gHeart" data-gheart aria-label="Practice this sentence again" aria-pressed="false"><i data-lucide="heart"></i></button></header>
     <div id="gameBody"></div>
   </main>
 
   <div class="sbar" id="sbar" aria-hidden="true"></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="ptr-t" id="ptrT" aria-hidden="true">Checking…</div>
   <div class="pip" id="pip" aria-hidden="true"><div class="pip-list" id="pipList"></div><span class="pip-line"><i id="pipFill"></i></span></div>
   <div class="mini" id="mini" role="group" aria-label="Now playing" hidden>
     <span class="mini-line"><i id="miniFill"></i></span>
@@ -467,6 +554,7 @@ body.lyr-ko .pip .ln .ko { font: 700 var(--lyr)/1.3 var(--sans); margin-top: 0 }
 
   <div class="scrim" id="scrim" data-back></div>
   <div class="dlg" id="dlgDel" role="alertdialog" aria-modal="true" aria-labelledby="dlgDelT" inert><h2 id="dlgDelT">Delete downloads?</h2><p>Your listening history stays. To play these albums without internet again, download them again.</p><div class="dlg-b"><button data-back>Cancel</button><button class="del" data-delok>Delete</button></div></div>
+  <div class="dlg" id="dlgQuit" role="alertdialog" aria-modal="true" aria-labelledby="dlgQuitT" inert><h2 id="dlgQuitT">Leave this game?</h2><p>Your progress in this round will be lost.</p><div class="dlg-b"><button data-back>Cancel</button><button class="del" data-gquitok>Leave</button></div></div>
   <section class="sheet" id="shMore" aria-label="More">
     <button class="grab" data-back aria-label="Close"></button>
     <div class="sh-list">
@@ -491,9 +579,15 @@ body.lyr-ko .pip .ln .ko { font: 700 var(--lyr)/1.3 var(--sans); margin-top: 0 }
     <div class="sh-t"><h2>Lyrics text size</h2></div>
     <div class="sh-list" id="sizeList"></div>
   </section>
+  <section class="sheet" id="shAspd" aria-label="Audiobook speed">
+    <button class="grab" data-back aria-label="Close"></button>
+    <div class="sh-t g-spd-t"><h2>Audiobook speed</h2><output id="aRateV" for="aRate">1.0</output></div>
+    <div class="track g-spd"><input id="aRate" type="range" min="0.5" max="2" step="0.1" value="1" aria-label="Audiobook speed"></div>
+    <div class="g-spd-l"><span>Slower</span><span>Faster</span></div>
+  </section>
   <section class="sheet" id="shGspd" aria-label="Voice speed">
     <button class="grab" data-back aria-label="Close"></button>
-    <div class="sh-t g-spd-t"><h2>Voice speed</h2><output id="gRateV" for="gRate">1.0×</output></div>
+    <div class="sh-t g-spd-t"><h2>Game voice speed</h2><output id="gRateV" for="gRate">1.0</output></div>
     <div class="track g-spd"><input id="gRate" type="range" min="0.5" max="1.5" step="0.1" value="1" aria-label="Voice speed"></div>
     <div class="g-spd-l"><span>Slower</span><span>Faster</span></div>
   </section>
@@ -501,7 +595,18 @@ body.lyr-ko .pip .ln .ko { font: 700 var(--lyr)/1.3 var(--sans); margin-top: 0 }
   <section class="sheet g-sheet" id="gSheet" role="dialog" aria-modal="true" aria-label="Answer" inert>
     <p class="en" id="gEn"></p>
     <p class="ko" id="gKo"></p>
+    <div class="g-tip" id="gTip" hidden><small>Tip</small><p id="gTipT"></p></div>
     <button class="g-go" data-gnext>Next</button>
+  </section>
+  <section class="sheet" id="shGn" aria-label="Sentence game questions">
+    <button class="grab" data-back aria-label="Close"></button>
+    <div class="sh-t"><h2>Sentence game</h2></div>
+    <div class="sh-list" id="gnList"></div>
+  </section>
+  <section class="sheet" id="shGnb" aria-label="Fill the blank questions">
+    <button class="grab" data-back aria-label="Close"></button>
+    <div class="sh-t"><h2>Fill the blank</h2></div>
+    <div class="sh-list" id="gnbList"></div>
   </section>
   <section class="sheet" id="shLyr" aria-label="Podcast lyrics">
     <button class="grab" data-back aria-label="Close"></button>
@@ -523,6 +628,11 @@ if (LIVE.game) Object.assign(window, { GAME_BANK: LIVE.game.bank, GAME_VER: LIVE
 const EPS = __TIMELINE__;
 const $ = id => document.getElementById(id);
 const a = $('a');
+// 오디오북 속도(2026-11-14 성범 "음성 속도를 지정할수있는 부분도 설정에서 잡아줘, 오디오북과 게임 따로"). 트랙이 바뀌어도 유지된다
+const A_RATE = { min: .5, max: 2, step: .1 };
+let aSpd = 1; try { const v = +localStorage.getItem('sidea-audio-x'); if (v >= A_RATE.min && v <= A_RATE.max) aSpd = v } catch {}
+a.defaultPlaybackRate = a.playbackRate = aSpd;
+a.addEventListener('loadedmetadata', () => { if (a.playbackRate !== aSpd) a.playbackRate = aSpd });
 const SCRIPTS = __SCRIPTS__;
 /* 들은 기록은 자리 번호로 저장한다. 내용이 바뀌어 순서가 달라져도 밀리지 않게 화마다 이름표(과정|화 번호)를 두고, 아래에서 기록을 이름표 기준으로 옮긴다 */
 const idsOf = list => list.map(e => e.course + '|' + e.n + (e.alt ? '|alt' : '') + (e.draft ? '|draft' : ''));
@@ -581,7 +691,7 @@ const store = { get() { try { return JSON.parse(localStorage.getItem('course-1')
                 set(v) { try { localStorage.setItem('course-1', JSON.stringify(v)) } catch {} } };
 const first = store.get();
 /* loop: all(앨범 전체 반복) → one(한 화 반복) → off. size: 가사 글자 0·1·2 단계. ko: 팟캐스트 한국어 해석 */
-const S = Object.assign({ ep: 0, eps: {}, pos: 0, done: false, loop: 'all', size: 0, ko: true, dled: [], wifi: false, push: true }, first);
+const S = Object.assign({ ep: 0, eps: {}, pos: 0, done: false, loop: 'all', size: 0, ko: true, dled: [], push: true }, first);
 /* 2026-11-10 The Replay 8화(4부작 2개)를 2트랙으로 합쳐 그 뒤 화의 자리 번호가 6칸 당겨졌다. 옛 기록을 한 번 옮긴다.
    합친 트랙은 네 부를 다 들었을 때만 다 들은 것으로 치고, 들던 위치는 처음으로 돌린다 */
 if ((S.lay || 0) < 1) {
@@ -607,7 +717,7 @@ if ((S.lay || 0) < 1) {
 }
 const save = () => {
   S.eps[cur] = { done: S.done, pos: S.pos };
-  store.set({ lay: S.lay, ids: S.ids, ep: cur, eps: S.eps, loop: S.loop, size: S.size, lyr: S.lyr, dlAll: S.dlAll, wifi: S.wifi, push: S.push, started: S.started });
+  store.set({ lay: S.lay, ids: S.ids, ep: cur, eps: S.eps, loop: S.loop, size: S.size, lyr: S.lyr, push: S.push, started: S.started });
 };
 /* 시작 애니메이션: 모이기(마지막 타원 1.88초에 자리) → 쉼 → 출렁임(2.2초부터, 마지막 타원 3.46초에 끝) → 커지며 사라짐(0.5초) */
 setTimeout(() => { const el = $('intro'); el.classList.add('out'); setTimeout(() => el.remove(), 520); }, Math.max(300, (matchMedia('(prefers-reduced-motion: reduce)').matches ? 400 : 3700) - performance.now()));
@@ -627,7 +737,7 @@ const art = al => al.art && COVERS[al.art] ? `<img src="${COVERS[al.art]}" alt="
 const albumCover = (al, cls = '') => art(al) ? `<div class="cv ${cls}" aria-hidden="true">${art(al)}</div>` : `<div class="cv ${cls}" style="--c:${al.c}" aria-hidden="true"><small>Side A</small><b>${al.mark || esc(nameOf(al))}</b><span>${esc(al.about)}</span></div>`;
 
 /* 화면 이동: 쌓아 두고, 휴대폰 뒤로 가기로도 닫힌다. 바탕 화면 위에 재생 시트, 그 위에 작은 시트가 한 장 올라온다 */
-const BASE = ['home', 'album', 'settings', 'game'], SHEETS = { more: 'shMore', timer: 'shTimer', queue: 'shQueue', size: 'shSize', lyr: 'shLyr', del: 'dlgDel', gspd: 'shGspd' };
+const BASE = ['home', 'album', 'settings', 'game', 'sounds'], SHEETS = { more: 'shMore', timer: 'shTimer', queue: 'shQueue', size: 'shSize', lyr: 'shLyr', del: 'dlgDel', gspd: 'shGspd', aspd: 'shAspd', gquit: 'dlgQuit', gn: 'shGn', gnb: 'shGnb' };
 const stack = ['home'];
 let pushed = 0, albumSel = 0;
 function go(v) {
@@ -641,6 +751,8 @@ function go(v) {
    쌓여 있던 화면은 걷어 내고, 브라우저 뒤로 가기 기록도 그만큼 되돌린다 */
 let tabJump = false;
 function tab(v) {
+  /* 게임 중에 Game 탭을 다시 누르면 뒤로 버튼과 같다(2026-11-14 성범 "확인 창 띄우기"): 풀던 중이면 나가기 확인 창, 결과 화면이면 바로 진입 화면 */
+  if (v === 'game' && stack.length === 1 && stack[0] === 'game' && G.on && !G.pick) return gAskQuit();
   if (!BASE.includes(v) || stack.length === 1 && stack[0] === v) return;
   const n = stack.length - 1;
   stack.length = 1; stack[0] = v;
@@ -671,23 +783,27 @@ const topV = () => stack[stack.length - 1];
 const isUp = () => stack.includes('now');
 function render() {
   const t = topV(), base = [...stack].reverse().find(v => BASE.includes(v));
-  $('vHome').hidden = base !== 'home'; $('vAlbum').hidden = base !== 'album'; $('vSettings').hidden = base !== 'settings'; $('vGame').hidden = base !== 'game';
+  $('vHome').hidden = base !== 'home'; $('vAlbum').hidden = base !== 'album'; $('vSettings').hidden = base !== 'settings'; $('vGame').hidden = base !== 'game'; $('vSounds').hidden = base !== 'sounds';
   const up = isUp();
   $('vNow').classList.toggle('up', up); $('vNow').inert = !up || !!SHEETS[t];
   Object.entries(SHEETS).forEach(([k, id]) => { $(id).classList.toggle('up', t === k); $(id).inert = t !== k });
   $('scrim').classList.toggle('on', !!SHEETS[t]);
-  ['vHome', 'vAlbum', 'vSettings', 'vGame', 'mini', 'tabs'].forEach(id => $(id).inert = up || !!SHEETS[t]);
+  ['vHome', 'vAlbum', 'vSettings', 'vGame', 'vSounds', 'mini', 'tabs'].forEach(id => $(id).inert = up || !!SHEETS[t]);
   document.querySelectorAll('[data-tab]').forEach(b => { const on = b.dataset.tab === stack[0]; b.classList.toggle('on', on); on ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current') });
   showMini();
   if (base === 'home') renderHome();
   if (base === 'album') renderAlbum();
   if (base === 'settings') { renderSettings(); showStorage(); }
   if (base === 'game') gameEnter(); else gameLeave();
+  if (base === 'sounds') renderSounds(); else { sndStop(); sndDrawn = false }
   if (t === 'queue') renderQueue();
   if (t === 'timer') renderTimer();
   if (t === 'size') renderSize();
   if (t === 'lyr') renderLyr();
+  if (t === 'gn' || t === 'gnb') renderGn(t === 'gnb' ? 'blank' : 'sentence');
   if (t === 'gspd') renderGspd();
+  if (t === 'aspd') renderAspd();
+  if (t !== 'aspd' && t !== 'gspd') pvStop();
   if (t === 'more') renderMore();
   if (t === 'now') { manual = 0; lastI = -2; requestAnimationFrame(() => tick(true)) }
   setBarColor(up ? '#000000' : base === 'album' ? ALBUMS[albumSel].c : '#121212');
@@ -774,77 +890,14 @@ function renderAlbum() {
   $('tracks').innerHTML = trackRows(al, true);
   icons(); syncPlay();
 }
-/* 소리 전부 받기 (2026-11-13 성범 요청: 앨범별 받기 단추를 없애고 설정 한 곳에서 전부 받고 지운다. 옛 앨범 받기는 2026-11-10).
-   모든 화의 소리, 쉐도잉 한국어 해설, 문장 게임의 문제 소리를 R2에서 받아 기기의 audio-v1 저장소에 넣는다.
-   재생할 때 이 저장소에 있으면 인터넷 없이 그것을 쓴다(loadEp, cmPlay, gSpeak. 웹은 sw.js도 같은 저장소를 본다).
-   받는 중에 다시 누르면 멈추고, 다시 시작하면 이미 받은 파일은 건너뛴다. 다 받으면 S.dlAll에 받은 목록의 표시(DL_SIG)를 적는다.
-   앱이 새 판이 되어 소리가 늘면 표시가 달라져 다시 'Download all audio'가 된다 */
+/* 폰에 남은 소리(audio-v1). 2026-11-14 성범 결정: 한 번 들은 화는 폰에 남겨 다음부터 저장본으로 틀고(loadEp),
+   설정의 'Download all audio'와 Wi-Fi only는 뺐다(캐시 방식이면 필요 없다). 'Delete downloads'로 지운다 */
 const AUDIO_CACHE = 'audio-v1';
 const akey = f => { const u = new URL(f, location.href); return u.pathname + u.search };
+/* 폰에 있는 소리 목록(주소+지문). 켤 때 채우고, 받거나 지울 때 고친다 */
+const CACHED = new Set();
 const cacheHit = f => self.caches ? caches.open(AUDIO_CACHE).then(c => c.match(akey(f))).catch(() => null) : Promise.resolve(null);
-const ALL_MB = (LIVE.content || {}).mb || +'__ALL_MB__' || 0;   // build_pwa.py가 넣는 전체 소리 크기
 const dlFiles = () => [...new Set([...EPS.map(t => t.file), ...ALBUMS.flatMap(al => cmFiles(al.name)), ...GAME.map(q => q.clip)].filter(Boolean))];
-const dlSig = () => dlFiles().length + ':' + (window.GAME_VER || '');
-let dl = null;
-function syncDlAll() {
-  const done = !dl && S.dlAll === dlSig();
-  $('dlAllT').textContent = dl ? 'Downloading' : done ? 'All audio downloaded' : 'Download all audio';
-  $('dlAllV').innerHTML = dl ? `${Math.floor(dl.p)}% · Cancel` : done ? '<i class="ck" data-lucide="check"></i>' : ALL_MB ? `${ALL_MB} MB` : '';
-  $('dlAll').setAttribute('aria-label', dl ? `Downloading, ${Math.floor(dl.p)}%. Tap to cancel` : done ? 'All audio downloaded' : 'Download all audio');
-  if (done) icons();
-}
-/* 지금 모바일 데이터인지. 안드로이드 앱 WebView는 navigator.connection.type을 주지 않아 Wi-Fi only가 막지 못했다(2026-11-10 성범 제보).
-   앱에서는 @capacitor/network로 실제 연결 종류를 묻고, 브라우저에서만 navigator.connection을 쓴다 */
-async function onCellular() {
-  const C = window.Capacitor;
-  if (C && C.isNativePlatform && C.isNativePlatform() && C.isPluginAvailable('Network')) {
-    try { const s = await C.nativePromise('Network', 'getStatus', {}); return s.connectionType !== 'wifi' } catch { return true }
-  }
-  return !!(navigator.connection && navigator.connection.type === 'cellular');
-}
-/* R2 공개 주소(r2.dev)는 한꺼번에 많이 받으면 잠깐 막는다(429). 그럴 때와 연결이 잠깐 끊겼을 때는 기다렸다 다시 받는다(여섯 번까지, 점점 길게) */
-async function dlFetch(f, signal) {
-  for (let k = 0; ; k++) {
-    let r = null, err = null;
-    try { r = await fetch(f, { signal }) } catch (e) { if (e.name === 'AbortError') throw e; err = e }
-    if (r && r.ok) return r;
-    if (k >= 5 || r && r.status !== 429 && r.status < 500) throw err || new Error('HTTP ' + r.status);
-    await new Promise((ok, no) => { const t = setTimeout(ok, 2000 * (k + 1)); signal.addEventListener('abort', () => { clearTimeout(t); no(Object.assign(new Error('abort'), { name: 'AbortError' })) }, { once: true }) });
-  }
-}
-async function downloadAll() {
-  if (dl) { dl.ac.abort(); dl = null; syncDlAll(); return toast('Download canceled.') }
-  if (S.dlAll === dlSig()) return toast('All audio is already on this phone.');
-  if (!self.caches) return toast("This browser can't save audio.");
-  const WIFI_MSG = 'Wi-Fi only is on. Connect to Wi-Fi to download.';
-  if (S.wifi && await onCellular()) return toast(WIFI_MSG);
-  const ac = new AbortController(), me = { p: 0, ac };
-  dl = me; syncDlAll();
-  try { navigator.storage && navigator.storage.persist && navigator.storage.persist() } catch {}
-  let n = 0, shown = -1;
-  try {
-    const c = await caches.open(AUDIO_CACHE), q = dlFiles(), all = q.length;
-    const worker = async () => {
-      while (q.length) {
-        const f = q.shift(), k = akey(f);
-        /* 받는 도중 와이파이가 끊겨 데이터로 바뀌어도 멈춘다(파일이 많아 스무 개마다 한 번 본다) */
-        if (S.wifi && n % 20 === 0 && await onCellular()) throw Object.assign(new Error('cellular'), { name: 'WifiOnly' });
-        if (!(await c.match(k))) await c.put(k, await dlFetch(f, ac.signal));
-        n++; if (dl === me) { me.p = n / all * 100; if (Math.floor(me.p) !== shown) { shown = Math.floor(me.p); syncDlAll(); if (shown % 10 === 0) showStorage() } }
-      }
-    };
-    await Promise.all(Array.from({ length: 4 }, worker));
-  } catch (e) {
-    if (dl === me) { dl = null; syncDlAll() }
-    if (e.name === 'WifiOnly') { ac.abort(); toast(WIFI_MSG) }
-    else if (e.name !== 'AbortError') { ac.abort(); toast("Couldn't download. Check your connection and try again.") }
-    return;
-  }
-  if (dl !== me) return;
-  S.dlAll = dlSig(); save();
-  dl = null; syncDlAll(); showStorage();
-  toast('Downloaded. Everything plays without internet.');
-}
 $('albumPlay').onclick = () => {
   const al = ALBUMS[albumSel];
   if (!(E.course === al.name && S.started)) { secQ = null; syncSub() }
@@ -855,7 +908,14 @@ $('albumPlay').onclick = () => {
 
 /* 설정 */
 const SIZES = [['Default', 18], ['Large', 21], ['Extra large', 24]];
-function renderSettings() { $('sizeVal').textContent = SIZES[S.size][0]; syncKo(); syncDl(); syncDlAll(); icons() }
+/* 게임 한 판 문제 수 고르기(5, 10, 15, 20). 글자 크기 시트와 같은 모양 */
+/* 2026-11-14 성범 "각각 설정하도록해줘": 문장 게임(Sentence game)과 빈칸 게임(Fill the blank)을 따로 고른다. 시트도 따로(shGn, shGnb) */
+let gnKind = 'sentence';
+function renderGn(kind = gnKind) { gnKind = kind; const cur = GAME_N[kind];
+  $(kind === 'blank' ? 'gnbList' : 'gnList').innerHTML = GAME_NS.map(v => `<button class="opt ${v === cur ? 'sel' : ''}" data-gn="${v}"><b>${v} questions</b>${v === cur ? '<i class="ck" data-lucide="check"></i>' : ''}</button>`).join(''); icons() }
+function gnSync() { $('gnVal').textContent = GAME_N.sentence + ' questions'; $('gnbVal').textContent = GAME_N.blank + ' questions' }
+function setGn(v) { GAME_N[gnKind] = v; try { localStorage.setItem(gnKind === 'blank' ? 'sidea-game-n-blank' : 'sidea-game-n', v) } catch {} gnSync(); renderGn() }
+function renderSettings() { gnSync(); spdSync(); $('sndN').textContent = GAME.length.toLocaleString('en-US'); $('sizeVal').textContent = SIZES[S.size][0]; syncKo(); syncDl(); icons() }
 function setSize(k) { S.size = k; document.documentElement.style.setProperty('--lyr', SIZES[k][1] + 'px'); $('sizeVal').textContent = SIZES[k][0]; renderSize(); save(); if (isUp()) { lastI = -2; requestAnimationFrame(() => tick(true)) } }
 /* 취침 타이머와 같은 고르기 목록. 누르면 바로 바뀌고 시트가 닫히므로 라디오 단추 대신 고른 줄에 체크를 단다 */
 function renderSize() { $('sizeList').innerHTML = SIZES.map(([t], k) => `<button class="opt ${k === S.size ? 'sel' : ''}" data-size="${k}"><b>${t}</b>${k === S.size ? '<i class="ck" data-lucide="check"></i>' : ''}</button>`).join(''); icons() }
@@ -970,11 +1030,12 @@ function cmCheck() {
 }
 function cmMark() {
   document.querySelectorAll('.cm').forEach(el => el.classList.toggle('now', CM.hold && +el.dataset.c === CM.k));
-  if (!CM.hold) return;
+  /* 해설이 끝나 작은 창에서 해설 글이 숨으면 지금 줄로 다시 맞춘다 */
+  if (!CM.hold) { if (PIP.on) pipLine(lastI); return }
   const box = $('script'), el = box.querySelector(`.cm[data-c="${CM.k}"]`);
   if (el && isUp()) box.scrollTo({ top: el.offsetTop - box.clientHeight * .22, behavior: 'smooth' });
   const pb = $('pipList'), pe = pb.querySelector(`.cm[data-c="${CM.k}"]`);
-  if (pe && PIP.on) pb.scrollTo({ top: pe.offsetTop - innerWidth * .05, behavior: 'smooth' });
+  if (pe && PIP.on) { clearTimeout(PIP.t); pb.scrollTo({ top: pe.offsetTop - innerWidth * .05, behavior: 'smooth' }) }
 }
 function cmSay(k) {
   const c = CM.cues[k], tok = ++CM.tok;
@@ -1038,7 +1099,8 @@ function tick(force) {
       el.classList.toggle('veil', L[k].kind === 'answer' && k > i);
     });
     if (isUp() && Date.now() - manual > 6000) center(i, force);
-    if (PIP.on) pipLine(i);
+    /* 해설을 읽는 동안에는 작은 창을 해설 글에 둔다(cmMark). 여기서 첫 줄로 다시 내리면 해설 글이 안 보였다 */
+    if (PIP.on && !CM.hold) pipLine(i);
   }
 }
 /* PIP 창: 재생 화면의 가사를 그대로 옮겨 깔고(지금 줄 표시와 가사 표시 설정은 같은 .ln 규칙을 탄다), 지금 줄을 창 위쪽으로 민다 */
@@ -1056,9 +1118,9 @@ function pipLine(i, jump) {
    작은 창에서는 화면 그리기 박자(requestAnimationFrame)가 느려질 수 있어 timeupdate에서도 줄을 맞춘다 */
 window.addEventListener('sidea-pip', e => {
   PIP.on = !!e.detail; document.body.classList.toggle('in-pip', PIP.on);
-  if (PIP.on) { pipFill(); tick(true); pipLine(lastI, true) } else { $('pipList').innerHTML = ''; manual = 0; tick(true) }
+  if (PIP.on) { pipFill(); tick(true); if (CM.hold) cmMark(); else pipLine(lastI, true) } else { $('pipList').innerHTML = ''; manual = 0; tick(true) }
 });
-addEventListener('resize', () => { if (PIP.on) pipLine(lastI, true) });
+addEventListener('resize', () => { if (PIP.on) { if (CM.hold) cmMark(); else pipLine(lastI, true) } });
 window.addEventListener('sidea-pip-act', e => { const fn = ACTIONS[e.detail]; if (fn) fn() });
 const pipTell = () => { try { window.SideAPip && SideAPip.setPlaying(isOn()) } catch {} };
 /* 지금 줄은 가사 영역 위쪽 22%쯤에 둔다 */
@@ -1129,6 +1191,7 @@ const NMS = (m, o) => CAP ? CAP.nativePromise('MediaSession', m, o).catch(() => 
 let exitAsk = 0;
 if (CAP && Capacitor.isPluginAvailable('App')) CAP.nativeCallback('App', 'addListener', { eventName: 'backButton' }, () => {
   if (stack.length > 1) return back();
+  if (stack[0] === 'game' && G.on && !G.pick) return gAskQuit();
   if (stack[0] !== 'home') return tab('home');
   if (isOn()) return CAP.nativePromise('App', 'minimizeApp', {}).catch(() => {});
   if (Date.now() - exitAsk < 2600) return CAP.nativePromise('App', 'exitApp', {}).catch(() => {});
@@ -1170,8 +1233,8 @@ function media(state) {
 function position() {
   const d = a.duration || T.duration, p = Math.min(ready ? a.currentTime : S.pos, d);
   if (!isFinite(d) || !d) return;
-  if (CAP) NMS('setPositionState', { duration: d, position: p, playbackRate: 1 });
-  else try { navigator.mediaSession.setPositionState({ duration: d, position: p, playbackRate: 1 }) } catch {}
+  if (CAP) NMS('setPositionState', { duration: d, position: p, playbackRate: aSpd });
+  else try { navigator.mediaSession.setPositionState({ duration: d, position: p, playbackRate: aSpd }) } catch {}
 }
 /* 목록에서 화를 고르면 처음부터 재생한다 */
 function startEp(i) {
@@ -1190,7 +1253,7 @@ function nudge(s) { const t = Math.max(0, Math.min((a.duration || T.duration) - 
    규칙과 난이도 기준은 docs/superpowers/specs/side-a-app-screens.md 6장 '게임 방향'.
    문제와 소리(2단계, 2026-11-13): build_game.py가 이미 만든 화의 소리에서 줄 구간을 잘라 game/NNNN.webm으로 두고, 목록을 game-data.js(GAME_BANK)로 쓴다.
    약 1,300문장(초급·심화·고급 예문과 말해보기 정답, 쉐도잉 대화 줄. 팟캐스트는 뺌). 그때그때 부르는 유료 음성 API는 쓰지 않는다.
-   소리는 R2(audio/game/)에 있고(upload_game_r2.py), 설정의 'Download all audio'로 받아 두면 인터넷 없이 된다.
+   소리는 R2(audio/game/)에 있고(upload_game_r2.py), 폰에 저장본이 있으면 인터넷 없이 된다.
    game-data.js가 없으면(아티팩트 한 장짜리) 아래 GAME_SAMPLE 18문장을 폰의 영어 음성(TTS)으로 읽는다. 잘라 둔 소리를 못 틀 때도 폰 음성으로 읽는다 */
 const GAME_SAMPLE = [
   { en: 'I have a pencil.', ko: '저는 연필이 있어요.', x: ['has', 'the'] },
@@ -1215,7 +1278,15 @@ const GAME_SAMPLE = [
 ];
 /* 문제 하나: en 영어, ko 뜻, up 한 단계 올림, src 어느 화의 몇 초부터 몇 초까지인지, clip 잘라 둔 소리 파일 */
 const GAME = window.GAME_BANK ? GAME_BANK.map(([en, ko, ep, start, end, up], k) => ({ en, ko, up: !!up, src: { ep, start, end }, clip: `${window.GAME_AUDIO || 'game/'}${String(k + 1).padStart(4, '0')}.webm?v=${window.GAME_VER || ''}` })) : GAME_SAMPLE;
-const GAME_N = 10;                         // 한 판의 문제 수(나중에 설정에서 바꿀 수 있게 한다)
+/* 문장별 팁(문법이나 어휘 팁 하나, 두 줄 이내). 영어 문장을 열쇠로 { "영어": "팁 글" }을 받는다.
+   원본은 content/game/tips-*.md, game_tips.py가 game-data.js(window.GAME_TIPS)와 R2 게임 묶음(tips)에 넣는다. R2 묶음에 팁이 있으면 그것을 쓴다.
+   팁이 없는 문장은 맞음 판에 박스를 보여 주지 않는다 */
+const GAME_TIPS = (LIVE.game && LIVE.game.tips) || window.GAME_TIPS || {};
+/* 한 판의 문제 수(2026-11-14 성범 "설정에 게임에 대한 문제 수를 조절할수있도록해줘, 5, 10, 15, 20 이렇게 고정으로", "각각 설정하도록해줘"). 게임마다 따로 고른다.
+   바꾸면 다음 판부터 적용된다. 'sidea-game-n'에 둔다 */
+const GAME_NS = [5, 10, 15, 20];
+const GAME_N = { sentence: 10, blank: 10 };   // 게임마다 따로(sidea-game-n, sidea-game-n-blank)
+try { const a = +localStorage.getItem('sidea-game-n'), b = +localStorage.getItem('sidea-game-n-blank'); if (GAME_NS.includes(a)) GAME_N.sentence = a; if (GAME_NS.includes(b)) GAME_N.blank = b } catch {}
 const GAME_REPLAYS = 3;                    // 다시 듣기는 한 문제에 3번. 문제가 뜰 때 자동으로 읽는 첫 번은 세지 않는다
 const G_FAKES = [3, 4, 5, 5, 6], G_BASE = [.8, .9, 1, 1, 1.1];   // 단계(1~5)별 가짜 단어 수, 기본 읽는 속도
 /* 헷갈리는 묶음: 문장에 이 가운데 하나가 있으면 같은 묶음의 다른 말을 가짜 카드로 먼저 쓴다(2026-11-13 성범 "낚는 단어 카드가 너무 적다"로 묶음과 장수를 늘림) */
@@ -1224,24 +1295,31 @@ const G_PAIRS = [['have', 'has', 'had'], ['a', 'an', 'the'], ['is', 'was', 'are'
   ['this', 'that', 'these'], ['my', 'me', 'mine'], ['go', 'going', 'went'], ['get', 'got', 'getting'], ['want', 'wanted', 'wants'], ['what', 'how', 'why'], ['some', 'any'], ['much', 'many'],
   ['they', 'them', 'their'], ['he', 'she', 'him', 'her'], ['we', 'us', 'our'], ['of', 'off'], ['then', 'than'], ['so', 'such'], ['really', 'very'], ['not', 'no'], ['been', 'being', 'be']];
 const G_RATE = { min: .5, max: 1.5, step: .1 };   // 헤더 속도 시트의 슬라이더(2026-11-13 성범 요청). 고른 값을 단계별 기본 속도에 곱한다
-const G = { on: false, round: null, q: null, tIn: 0, voice: null };
+const G = { on: false, pick: true, round: null, q: null, tIn: 0, voice: null, saved: {} };
 const gTTS = () => window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('TextToSpeech');
 
 /* 카드 글자: 마침표·쉼표·물음표를 떼고, 문장 첫 단어는 소문자로(I, I'm 등은 그대로). 문장 가운데의 대문자(이름)는 그대로 둔다 */
-const gTok = en => en.split(/\s+/).map((w, k) => { w = w.replace(/^[^\w']+|[^\w']+$/g, ''); return k === 0 && !/^I\b/.test(w) ? w.toLowerCase() : w }).filter(Boolean);
+/* 맨 앞 감탄사(2026-11-14 성범 "oh~ 가 처음나와도 그건 정답범위에 없는것"): whoa, oh, ha 같은 말로 시작하면 그 말은 카드로 내지 않는다.
+   소리에는 남아 있으니 답 줄 맨 앞에 미리 놓인 흐린 글자로만 보여 준다. 빈칸 고르기에서도 빈칸이 되지 않는다(원래 G_PAIRS에 없음) */
+const G_LEAD = /^(?:whoa|wow|ha|haha|oh|ah|aw|aww|ooh|ugh|hmm|damn|uh|um)\b\S*\s+/i;
+const gLead = en => (en.match(G_LEAD) || [''])[0];
+const gLeadW = en => gLead(en).replace(/[^\w']/g, '');
+const gTok = en => { const L = gLead(en), cap = !L || /[.!?]\s*$/.test(L);
+  return en.slice(L.length).split(/\s+/).map((w, k) => { w = w.replace(/^[^\w']+|[^\w']+$/g, ''); return k === 0 && cap && !/^I\b/.test(w) ? w.toLowerCase() : w }).filter(Boolean) };
 /* 문장 단계: 3~4단어 1, 5~6 2, 7~8 3, 9~11 4, 12~14 5. 줄여 말하는 소리와 up 표시는 한 단계 올린다. 15단어부터는 내지 않는다(0) */
 function gLevel(q) {
   if (q.lv !== undefined) return q.lv;
-  const n = gTok(q.en).length; if (n > 14) return q.lv = 0;
+  const n = gTok(q.en).length; if (n > 14 || n < 2) return q.lv = 0;
   const lv = n <= 4 ? 1 : n <= 6 ? 2 : n <= 8 ? 3 : n <= 11 ? 4 : 5;
   return q.lv = Math.min(5, lv + (q.up || /\b(gonna|wanna|kinda|gotta)\b/i.test(q.en) ? 1 : 0));
 }
 const gMix = arr => { const r = [...arr]; for (let k = r.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [r[k], r[j]] = [r[j], r[k]] } return r };
 /* 가짜 단어: 헷갈리는 짝 → 문장에 적어 둔 것(x) → 같은 단계 다른 문장의 단어. 정답 문장에 있는 단어는 쓰지 않는다 */
 function gFakes(q, n) {
-  const toks = gTok(q.en), has = new Set(toks.map(w => w.toLowerCase())), out = [];
+  const toks = gTok(q.en), has = new Set([...toks, gLeadW(q.en)].map(w => w.toLowerCase())), out = [];
   const add = w => { const k = w.toLowerCase(); if (out.length < n && !has.has(k)) { has.add(k); out.push(w) } };
-  const low = toks.map(w => w.toLowerCase());
+  const low = toks.map(w => w.toLowerCase()), t = gStats();
+  toks.forEach(w => Object.keys((t.w[gKey(w)] || {}).conf || {}).forEach(add));   // 이 문장의 단어와 헷갈린 적 있는 말을 가짜 카드로 먼저(2026-11-14)
   gMix(G_PAIRS.filter(g => g.some(x => low.includes(x.toLowerCase())))).forEach(g => { const o = gMix(g.filter(x => !low.includes(x.toLowerCase()))); if (o[0]) add(o[0]) });
   gMix(G_PAIRS.filter(g => g.some(x => low.includes(x.toLowerCase())))).forEach(g => gMix(g).forEach(add));
   (q.x || []).forEach(add);
@@ -1253,20 +1331,56 @@ function gFakes(q, n) {
 /* 폰에 남기는 것: 지금 단계(처음 2), 연속 기록, 최근 세 판의 문장, 한 번에 못 맞힌 문장 */
 function gState() { let st = {}; try { st = JSON.parse(localStorage.getItem('sidea-game') || '{}') } catch {} return Object.assign({ level: 2, streak: 0, recent: [], miss: {} }, st) }
 function gKeep(st) { try { localStorage.setItem('sidea-game', JSON.stringify(st)) } catch {} }
-/* 한 판 짜기: 지금 단계 7, 한 단계 아래 2, 한 단계 위 1(끝 단계에서는 같은 단계로). 맞는 단계의 문장이 모자라면 가까운 단계에서 채운다.
-   최근 세 판에 나온 문장은 빼고(남는 문장이 모자라면 넣는다), 한 번에 못 맞혔거나 건너뛴 문장은 두 배, 끝까지 들은 화의 문장은 세 배 더 자주 나온다 */
+/* 하트한 문장(2026-11-13 결정): 못 맞힘 기록과 따로 'sidea-game-heart'에 영어 문장 목록으로 둔다. 성범이 끌 때까지 남고, 한 번에 맞혀도 지워지지 않는다 */
+/* 문장별, 단어별 기록(2026-11-14 성범 "그냥 데이터로만 갖고있고 앱이 알아서 배치해주는거면됨"). 화면에는 보여 주지 않고 출제에만 쓴다. 'sidea-game-stats'
+   s[영어 문장] = { n 나온 횟수, first 한 번에 맞힘, miss 못 맞힘, box 복습 칸(0~4), due 다시 낼 때, last 마지막 }
+     한 번에 맞히면 칸이 하나 오르고 1, 3, 7, 14일 뒤에 다시 낸다. 못 맞히면 칸 0(약점)
+   w[단어] = { ok 맞힘, bad 틀림, conf { 헷갈린 말: 횟수 } }. 문장 게임은 빨간 카드 자리의 정답 단어와 그 자리에 놓은 말, 빈칸 게임은 빈칸 단어와 잘못 고른 보기.
+     틀림이 맞힘보다 많으면 약한 단어다 */
+const G_GAP = [1, 3, 7, 14];
+function gStats() { try { return Object.assign({ s: {}, w: {} }, JSON.parse(localStorage.getItem('sidea-game-stats') || '{}')) } catch { return { s: {}, w: {} } } }
+function gStatsKeep(t) { try { localStorage.setItem('sidea-game-stats', JSON.stringify(t)) } catch {} }
+const gKey = w => /^I('|$)/.test(w) ? w : w.toLowerCase();
+const gWeak = (t, w) => { const r = t.w[gKey(w)]; return r && r.bad > r.ok ? r.bad - r.ok : 0 };
+function gHearts() { try { return new Set(JSON.parse(localStorage.getItem('sidea-game-heart') || '[]')) } catch { return new Set() } }
+function gHeartSet(en, on) { const h = gHearts(); on ? h.add(en) : h.delete(en); try { localStorage.setItem('sidea-game-heart', JSON.stringify([...h])) } catch {} }
+function gHeartSync() { const on = !!(G.q && gHearts().has(G.q.q.en)), b = $('gHeart'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on) }
+/* 한 판 짜기(2026-11-14 성범 "응 그렇게 해줘": 10문제면 새 문장 5, 약점 3, 복습 2).
+   약점: 하트한 문장과 마지막에 못 맞힌 문장(예전 기록 st.miss 포함)을 먼저, 모자라면 약한 단어가 든 문장. 복습: 한 번에 맞혔고 다시 낼 날(1, 3, 7, 14일 뒤)이 된 문장.
+   새 문장: 한 번도 안 나온 문장(끝까지 들은 화의 문장은 세 배). 몫은 약점 30%, 복습 20%를 내림하고 나머지가 새 문장(5문제면 1, 1, 3).
+   어떤 몫이 모자라면 새 문장, 약점, 복습, 아직 날이 안 된 문장 차례로 채운다.
+   단계는 지금처럼 지금 단계 7, 한 단계 아래 2, 한 단계 위 1의 비율로 자리를 나눠 각 몫에서 가까운 단계 문장을 고른다. 최근 세 판의 문장은 되도록 뺀다 */
 function gPickRound(n) {
-  const st = gState(), lv = st.level, recent = new Set(st.recent.flat());
+  const st = gState(), lv = st.level, recent = new Set(st.recent.flat()), hearts = gHearts(), t = gStats(), now = Date.now();
   let pool = GAME.map((q, k) => k).filter(k => gLevel(GAME[k]) > 0);
   const fresh = pool.filter(k => !recent.has(GAME[k].en)); if (fresh.length >= n) pool = fresh;
+  const weakW = k => gTok(GAME[k].en).reduce((a, w) => a + gWeak(t, w), 0), sOf = k => t.s[GAME[k].en];
+  const kindOf = k => { const q = GAME[k], s = sOf(k);
+    if (hearts.has(q.en) || (s ? s.box === 0 && s.miss > 0 : st.miss[q.en])) return 'weak';
+    if (weakW(k)) return 'wword';   // 약한 단어만 든 문장: 약점 몫이 남을 때만 쓴다
+    return !s ? 'new' : s.due <= now ? 'due' : 'rest' };
+  const by = { weak: [], wword: [], due: [], new: [], rest: [] }; pool.forEach(k => by[kindOf(k)].push(k));
+  const W = {
+    /* 실제로 못 맞힌 문장과 하트 문장이 먼저, 약한 단어만 든 문장은 그다음(한 번 틀린 it 같은 흔한 말이 약점 몫을 다 차지하지 않게) */
+    weak: k => 1 + (hearts.has(GAME[k].en) ? 6 : 0) + 3 * Math.min(3, (sOf(k) || {}).miss || (st.miss[GAME[k].en] ? 1 : 0)) + Math.min(2, weakW(k)),
+    wword: k => Math.min(3, weakW(k)),
+    due: k => 1 + Math.min(3, (now - sOf(k).due) / 864e5 / 7),
+    new: k => { const q = GAME[k]; return q.src && (S.eps[q.src.ep] || {}).done ? 3 : 1 },
+    rest: () => 1 };
+  const take = { weak: Math.min(by.weak.length, Math.floor(n * .3)), due: Math.min(by.due.length, Math.floor(n * .2)), rest: 0 };
+  take.wword = Math.min(by.wword.length, Math.floor(n * .3) - take.weak);
+  take.new = Math.min(by.new.length, n - take.weak - take.wword - take.due);
+  let short = n - take.weak - take.wword - take.due - take.new;
+  for (const c of ['new', 'weak', 'wword', 'due', 'rest']) { const more = Math.min(short, by[c].length - take[c]); take[c] += more; short -= more }
   const mix = [...Array(7).fill(lv), ...Array(2).fill(Math.max(1, lv - 1)), Math.min(5, lv + 1)];
-  const weight = k => { const q = GAME[k]; return (st.miss[q.en] ? 2 : 1) * (q.src && (S.eps[q.src.ep] || {}).done ? 3 : 1) };
-  const out = [];
-  for (let k = 0; k < n; k++) {
-    const want = mix[Math.floor(k * mix.length / n)], left = pool.filter(i => !out.includes(i)); if (!left.length) break;
-    const d = Math.min(...left.map(i => Math.abs(gLevel(GAME[i]) - want))), c = left.filter(i => Math.abs(gLevel(GAME[i]) - want) === d);
-    let r = Math.random() * c.reduce((t, i) => t + weight(i), 0), pick = c[0];
-    for (const i of c) { r -= weight(i); if (r <= 0) { pick = i; break } }
+  const slots = gMix(Array.from({ length: n }, (_, k) => mix[Math.floor(k * mix.length / n)])), out = [];
+  for (const c of ['weak', 'wword', 'due', 'new', 'rest']) for (let j = 0; j < take[c]; j++) {
+    /* 새 문장은 원하는 단계에 가장 가까운 문장만, 약점과 복습은 단계가 멀수록 덜 뽑히게만 한다(틀린 문장이 다른 단계라서 밀려나지 않게) */
+    const want = slots[out.length], left = by[c].filter(i => !out.includes(i)); if (!left.length) break;
+    const dist = i => Math.abs(gLevel(GAME[i]) - want), d = Math.min(...left.map(dist)), soft = c !== 'new' && c !== 'rest';
+    const cand = soft ? left : left.filter(i => dist(i) === d), w = i => W[c](i) * (soft ? 1 / (1 + dist(i)) : 1);
+    let r = Math.random() * cand.reduce((a, i) => a + w(i), 0), pick = cand[0];
+    for (const i of cand) { r -= w(i); if (r <= 0) { pick = i; break } }
     out.push(pick);
   }
   return gMix(out);
@@ -1306,7 +1420,7 @@ function gSpeak() {
     gClip.play().catch(e => { if (e && e.name !== 'AbortError' && G.on && G.q && G.q.q === q) gSay(q.en, base) });
   };
   if (gClip.dataset.clip === q.clip) return go();
-  /* 받아 둔 소리('Download all audio')면 기기 저장본을, 아니면 R2에서 바로 튼다 */
+  /* 폰에 저장본(audio-v1)이 있으면 그것을, 아니면 R2에서 바로 튼다 */
   const tok = G.clipTok = (G.clipTok || 0) + 1;
   cacheHit(q.clip).then(hit => hit ? hit.blob() : null).catch(() => null).then(b => {
     if (tok !== G.clipTok || !G.on) return;
@@ -1320,38 +1434,108 @@ const gSfx = { ok: new Audio('sfx-correct.mp3'), no: new Audio('sfx-wrong.mp3') 
 Object.values(gSfx).forEach(x => { x.preload = 'auto' });
 function gDing(k) { const x = gSfx[k]; try { x.currentTime = 0; x.play().catch(() => {}) } catch {} }
 
-function gNewRound() {
-  G.round = { order: gPickRound(GAME_N), i: 0, first: 0, ms: 0, end: false, level: gState().level };
+function gNewRound(kind = 'sentence') {
+  G.round = { kind, order: kind === 'blank' ? gPickBlank(GAME_N.blank) : gPickRound(GAME_N.sentence), i: 0, first: 0, ms: 0, end: false, level: gState().level };
   G.tIn = Date.now(); gLoad();
 }
+/* 빈칸 고르기(2026-11-14 성범 "빈칸은 이 문장에 있는 어떤것도 상관없어, 내이름이나 랩퍼이름이나 쿠팡이나 이런 특정 브랜드 명사가 아닌
+   어휘학습을 위한 단어라면 뭐든 좋아"): 문장의 모든 단어 가운데 하나를 문제가 나올 때마다 무작위로 빈칸으로 한다.
+   빼는 말: 고유명사(GAME_NAMES, 대소문자까지 같은 말. R2 게임 자료의 names, game_names.py가 만든다), 맨 앞 감탄사, 글자가 없는 말.
+   보기 네 장: 헷갈리는 묶음(G_PAIRS)에 든 말이면 같은 묶음의 다른 말을 먼저 쓰고, 모자라면 게임 문장에 나온 단어 가운데
+   첫 글자, 끝 두 글자, 길이가 비슷한 말로 채운다. 문장에 이미 있는 말과 고유명사는 보기로 쓰지 않는다 */
+const GAME_NAMES = new Set((LIVE.game && LIVE.game.names) || window.GAME_NAMES || []);
+const gCore = w => w.replace(/^[^\w']+|[^\w']+$/g, '');
+const gGroupOf = w => G_PAIRS.filter(g => g.some(x => x.toLowerCase() === w.toLowerCase()));
+let gVocab = null;
+/* 보기 후보 단어: 카드 글자(gTok, 문장 첫 단어만 소문자)에서 고유명사를 뺀 말. Korean, Friday처럼 늘 대문자인 말은 대문자 그대로 */
+const gVocabOf = () => { if (gVocab) return gVocab; const m = new Map();
+  GAME.forEach(q => gTok(q.en).forEach(w => { const k = w.toLowerCase(); if (/[a-z]/i.test(w) && !GAME_NAMES.has(w) && (!m.has(k) || w === k)) m.set(k, w) }));
+  return gVocab = [...m.values()] };
+function gLike(a, n, skip) {
+  const A = a.toLowerCase(), ap = A.includes("'");
+  const score = x => (x[0] === A[0] ? 2 : 0) + (x.slice(-2) === A.slice(-2) ? 2 : 0) + (Math.abs(x.length - A.length) <= 1 ? 2 : Math.abs(x.length - A.length) <= 2 ? 1 : 0) + (x.includes("'") === ap ? 1 : -3);
+  return gMix(gVocabOf().filter(x => x.toLowerCase() !== A && !skip.has(x.toLowerCase())).map(x => [x, score(x)]).sort((p, q) => q[1] - p[1]).slice(0, 15)).slice(0, n).map(p => p[0]);
+}
+function gBlankOf(q) {
+  const words = q.en.split(/\s+/), lead = !!gLead(q.en);
+  const cand = words.map((w, k) => k).filter(k => { const c = gCore(words[k]); return !(lead && k === 0) && /[a-z]/i.test(c) && !GAME_NAMES.has(c) });
+  if (!cand.length) return null;
+  /* 약한 단어(틀림이 맞힘보다 많은 말)는 빈칸으로 더 자주 고른다: 무게 1 + 약한 정도×3. 헷갈린 적 있는 말은 보기에 먼저 넣는다(많이 헷갈린 차례로 두 개까지) */
+  const t = gStats(), wt = i => 1 + 3 * gWeak(t, gCore(words[i]));
+  let r = Math.random() * cand.reduce((a, i) => a + wt(i), 0), k = cand[0];
+  for (const i of cand) { r -= wt(i); if (r <= 0) { k = i; break } }
+  const w = gCore(words[k]), low = new Set(words.map(x => gCore(x).toLowerCase()));
+  const cap = /^[A-Z][a-z']*$/.test(w) && !/^I('|$)/.test(w), fit = x => cap && !/^I('|$)/.test(x) ? x[0].toUpperCase() + x.slice(1) : x;
+  const ok = x => x.toLowerCase() !== w.toLowerCase() && !low.has(x.toLowerCase());
+  const conf = Object.entries((t.w[gKey(w)] || {}).conf || {}).sort((a, b) => b[1] - a[1]).map(e => e[0]).filter(ok).slice(0, 2);
+  const group = [...new Set(gGroupOf(w).flat().filter(x => ok(x) && !conf.includes(gKey(x))))];
+  const pick = [...conf, ...gMix(group)].slice(0, 3); pick.push(...gLike(w, 3 - pick.length, new Set([...low, ...pick.map(x => x.toLowerCase())])));
+  return { k, words, ans: w, choices: gMix([w, ...pick.map(fit)]) };
+}
+function gPickBlank(n) { return gPickRound(n).filter(k => gBlankOf(GAME[k])) }   // 거의 모든 문장에 빈칸 자리가 있어 문장 게임과 같은 짜기를 쓴다
 function gLoad() {
+  if (G.round.kind === 'blank') {
+    const q = GAME[G.round.order[G.round.i]], b = gBlankOf(q);
+    G.q = { q, ...b, bad: new Set(), wrong: {}, tries: 0, replays: 0, phase: 'play', t0: Date.now() };
+    gHeartSync(); gDraw(); gSpeak(); return;
+  }
   const q = GAME[G.round.order[G.round.i]], toks = gTok(q.en);
-  G.q = { q, toks, bank: gMix([...toks, ...gFakes(q, G_FAKES[(gLevel(q) || 3) - 1])]), ans: [], bad: new Set(), tries: 0, replays: 0, phase: 'play', t0: Date.now() };
-  gPick(); gDraw(); gSpeak();
+  G.q = { q, toks, bank: gMix([...toks, ...gFakes(q, G_FAKES[(gLevel(q) || 3) - 1])]), ans: [], bad: new Set(), wrong: {}, tries: 0, replays: 0, phase: 'play', t0: Date.now() };
+  gPick(); gHeartSync(); gDraw(); gSpeak();
 }
 /* Game 탭에 들어오면 듣던 오디오북을 멈추고 첫 문제를 바로 읽는다. 다른 탭에 다녀오면 하던 판을 그대로 잇는다(다시 읽어 주지는 않는다) */
-function gameEnter() {
-  if (G.on) return; G.on = true; G.tIn = Date.now(); if (isOn()) halt();
-  if (G.round) return gDraw();
-  $('gameBody').innerHTML = ''; gFindVoices().then(() => { if (G.on && !G.round) gNewRound() });
+/* 진입 화면(2026-11-14): 탭에 들어오면 게임 카드 두 장(Sentence game, Fill the blank)이 먼저 나온다.
+   카드의 START GAME을 눌러야 오디오북이 멈추고 게임이 시작된다. 하던 판이 있으면 버튼이 CONTINUE이고 누르면 그 판을 잇는다 */
+function gameEnter() { if (G.on) return; G.on = true; G.pick = true; gPickDraw() }
+function gameLeave() { if (!G.on) return; G.on = false; gStop(); gPause(); G.pick = true }
+function gPause() { if (!G.pick && G.round && !G.round.end) G.round.ms += Date.now() - G.tIn }
+function gPickDraw() {
+  $('vGame').classList.add('pick'); $('gHead').hidden = false; $('gTitle').textContent = 'Game'; gSheetSync();
+  const mid = k => { const R = G.round && G.round.kind === k ? G.round : (G.saved[k] || {}).round; return !!(R && !R.end) };
+  const card = (k, ic, t, d) => `<div class="g-card"><span class="g-ic"><i data-lucide="${ic}"></i></span><span class="g-ct"><b>${t}</b><span>${d}</span></span><button class="g-go" data-gstart="${k}">${mid(k) ? 'CONTINUE' : 'START GAME'}</button></div>`;
+  $('gameBody').innerHTML = `<div class="g-list">${card('sentence', 'audio-lines', 'Sentence game', 'Listen and put the words in order')}${card('blank', 'text-cursor-input', 'Fill the blank', 'Listen and pick the missing word')}</div>`;
+  icons();
 }
-function gameLeave() { if (!G.on) return; G.on = false; gStop(); if (G.round && !G.round.end) G.round.ms += Date.now() - G.tIn }
+/* 게임마다 하던 판을 따로 둔다: 다른 게임으로 들어가면 지금 판은 G.saved에 맡겨 두고, 그 게임의 맡겨 둔 판이 있으면 꺼낸다 */
+function gStart(kind = 'sentence') {
+  G.pick = false; $('vGame').classList.remove('pick'); G.tIn = Date.now(); if (isOn()) halt();
+  if (G.round && G.round.kind !== kind) { if (!G.round.end) G.saved[G.round.kind] = { round: G.round, q: G.q }; G.round = null; G.q = null }
+  if (!G.round && G.saved[kind]) { ({ round: G.round, q: G.q } = G.saved[kind]); delete G.saved[kind] }
+  if (G.round && !G.round.end) { gHeartSync(); gDraw(); if (G.q.phase === 'play') gSpeak(); return }
+  G.round = null; $('gameBody').innerHTML = ''; gFindVoices().then(() => { if (G.on && !G.pick && !G.round) gNewRound(kind) });
+}
+/* 게임 중단(2026-11-14 성범 "속도 조절자리에 뒤로가기버튼 넣어주고, 버튼누르면 다이얼로그로 정말 뒤로갈거냐"):
+   헤더 왼쪽 뒤로 버튼이나 안드로이드 뒤로 가기 → 판이 진행 중이면 확인 창, Leave를 누르면 이번 판을 버리고 진입 화면으로.
+   이미 푼 문제의 기록(sidea-game-log, 못 맞힘)은 남고, 단계 오르내림과 최근 세 판에는 넣지 않는다. 결과 화면에서는 묻지 않고 바로 나간다 */
+function gAskQuit() { if (G.round && !G.round.end) go('gquit'); else gQuit() }
+function gQuit() { gStop(); if (G.round) delete G.saved[G.round.kind]; G.round = null; G.q = null; G.pick = true; gPickDraw() }
 function gDraw() {
-  const R = G.round, el = $('gameBody'); if (!R) return;
+  const R = G.round, el = $('gameBody'); if (!R || G.pick) return;
   $('gHead').hidden = R.end;
   if (R.end) {
     const n = R.order.length;
     el.innerHTML = `<div class="g-end"><span class="g-done"><i data-lucide="check"></i></span><h2>Round complete</h2><p>${n} sentence${n === 1 ? '' : 's'} done</p>
-      <ul class="g-stats"><li><i data-lucide="circle-check"></i><b>First try</b><span>${R.first} / ${n}</span></li><li><i data-lucide="clock"></i><b>Time</b><span>${mmss(R.ms / 1000)}</span></li><li><i data-lucide="circle-arrow-up"></i><b>Level</b><span>${R.level} of 5</span></li></ul></div>
-      <div class="g-foot"><button class="g-go" data-gagain>Play again</button></div>`;
+      <ul class="g-stats"><li><i data-lucide="circle-check"></i><b>First try</b><span>${R.first} / ${n}</span></li><li><i data-lucide="clock"></i><b>Time</b><span>${mmss(R.ms / 1000)}</span></li>${R.kind === 'blank' ? '' : `<li><i data-lucide="circle-arrow-up"></i><b>Level</b><span>${R.level} of 5</span></li>`}</ul></div>
+      <div class="g-foot"><button class="g-txt" data-gexit>Back to games</button><button class="g-go" data-gagain>Play again</button></div>`;
     icons(); gSheetSync(); return;
   }
   if (gDrag) { gDrag.ghost && gDrag.ghost.remove(); gDrag = null }
+  /* 헤더 제목(2026-11-14 성범 "헤더에 game이 아니라 각 게임이름이랑 (n/n) 진행갯수"): 게임 이름 뒤에 회색으로 몇 번째 문제인지 */
+  $('gTitle').innerHTML = `${R.kind === 'blank' ? 'Fill the blank' : 'Sentence game'} <span class="g-n">(${R.i + 1}/${R.order.length})</span>`;
   const Q = G.q, out = Q.replays >= GAME_REPLAYS;
+  if (R.kind === 'blank') {
+    const done = Q.phase !== 'play', w = Q.words[Q.k], core = gCore(w), cut = w.indexOf(core), pre = w.slice(0, cut), post = w.slice(cut + core.length);
+    const line = Q.words.map((x, k) => k !== Q.k ? esc(x) : `${esc(pre)}<span class="g-blank">${done ? esc(core) : `<i>${esc(core)}</i>`}</span>${esc(post)}`).join(' ');
+    el.innerHTML = `<div class="g-q"><div class="g-box">
+        <button class="g-listen${out ? ' out' : ''}" data-gsay aria-label="${out ? 'No replays left' : 'Listen again'}"${out ? ' disabled' : ''}><i data-lucide="${out ? 'volume-x' : 'volume-2'}"></i></button>
+        <p class="g-rep">Replay ${Q.replays}/${GAME_REPLAYS}</p><p class="g-bl">${line}</p></div>
+      <div class="g-chs">${Q.choices.map((c, k) => `<button class="g-ch${Q.bad.has(k) ? ' bad' : done && c === Q.ans ? ' ok' : ''}" data-gch="${k}"${done || Q.bad.has(k) ? ' tabindex="-1"' : ''}>${esc(c)}</button>`).join('')}</div></div>`;
+    icons(); gSheetSync(); return;
+  }
   el.innerHTML = `<div class="g-q"><div class="g-box">
       <button class="g-listen${out ? ' out' : ''}" data-gsay aria-label="${out ? 'No replays left' : 'Listen again'}"${out ? ' disabled' : ''}><i data-lucide="${out ? 'volume-x' : 'volume-2'}"></i></button>
       <p class="g-rep">Replay ${Q.replays}/${GAME_REPLAYS}</p>
-      <div class="g-ans" id="gAns" aria-label="Your sentence">${Q.ans.map(b => `<button class="g-w g-c${Q.phase === 'ok' ? ' ok' : Q.bad.has(b) ? ' bad' : ''}" data-gout="${b}">${esc(Q.bank[b])}</button>`).join('')}</div>
+      <div class="g-ans" id="gAns" aria-label="Your sentence">${gLeadW(Q.q.en) ? `<span class="g-w g-lead">${esc(gLeadW(Q.q.en))}</span>` : ''}${Q.ans.map(b => `<button class="g-w g-c${Q.phase === 'ok' ? ' ok' : Q.bad.has(b) ? ' bad' : ''}" data-gout="${b}">${esc(Q.bank[b])}</button>`).join('')}</div>
     </div>
     <div class="g-bank">${Q.bank.map((w, k) => `<button class="g-w${Q.ans.includes(k) ? ' used' : ''}" data-gin="${k}"${Q.ans.includes(k) ? ' tabindex="-1"' : ''}>${esc(w)}</button>`).join('')}</div></div>
     <div class="g-foot"><button class="g-go" data-gcheck${Q.ans.length && !Q.bad.size ? '' : ' disabled'}>Check</button></div>`;
@@ -1359,19 +1543,28 @@ function gDraw() {
 }
 /* 맞음 판(정답 문장과 뜻, Next). 맞혔을 때와 정답을 공개할 때 뜬다. 떠 있는 동안 뒤 화면과 하단 탭은 눌리지 않는다 */
 function gSheetSync() {
-  const R = G.round, show = G.on && !!R && !R.end && !!G.q && G.q.phase !== 'play' && stack.length === 1;
+  const R = G.round, show = G.on && !G.pick && !!R && !R.end && !!G.q && G.q.phase !== 'play' && stack.length === 1;
   $('gDim').classList.toggle('on', show); $('gSheet').classList.toggle('up', show); $('gSheet').inert = !show;
-  if (show) { $('gEn').textContent = G.q.q.en; $('gKo').textContent = G.q.q.ko }
-  $('vGame').inert = $('tabs').inert = show || isUp() || !!SHEETS[topV()];
+  if (show) { const tip = GAME_TIPS[G.q.q.en]; $('gEn').textContent = G.q.q.en; $('gKo').textContent = G.q.q.ko; $('gTip').hidden = !tip; $('gTipT').textContent = tip || '' }
+  /* 판이 떠 있어도 헤더는 눌린다(하트). 문제 칸과 하단 탭만 막는다 */
+  $('gameBody').inert = show; $('vGame').inert = isUp() || !!SHEETS[topV()]; $('tabs').inert = show || isUp() || !!SHEETS[topV()];
 }
 function gLog(result) {
   const Q = G.q;
   try { const log = JSON.parse(localStorage.getItem('sidea-game-log') || '[]');
-    log.push({ en: Q.q.en, ok: result === 'first', result, tries: Q.tries, level: gLevel(Q.q), rate: gSpd, voice: G.voice ? G.voice.name : null, sec: Math.round((Date.now() - Q.t0) / 100) / 10, replays: Q.replays, at: Date.now() });
+    log.push({ game: G.round.kind, en: Q.q.en, ok: result === 'first', result, tries: Q.tries, level: gLevel(Q.q), rate: gSpd, voice: G.voice ? G.voice.name : null, sec: Math.round((Date.now() - Q.t0) / 100) / 10, replays: Q.replays, at: Date.now() });
     localStorage.setItem('sidea-game-log', JSON.stringify(log.slice(-500))) } catch {}
+  const t = gStats(), now = Date.now(), s = t.s[Q.q.en] || (t.s[Q.q.en] = { n: 0, first: 0, miss: 0, box: 0, due: 0, last: 0 });
+  s.n++; s.last = now;
+  if (result === 'first') { s.first++; s.box = Math.min(G_GAP.length, s.box + 1); s.due = now + G_GAP[s.box - 1] * 864e5 } else { s.miss++; s.box = 0; s.due = 0 }
+  (G.round.kind === 'blank' ? [Q.ans] : Q.toks).forEach(w => {
+    const r = t.w[gKey(w)] || (t.w[gKey(w)] = { ok: 0, bad: 0 }), x = Q.wrong[w];
+    if (x) { r.bad++; r.conf = r.conf || {}; x.forEach(c => { if (gKey(c) !== gKey(w)) r.conf[gKey(c)] = (r.conf[gKey(c)] || 0) + 1 }) } else r.ok++;
+  });
+  gStatsKeep(t);
   const st = gState(); if (result === 'first') delete st.miss[Q.q.en]; else st.miss[Q.q.en] = 1; gKeep(st);
 }
-/* 한 문제가 끝나는 길은 셋: 맞히기(first 한 번에, late 고쳐서), 건너뛰기(skip), 듣기를 다 쓰고 또 틀려 정답 공개(shown).
+/* 한 문제가 끝나는 길은 둘: 맞히기(first 한 번에, late 고쳐서), 듣기를 다 쓰고 또 틀려 정답 공개(shown). 건너뛰기는 2026-11-14 없앴다(헤더 그 자리에 하트).
    한 번에 맞힌 것만 First try로 센다 */
 function gCheck() {
   const Q = G.q; if (Q.phase !== 'play') return;
@@ -1379,6 +1572,7 @@ function gCheck() {
   const bad = Q.ans.filter((b, k) => Q.bank[b] !== Q.toks[k]);
   if (!bad.length && Q.ans.length === Q.toks.length) { if (!Q.tries) G.round.first++; Q.phase = 'ok'; gLog(Q.tries ? 'late' : 'first'); gDing('ok'); gAgain(900); return gDraw() }
   Q.tries++; gDing('no');
+  Q.ans.forEach((b, k) => { const w = Q.toks[k]; if (w && Q.bank[b] !== w) (Q.wrong[w] = Q.wrong[w] || []).push(Q.bank[b]) });   // 틀린 자리의 정답 단어와 그 자리에 놓은 말
   if (Q.replays >= GAME_REPLAYS) {
     /* 정답 공개: 답 줄을 정답으로 채우고(초록 표시는 없다) 맞음 판과 같은 판을 띄운다 */
     const used = new Set(); Q.ans = Q.toks.map(w => { const b = Q.bank.findIndex((x, i) => x === w && !used.has(i)); used.add(b); return b });
@@ -1393,6 +1587,7 @@ function gNext() {
   const R = G.round; gStop();
   if (++R.i < R.order.length) return gLoad();
   R.end = true; R.ms += Date.now() - G.tIn; G.tIn = Date.now();
+  if (R.kind === 'blank') return gDraw();   // 빈칸 고르기는 단계 오르내림과 최근 세 판에 넣지 않는다(시험판, 작성자 판단)
   /* 단계 오르내림: 두 판 연속 First try 8 이상(80%)이면 한 단계 위, 한 판이라도 4 이하(40%)면 한 단계 아래. 움직이면 연속 기록은 0부터 */
   const st = gState(), n = R.order.length;
   if (R.first <= n * .4) { st.level = Math.max(1, st.level - 1); st.streak = 0 }
@@ -1401,23 +1596,63 @@ function gNext() {
   st.recent = [...st.recent, R.order.map(k => GAME[k].en)].slice(-3); gKeep(st);
   R.level = st.level; gDraw();
 }
-/* 속도 시트: 슬라이더 하나. 움직이는 동안 값이 바뀌고, 손을 떼면 저장하고 지금 문제를 그 속도로 한 번 들려준다(다시 듣기 횟수에는 넣지 않는다) */
+/* 게임 속도 시트: 2026-11-14부터 설정의 Voice speed 묶음 Game 줄에서 연다. 고른 값(sidea-game-x)은 그대로 쓰인다.
+   슬라이더 하나. 움직이는 동안 값이 바뀌고, 손을 떼면 저장하고 지금 문제를 그 속도로 한 번 들려준다(다시 듣기 횟수에는 넣지 않는다) */
 function renderGspd() { const r = $('gRate'); r.min = G_RATE.min; r.max = G_RATE.max; r.step = G_RATE.step; r.value = gSpd; gSpdShow() }
-function gSpdShow() { const r = $('gRate'); r.style.setProperty('--p', (r.value - r.min) / (r.max - r.min) * 100 + '%'); $('gRateV').textContent = (+r.value).toFixed(1) + '×' }
-$('gRate').addEventListener('input', gSpdShow);
-$('gRate').addEventListener('change', e => { gSpd = +e.target.value; try { localStorage.setItem('sidea-game-x', gSpd) } catch {} if (G.on && G.round && !G.round.end && G.q.phase === 'play') gSpeak() });
+function gSpdShow() { const r = $('gRate'); r.style.setProperty('--p', (r.value - r.min) / (r.max - r.min) * 100 + '%'); $('gRateV').textContent = (+r.value).toFixed(1) }
+$('gRate').addEventListener('input', () => { gSpdShow(); pvPlay('game', +$('gRate').value) });
+/* 속도 미리듣기(2026-11-14 성범 "배속 움직일때마다 미리듣기도 나오게해줘"): 슬라이더 값이 바뀔 때마다 그 속도로 약 3초 들려준다.
+   두 시트 모두 같은 평범한 예문 하나(성범 "예문 그냥 평범한걸로 해줘", "똑같은걸로해 둘다")를 고른 속도로 튼다. 단계 기본 속도는 곱하지 않는다.
+   오디오북이 재생 중이면 겹치지 않게 예문 대신 듣던 소리 속도를 바로 바꾼다(`작성자 판단`). 시트를 닫으면 멈춘다 */
+const PV_EN = "I think it's going to rain today.";
+const pvA = new Audio(); pvA.preload = 'auto'; let pvT = 0, pvTok = 0, pvUrl = null;
+function pvClip() { const q = GAME.find(x => x.en === PV_EN && x.clip) || GAME.find(x => x.clip); return q ? q.clip : null }
+function pvStop() { clearTimeout(pvT); pvTok++; pvA.pause() }
+function pvPlay(kind, rate) {
+  clearTimeout(pvT); const tok = ++pvTok;
+  if (kind === 'audio' && !a.paused) { a.playbackRate = rate; return }
+  pvT = setTimeout(() => {
+    const go = (src, at) => {
+      if (tok !== pvTok) return;
+      if (pvA.dataset.src !== src) { pvA.dataset.src = src; pvA.src = src }
+      const start = () => { if (tok !== pvTok) return; try { pvA.currentTime = at } catch {} pvA.defaultPlaybackRate = pvA.playbackRate = rate; pvA.play().catch(() => {}); pvT = setTimeout(() => { if (tok === pvTok) pvA.pause() }, 3000) };
+      if (pvA.readyState >= 1) start(); else pvA.addEventListener('loadedmetadata', start, { once: true });
+    };
+    const c = pvClip(); if (!c) return;
+    cacheHit(c).then(h => h ? h.blob() : null).catch(() => null).then(b => {
+      if (tok !== pvTok) return;
+      if (b) { if (pvUrl) URL.revokeObjectURL(pvUrl); pvUrl = URL.createObjectURL(b); go(pvUrl, 0) } else go(c, 0);
+    });
+  }, 180);
+}
+function spdSync() { $('aspdVal').textContent = aSpd.toFixed(1); $('gspdVal').textContent = gSpd.toFixed(1) }
+function renderAspd() { const r = $('aRate'); r.min = A_RATE.min; r.max = A_RATE.max; r.step = A_RATE.step; r.value = aSpd; aSpdShow() }
+function aSpdShow() { const r = $('aRate'); r.style.setProperty('--p', (r.value - r.min) / (r.max - r.min) * 100 + '%'); $('aRateV').textContent = (+r.value).toFixed(1) }
+$('aRate').addEventListener('input', () => { aSpdShow(); pvPlay('audio', +$('aRate').value) });
+$('aRate').addEventListener('change', e => { aSpd = +e.target.value; a.defaultPlaybackRate = a.playbackRate = aSpd; try { localStorage.setItem('sidea-audio-x', aSpd) } catch {} spdSync(); position() });
+$('gRate').addEventListener('change', e => { gSpd = +e.target.value; try { localStorage.setItem('sidea-game-x', gSpd) } catch {} spdSync() });
 function gameClick(t) {
   let b;
+  if (G.on && G.pick) { { const b = t.closest('[data-gstart]'); if (b) { gStart(b.dataset.gstart); return true } } return false }
+  if (t.closest('[data-gquit]')) { gAskQuit(); return true }
   if (!G.on || !G.round) return false;
   const Q = G.q, play = !G.round.end && Q.phase === 'play';
-  if (t.closest('[data-gagain]')) { G.round = null; gNewRound(); return true }
+  if (t.closest('[data-gexit]')) { gQuit(); return true }
+  if (t.closest('[data-gagain]')) { const k = G.round.kind; G.round = null; gNewRound(k); return true }
   if (t.closest('[data-gnext]')) { if (!G.round.end && Q.phase !== 'play') gNext(); return true }
-  if (t.closest('[data-gskip]')) { if (play) { gLog('skip'); gNext() } return true }
+  /* 하트: 문제를 푸는 중에도, 맞음 판이 떠 있을 때도 누를 수 있다. 다시 누르면 꺼진다 */
+  if (t.closest('[data-gheart]')) { if (!G.round.end && Q) { gHeartSet(Q.q.en, !gHearts().has(Q.q.en)); gHeartSync() } return true }
   if (t.closest('[data-gsay]')) { if (play && Q.replays < GAME_REPLAYS) { Q.replays++; gDraw(); gSpeak() } return true }
   /* 누르기: 단어 모음의 카드는 맨 뒤에 붙고, 답 자리의 카드는 단어 모음으로 돌아간다. 끌어다 놓은 직후의 누름은 무시한다 */
   if (b = t.closest('[data-gin]')) { const k = +b.dataset.gin; if (play && !(Date.now() - G.dropAt < 350) && !Q.ans.includes(k)) { Q.ans.push(k); Q.bad.clear(); gDraw(); gPop(k) } return true }
   if (b = t.closest('[data-gout]')) { if (play && !(Date.now() - G.dropAt < 350)) { const k = +b.dataset.gout; Q.ans = Q.ans.filter(x => x !== k); Q.bad.clear(); gDraw() } return true }
   if (t.closest('[data-gcheck]')) { gCheck(); return true }
+  if (b = t.closest('[data-gch]')) {
+    const k = +b.dataset.gch; if (!play || Q.bad.has(k)) return true;
+    if (Q.choices[k] === Q.ans) { if (!Q.tries) G.round.first++; Q.phase = 'ok'; gLog(Q.tries ? 'late' : 'first'); gDing('ok'); gAgain(900) }
+    else { Q.tries++; Q.bad.add(k); (Q.wrong[Q.ans] = Q.wrong[Q.ans] || []).push(Q.choices[k]); gDing('no') }
+    gDraw(); return true;
+  }
   return false;
 }
 
@@ -1462,17 +1697,60 @@ const gDrop = (e, cancel) => {
 addEventListener('pointerup', e => gDrop(e, false));
 addEventListener('pointercancel', e => gDrop(e, true));
 
+/* 임시 화면 'Game sounds': 'To check'와 'Checked' 두 탭(2026-11-13 성범 요청). 재생을 누른 문장은 확인함으로 기기에 저장하고,
+   소리가 끝나거나 멈추거나 다른 문장을 틀면 'To check' 목록에서 빠진다. 받아 둔 소리가 있으면 그것을, 없으면 R2에서 바로 튼다 */
+const sndA = new Audio();
+let sndK = -1, sndDrawn = false, sndTab = 'todo';
+const sndDone = new Set((() => { try { return JSON.parse(localStorage.getItem('sidea-snd-done') || '[]') } catch { return [] } })());
+function sndSave() { try { localStorage.setItem('sidea-snd-done', JSON.stringify([...sndDone])) } catch {} }
+function sndCount() {
+  const n = GAME.filter((q, k) => sndDone.has(k)).length;
+  $('sndT0').textContent = (GAME.length - n).toLocaleString('en-US'); $('sndT1').textContent = n.toLocaleString('en-US');
+}
+function renderSounds() {
+  if (sndDrawn) return; sndDrawn = true;
+  document.querySelectorAll('[data-sndtab]').forEach(b => b.setAttribute('aria-selected', b.dataset.sndtab === sndTab));
+  const ks = GAME.map((q, k) => k).filter(k => sndDone.has(k) === (sndTab === 'done'));
+  $('sndList').innerHTML = ks.map(k => { const q = GAME[k]; return `<li class="snd" data-sndrow="${k}"><em>${String(k + 1).padStart(4, '0')}</em><span><b>${esc(q.en)}</b><small>${esc(q.ko || '')}</small></span><button data-snd="${k}" aria-label="Play ${k + 1}"><i class="p1" data-lucide="play"></i><i class="p2" data-lucide="pause"></i></button></li>` }).join('');
+  $('sndEmpty').hidden = ks.length > 0;
+  $('sndEmpty').textContent = sndTab === 'done' ? 'Sounds you play show up here.' : 'All sounds checked.';
+  sndCount(); sndMark(); icons();
+}
+function sndMove(k) {
+  if (k < 0 || sndTab !== 'todo' || !sndDone.has(k)) return;
+  const li = document.querySelector(`[data-sndrow="${k}"]`); if (li) li.remove();
+  $('sndEmpty').hidden = !!document.querySelector('[data-sndrow]');
+}
+function sndMark() { document.querySelectorAll('.snd > button.on').forEach(b => b.classList.remove('on')); if (sndK >= 0 && !sndA.paused) { const b = document.querySelector(`[data-snd="${sndK}"]`); if (b) b.classList.add('on') } }
+function sndStop() { if (!sndA.paused) sndA.pause(); sndMark(); sndMove(sndK) }
+function sndShow(tab) { if (tab === sndTab) return; sndStop(); sndTab = tab; sndDrawn = false; renderSounds(); $('vSounds').scrollTop = 0 }
+function sndPlay(k) {
+  if (k === sndK && !sndA.paused) return sndStop();
+  if (isOn()) togglePlay();
+  const prev = sndK; sndK = k; const q = GAME[k];
+  if (prev !== k) sndMove(prev);
+  sndDone.add(k); sndSave(); sndCount();
+  cacheHit(q.clip).then(h => h ? h.blob() : null).catch(() => null).then(b => {
+    if (sndK !== k) return;
+    if (sndA.src.startsWith('blob:')) URL.revokeObjectURL(sndA.src);
+    sndA.src = b ? URL.createObjectURL(b) : q.clip; sndA.currentTime = 0;
+    sndA.play().then(sndMark).catch(() => toast("Couldn't play this sound."));
+  });
+}
+sndA.addEventListener('ended', () => { sndMark(); sndMove(sndK) }); sndA.addEventListener('pause', sndMark);
+
 /* 입력 */
 document.addEventListener('click', e => {
   const t = e.target;
   if (t.closest('[data-pp]')) return togglePlay();
   if (t.closest('[data-back]')) return back();
-  if (t.closest('[data-wifi]')) { S.wifi = !S.wifi; save(); syncDl(); return }
   if (t.closest('[data-push]')) { S.push = !S.push; save(); syncDl(); return }
   if (t.closest('[data-deldl]')) return go('del');
   if (t.closest('[data-delok]')) { closeSheets(); deleteDownloads(); return }
-  if (t.closest('[data-dlall]')) { downloadAll(); return }
+  if (t.closest('[data-gquitok]')) { closeSheets(); gQuit(); return }
   if (t.closest('[data-signin]')) { toast('Sign-in is coming in a later update.'); return }
+  const sn = t.closest('[data-snd]'); if (sn) return sndPlay(+sn.dataset.snd);
+  const st = t.closest('[data-sndtab]'); if (st) return sndShow(st.dataset.sndtab);
   if (gameClick(t)) return;
   const tb = t.closest('[data-tab]'); if (tb) return tab(tb.dataset.tab);
   const sh = t.closest('[data-sheet]');
@@ -1482,6 +1760,7 @@ document.addEventListener('click', e => {
   const al = t.closest('[data-album]'); if (al) { albumSel = +al.dataset.album; return go('album') }
   const tm = t.closest('[data-timer]'); if (tm) { setTimer(+tm.dataset.timer); return closeSheets() }
   const sz = t.closest('[data-size]'); if (sz) { setSize(+sz.dataset.size); return closeSheets() }
+  const gnb = t.closest('[data-gn]'); if (gnb) { setGn(+gnb.dataset.gn); return closeSheets() }
   const ly = t.closest('[data-lyr]'); if (ly) { S.lyr = ly.dataset.lyr; save(); syncKo(); if (isUp()) { lastI = -2; requestAnimationFrame(() => tick(true)) } return closeSheets() }
   const pl = t.closest('[data-play]');
   if (pl) {
@@ -1581,9 +1860,8 @@ a.addEventListener('error', () => {
   if (again) setTimeout(play, blobUrl ? 0 : 1500 * retries);
 });
 
-/* 설정 · Downloads. 소리는 앱 안에 없고(2026-11-10 R2로 옮김), 'Download all audio'로 받은 것만 기기(audio-v1)에 있다 */
+/* 설정 · Downloads. 소리는 앱 안에 없고(2026-11-10 R2로 옮김), 한 번 들은 화만 기기(audio-v1)에 남는다 */
 function syncDl() {
-  document.querySelectorAll('[data-wifi]').forEach(b => b.setAttribute('aria-checked', String(!!S.wifi)));
   document.querySelectorAll('[data-push]').forEach(b => b.setAttribute('aria-checked', String(!!S.push)));
 }
 async function showStorage() {
@@ -1593,8 +1871,7 @@ async function showStorage() {
 }
 async function deleteDownloads() {
   try { for (const k of await caches.keys()) if (k.startsWith('audio')) await caches.delete(k); } catch {}
-  if (dl) { dl.ac.abort(); dl = null }
-  S.dlAll = ''; save(); syncDlAll();
+  CACHED.clear();
   showStorage(); toast('Downloads deleted.');
 }
 syncDl();
@@ -1603,7 +1880,8 @@ function loadEp(i, resume) {
   cur = i; T = EPS[i]; L = T.lines; E = SCRIPTS[i];
   const st = S.eps[i] || {};
   S.pos = resume ? st.pos || 0 : 0; S.done = !!st.done; lastI = -2; blobUrl = null; ready = false; noNet = false; asked = false; $('offline').hidden = true;
-  a.src = T.file; a.load();
+  /* 폰에 저장본이 있으면 인터넷 주소로 흘려 받지 않고 저장본을 꺼낼 때까지 비워 둔다(아래 cacheHit) */
+  if (CACHED.has(akey(T.file))) { a.removeAttribute('src'); a.load() } else { a.src = T.file; a.load() }
   const al = albumOf(E.course);
   document.body.style.setProperty('--c', al.c);
   renderScript();
@@ -1618,10 +1896,17 @@ function loadEp(i, resume) {
   if (!$('vAlbum').hidden) renderAlbum();
   if (topV() === 'queue') renderQueue();
   icons(); tick(true); save();
-  // 받아 둔 앨범이면 기기 저장본을, 아니면 인터넷에서 통째로 받아 메모리에 둔다(앱도 2026-11-10부터 소리가 R2에 있어서 똑같이)
-  const file = T.file;
-  cacheHit(file).then(hit => hit || fetch(file)).then(r => r && r.ok ? r.blob() : null).then(b => { if (b && T.file === file) { blobUrl = URL.createObjectURL(b); $('offline').hidden = true; useBlob() } })
-    .catch(() => { if (T.file === file) { noNet = true; if (asked) showOffline() } });
+  // 기기 저장본(audio-v1)이 있으면 그것을, 없으면 인터넷에서 통째로 받아 메모리에 두고 저장소에도 넣는다.
+  // 2026-11-14 성범 요청: 처음 한 번 들은 화는 폰에 남겨 두고, 설정의 다운로드 지우기 전까지 다시 받지 않는다
+  const file = T.file, k = akey(file), have = CACHED.has(k);
+  cacheHit(file).then(hit => hit || fetch(file).then(r => {
+    if (r.ok && self.caches) { const copy = r.clone(); caches.open(AUDIO_CACHE).then(c => c.put(k, copy)).then(() => CACHED.add(k)).catch(() => {}) }
+    return r;
+  })).then(r => r && r.ok ? r.blob() : null).then(b => {
+    if (!b || T.file !== file) return;
+    blobUrl = URL.createObjectURL(b); $('offline').hidden = true;
+    if (have) { ready = false; a.src = blobUrl; a.load() } else useBlob();
+  }).catch(() => { if (T.file === file) { if (have && !a.src) { a.src = file; a.load() } noNet = true; if (asked) showOffline() } });
 }
 
 try { history.replaceState({ n: 1 }, '') } catch {}
@@ -1637,16 +1922,90 @@ if (S.started === undefined) S.started = Object.keys(S.eps).length > 0;
 { const i = Math.min(S.ep, EPS.length - 1), st = S.eps[i] || {}; cur = i; S.pos = st.pos || 0; S.done = !!st.done }
 setSize(S.size);
 loadEp(Math.min(S.ep, EPS.length - 1), true);
+/* 폰에 있는 소리 목록을 채운다. 소리를 다시 만들어 지문이 바뀐 옛 판 파일은 지운다(지금 목록이 비정상으로 적으면 지우지 않는다) */
+if (self.caches) caches.open(AUDIO_CACHE).then(async c => {
+  const now = new Set(dlFiles().map(akey)), keep = now.size > 100;
+  for (const r of await c.keys()) { const k = akey(r.url); if (now.has(k)) CACHED.add(k); else if (keep && k.startsWith('/audio/')) await c.delete(r) }
+}).catch(() => {});
+/* 새 판을 반영하느라 다시 불러온 경우(아래 liveTry): 시작 애니메이션 없이 보던 화면과 스크롤로 돌려놓는다 */
+let resume = null;
+try { resume = JSON.parse(sessionStorage.getItem('sidea-resume') || 'null'); sessionStorage.removeItem('sidea-resume') } catch {}
+if (resume && Date.now() - resume.at < 60000 && Array.isArray(resume.stack) && resume.stack.length) {
+  $('intro').style.display = 'none';
+  const st = resume.stack.filter(k => BASE.includes(k) || k === 'now');
+  if (!BASE.includes(st[0])) st.unshift('home');
+  const ai = ALBUMS.findIndex(al => al.name === resume.album);
+  if (ai >= 0) albumSel = ai; else if (st.includes('album')) st.splice(st.indexOf('album'), 1);
+  stack.length = 0; stack.push(...st);
+  for (let k = 1; k < stack.length; k++) try { history.pushState({ n: k + 1 }, ''); pushed++ } catch {}
+} else resume = null;
 render();
+if (resume) { const v = document.querySelector('main.view:not([hidden])'); if (v) v.scrollTop = resume.top || 0; syncSbar(); setTimeout(() => toast('Updated.'), 250) }
 icons(); showMini(); tick(true);
-/* 앱을 끄지 않고 돌아왔을 때도 새 판을 확인한다(10분에 한 번). 받아 두기만 하고, 재생 중도 게임 중도 아니면 새로 켠 것처럼 다시 그린다.
-   재생 중이나 게임 중이면 바꿔 끼우지 않고 다음에 켤 때 적용된다 */
-let liveAt = Date.now();
+/* 앱을 끄지 않아도 새 판이 반영되게 한다(2026-11-14 성범 요청).
+   ① 앱으로 돌아올 때마다 새 판을 확인한다(30초 안에 다시 돌아오면 건너뜀). 목록 파일은 작아서 데이터 부담이 거의 없다.
+   ② 새 판을 받아 두었는데 재생 중, 게임 화면, 작은 시트가 열린 중이면 바로 바꾸지 않고,
+      재생을 멈추거나(2초 뒤에도 멈춰 있으면) 게임에서 나가거나 시트를 닫을 때 반영한다.
+   반영은 다시 불러오기(reload)라서, 그 전에 보던 화면(탭, 앨범, 재생 화면)과 스크롤을 sessionStorage에 남기고
+   다시 켜질 때 시작 애니메이션 없이 그 화면으로 돌려놓는다. 듣던 화와 위치는 평소처럼 save()로 남는다 */
+let liveAt = 0, liveT = 0;
+const liveIdle = () => !isOn() && !(G.on && !G.pick) && !SHEETS[topV()] && document.visibilityState === 'visible';
+function liveTry(ms) {
+  if (!window.SIDEA_V || !(SIDEA_V() > LIVE.mf.v) || !liveIdle()) return;
+  clearTimeout(liveT);
+  liveT = setTimeout(() => {
+    if (!liveIdle()) return;
+    /* 저장이 안 되는 등으로 다시 불러와도 새 판이 안 들어가면 계속 다시 불러오지 않게 1분에 한 번까지만 */
+    try { if (Date.now() - (+sessionStorage.getItem('sidea-live-r') || 0) < 60000) return; sessionStorage.setItem('sidea-live-r', Date.now()) } catch {}
+    liveApply();
+  }, typeof ms === 'number' ? ms : 0);   // 멈춘 직후만 2초 기다린다(바로 다시 누를 수 있어서). 돌아왔을 때나 화면을 옮길 때는 바로
+}
+function liveApply() {
+  save();
+  const v = document.querySelector('main.view:not([hidden])');
+  try { sessionStorage.setItem('sidea-resume', JSON.stringify({ at: Date.now(), stack: stack.filter(k => !SHEETS[k]), album: (ALBUMS[albumSel] || {}).name, top: v ? v.scrollTop : 0 })) } catch {}
+  location.reload();
+}
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden || !window.SIDEA_CHECK || Date.now() - liveAt < 600000) return;
+  if (document.hidden || !window.SIDEA_CHECK) return;
+  if (Date.now() - liveAt < 30000) return liveTry();
   liveAt = Date.now();
-  SIDEA_CHECK().catch(() => {}).then(() => { if (SIDEA_V() > LIVE.mf.v && !isOn() && !G.on && !dl) location.reload() });
+  SIDEA_CHECK().catch(() => {}).then(liveTry);
 });
+a.addEventListener('pause', () => liveTry(2000));
+/* 재생을 멈춘 뒤 다시 확인할 기회: 화면을 옮길 때(게임에서 나가기, 시트 닫기) */
+{ const r0 = render; render = function () { r0.apply(this, arguments); liveTry() } }
+/* 당겨서 새로고침: 홈이 맨 위일 때 아래로 당기면 홈 화면이 따라 내려오고, 충분히 당겼다 놓으면 제자리로 돌아가며 바로 새 판을 확인한다. 새 판이 있으면 바로 반영하고(재생 중이면 멈출 때),
+   없으면 "Up to date."를 띄운다. 가로로 넘기는 카드 줄을 밀 때는 반응하지 않는다 */
+if (window.SIDEA_CHECK) {
+  const home = $('vHome'), FULL = 64;
+  let y0 = null, x0 = 0, d = 0, busy = false, buzzed = false;
+  const show = (v, anim) => { home.classList.toggle('ptr-back', !!anim); home.style.transform = v ? `translateY(${v}px)` : '' };
+  home.addEventListener('touchstart', e => { d = 0; buzzed = false; y0 = !busy && home.scrollTop <= 0 && e.touches.length === 1 ? e.touches[0].clientY : null; if (y0 !== null) x0 = e.touches[0].clientX }, { passive: true });
+  home.addEventListener('touchmove', e => {
+    if (y0 === null) return;
+    const dy = e.touches[0].clientY - y0, dx = Math.abs(e.touches[0].clientX - x0);
+    if (home.scrollTop > 0 || d === 0 && dx > Math.abs(dy)) { y0 = null; show(0, true); return }
+    d = Math.max(0, dy); show(Math.min(d * .5, FULL * 2));
+    /* 기준선을 넘으면 짧게 한 번 떨려 놓아도 된다고 알린다. 다시 올렸다 넘기면 또 떨린다 */
+    if (d * .5 >= FULL && !buzzed) { buzzed = true; try { navigator.vibrate && navigator.vibrate(12) } catch {} } else if (d * .5 < FULL) buzzed = false;
+  }, { passive: true });
+  const end = () => { if (y0 === null) return; y0 = null; d * .5 >= FULL ? pull() : show(0, true) };
+  home.addEventListener('touchend', end); home.addEventListener('touchcancel', () => { y0 = null; show(0, true) });
+  async function pull() {
+    busy = true; show(FULL, true); $('ptrT').classList.add('on');
+    let ok = true; liveAt = Date.now();
+    const t0 = Date.now();
+    try { await SIDEA_CHECK() } catch { ok = false }
+    await new Promise(y => setTimeout(y, Math.max(0, 600 - (Date.now() - t0))));   // 빨리 끝나도 0.6초는 보여 깜빡이지 않게
+    const fresh = SIDEA_V() > LIVE.mf.v;
+    if (fresh && !isOn()) return liveApply();
+    $('ptrT').classList.remove('on'); show(0, true);
+    busy = false;
+    toast(fresh ? 'Update ready. It applies when you pause.' : ok ? 'Up to date.' : "Couldn't check. Check your connection.");
+  }
+  window.SIDEA_PULL = pull;   // 브라우저에서 시험할 때 쓴다
+}
 </script>
 <script>
 /* 부팅(2026-11-13 성범 요청: 내용과 커버를 R2에 올려 관리하고, 앱을 켤 때마다 새 판을 확인해 받아 온다).
@@ -1683,7 +2042,9 @@ document.addEventListener('visibilitychange', () => {
   })().finally(() => { busy = null }));
   window.SIDEA_CHECK = check; window.SIDEA_V = () => cur.mf.v;
   const first = check().catch(() => null);
-  await Promise.race([first, new Promise(y => setTimeout(y, 2500))]);
+  /* 새 판을 반영하느라 다시 불러온 때는 새 판이 이미 저장돼 있으니 기다리지 않고 바로 켠다 */
+  let resuming = false; try { resuming = !!sessionStorage.getItem('sidea-resume') } catch {}
+  if (!resuming) await Promise.race([first, new Promise(y => setTimeout(y, 2500))]);
   window.SIDEA_LIVE = cur;
   run();
 })();

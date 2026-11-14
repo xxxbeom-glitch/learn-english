@@ -12,6 +12,8 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from data_pack import DATA_URL, pack
+from game_tips import apply as apply_tips
+from game_names import apply as apply_names
 
 HERE = Path(__file__).parent
 APP = HERE / "app"
@@ -24,11 +26,12 @@ HEAD = """<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <script>
-/* 폰에서는 화면 폭을 시안과 같은 360으로 잡아, 폭이 넓은 폰에서도 시안 비율 그대로 꽉 차게 키운다 */
+/* 폰에서는 화면 폭을 시안과 같은 360으로 잡아, 폭이 넓은 폰에서도 시안 비율 그대로 꽉 차게 키운다.
+   두 손가락 확대와 두 번 눌러 확대는 막는다(2026-11-14 성범 지적). 가사는 글자 크기 설정으로 키운다 */
 (function () { var m = document.querySelector('meta[name=viewport]');
-  function fit() { m.content = screen.width < 600 ? 'width=360, viewport-fit=cover' : 'width=device-width, initial-scale=1, viewport-fit=cover' }
+  function fit() { m.content = (screen.width < 600 ? 'width=360' : 'width=device-width, initial-scale=1') + ', viewport-fit=cover, user-scalable=no' }
   fit(); addEventListener('orientationchange', fit) })();
 </script>
 <meta name="theme-color" content="#121212">
@@ -128,6 +131,8 @@ def icon(size, art):
 
 
 def main():
+    apply_tips()  # content/game/tips-*.md의 팁을 app/game-data.js에 넣는다(2026-11-14)
+    apply_names()  # 빈칸 고르기에서 뺄 고유명사 목록(2026-11-14)
     # Vercel 연결 정보(.vercel)는 남기고 나머지만 새로 만든다.
     WEB.mkdir(exist_ok=True)
     for f in WEB.iterdir():
@@ -142,7 +147,7 @@ def main():
         body = body.replace(f'"{f.name}"', f'"{AUDIO_BASE}{f.name}?v={h}"')
     # 설정 · Storage used에 보일, 앱 안에 넣는 소리 크기
     body = body.replace("__BUNDLED_MB__", "0")
-    # 설정 · Download all audio에 보일 전체 소리 크기(화의 소리와 해설 + 문장 게임 소리). 게임 소리는 R2의 audio/game/에 있다(upload_game_r2.py)
+    # 전체 소리 크기(2026-11-14 Download all audio를 빼서 화면에는 안 보인다)(화의 소리와 해설 + 문장 게임 소리). 게임 소리는 R2의 audio/game/에 있다(upload_game_r2.py)
     total = sum(f.stat().st_size for f in files) + sum(f.stat().st_size for f in (APP / "game").glob("*.webm"))
     body = body.replace("__ALL_MB__", str(round(total / 1048576)))
     # 내용 묶음(대본·시간표, 게임 문장, 커버)을 data-pack/에 만들고, 그 목록을 이 앱의 기본 복사본 표시로 넣는다.

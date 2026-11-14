@@ -3,7 +3,7 @@
 다른 점:
 - 대본: content/stories/course-intermediate.md, course-advanced.md
 - '### 끝인사'는 초급처럼 말해보기 끝에 이어 붙이고, '### 검수 메모'는 읽지 않는다.
-- 시작음: 심화 sfx-start-intermediate.mp3, 고급 sfx-start-advanced.mp3 (2026-11-10 성범이 일레븐랩스 효과음에서 고름).
+- 시작음: 심화 sfx-start-intermediate.mp3, 고급 sfx-start-advanced.mp3, Level 1 뼈대 sfx-start-basics.mp3 (2026-11-10 성범이 일레븐랩스 효과음에서 고름).
   고급 소리는 평균 음량이 약 5dB 커서 더 줄여 초급 시작음과 맞춘다. 끝음과 말해보기 클릭음은 초급 것을 쓴다.
 - 결과: audio/<과정>/epNN/<i|a>-NN.mp3 (앱 폴더에는 아직 넣지 않는다).
 
@@ -24,6 +24,8 @@ STORIES = HERE.parent.parent / "content" / "stories"
 COURSE = {
     "intermediate": {"file": "course-intermediate.md", "tag": "i", "start": ("sfx-start-intermediate.mp3", "-9dB")},
     "advanced": {"file": "course-advanced.md", "tag": "a", "start": ("sfx-start-advanced.mp3", "-13dB")},
+    # Level 1 영어의 뼈대(2026-11-13). 시작음은 성범이 고른 MUSCSynth-bright_social_connec(3초, 평균 -17.3dB라 -11dB로 초급과 맞춤)
+    "basics": {"file": "course-basics.md", "tag": "f", "start": ("sfx-start-basics.mp3", "-11dB")},
 }
 
 
